@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b6b3a">
+  <meta name="description" content="Moultrie Pickleball Association player app">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg">
+  <title>Moultrie Pickleball Association</title>
+  <style>
+    :root{--green:#0b6b3a;--dark:#123;--bg:#f4f7f5;--card:#fff;--muted:#66736d;--line:#dce5df}
+    *{box-sizing:border-box} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--dark)}
+    header{background:var(--green);color:#fff;padding:22px 18px 18px;position:sticky;top:0;z-index:5;box-shadow:0 2px 8px #0002}
+    header h1{font-size:21px;margin:0 0 4px} header p{margin:0;opacity:.88;font-size:13px}
+    main{max-width:720px;margin:auto;padding:16px 14px 90px}.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:0 0 14px}
+    button,.tab{border:0;border-radius:12px;padding:12px 8px;font-weight:700;cursor:pointer}.tab{background:#e3ebe6;color:var(--green)}
+    .tab.active{background:var(--green);color:#fff}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:13px;box-shadow:0 2px 8px #00000008}
+    h2{font-size:18px;margin:0 0 12px}.sub{color:var(--muted);font-size:13px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .stat{background:#eef5f0;border-radius:12px;padding:12px}.stat b{display:block;font-size:22px;color:var(--green)}.stat span{font-size:12px;color:var(--muted)}
+    .row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}.row:last-child{border-bottom:0}
+    .badge{font-size:11px;font-weight:700;padding:5px 8px;border-radius:999px;background:#e8f2ec;color:var(--green)}
+    input,select{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;font-size:15px;background:#fff}
+    .primary{background:var(--green);color:#fff;width:100%}.secondary{background:#e7eee9;color:var(--green);width:100%}
+    table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:9px 6px;border-bottom:1px solid var(--line)}th{color:var(--muted)}
+    .hidden{display:none}.notice{padding:12px;border-radius:12px;background:#fff8df;color:#6b5510;font-size:13px;margin-bottom:12px}
+    .install{position:fixed;left:14px;right:14px;bottom:14px;background:#123;color:#fff;padding:13px 15px;border-radius:14px;display:none;box-shadow:0 5px 20px #0004;z-index:10}
+    .install button{float:right;background:#fff;color:#123;padding:7px 10px}
+    @media(min-width:600px){.grid{grid-template-columns:repeat(4,1fr)}}
+  </style>
+</head>
+<body>
+<header><h1>🏓 Moultrie Pickleball Association</h1><p>Player App • Schedule • Scores • Standings</p></header>
+<main>
+  <nav class="tabs">
+    <button class="tab active" data-tab="home">Home</button>
+    <button class="tab" data-tab="schedule">Schedule</button>
+    <button class="tab" data-tab="scores">Scores</button>
+    <button class="tab" data-tab="players">Players</button>
+  </nav>
+
+  <section id="home">
+    <div class="card"><h2>Welcome!</h2><p class="sub">Your club dashboard is ready. Use the tabs above to see games, enter results, and view standings.</p></div>
+    <div class="grid">
+      <div class="stat"><b id="playerCount">0</b><span>Players</span></div>
+      <div class="stat"><b id="gameCount">0</b><span>Games</span></div>
+      <div class="stat"><b id="playedCount">0</b><span>Played</span></div>
+      <div class="stat"><b id="leaderName">—</b><span>Leader</span></div>
+    </div>
+    <div class="card" style="margin-top:13px"><h2>Standings</h2><div id="standingsHome"></div></div>
+  </section>
+
+  <section id="schedule" class="hidden">
+    <div class="card"><h2>Round-Robin Schedule</h2><p class="sub">Games can be updated as your club adds players.</p><div id="scheduleList"></div></div>
+  </section>
+
+  <section id="scores" class="hidden">
+    <div class="card"><h2>Enter Score</h2>
+      <div class="notice">Scores are stored on this phone for now. A shared club database can be connected during the next deployment step.</div>
+      <label class="sub">Game</label><select id="gameSelect"></select>
+      <div class="grid" style="margin-top:10px"><div><label class="sub">Team 1</label><input id="score1" type="number" min="0" inputmode="numeric" placeholder="0"></div><div><label class="sub">Team 2</label><input id="score2" type="number" min="0" inputmode="numeric" placeholder="0"></div></div>
+      <button class="primary" style="margin-top:10px" id="saveScore">Save Score</button>
+    </div>
+    <div class="card"><h2>Recorded Scores</h2><div id="scoreList"></div></div>
+  </section>
+
+  <section id="players" class="hidden">
+    <div class="card"><h2>Players</h2><div class="grid"><input id="newPlayer" placeholder="Player name"><button class="primary" id="addPlayer">Add Player</button></div><div id="playerList" style="margin-top:8px"></div></div>
+  </section>
+</main>
+
+<div class="install" id="install"><span>Install the club app on your phone</span><button id="installBtn">Install</button></div>
+
+<script>
+const defaultPlayers=["Player 1","Player 2","Player 3","Player 4"];
+let players=JSON.parse(localStorage.getItem("mpa_players")||"null")||defaultPlayers;
+let games=JSON.parse(localStorage.getItem("mpa_games")||"null")||[
+  {id:1,a:"Player 1",b:"Player 2",s1:null,s2:null},
+  {id:2,a:"Player 3",b:"Player 4",s1:null,s2:null},
+  {id:3,a:"Player 1",b:"Player 3",s1:null,s2:null},
+  {id:4,a:"Player 2",b:"Player 4",s1:null,s2:null},
+  {id:5,a:"Player 1",b:"Player 4",s1:null,s2:null},
+  {id:6,a:"Player 2",b:"Player 3",s1:null,s2:null}
+];
+function save(){localStorage.setItem("mpa_players",JSON.stringify(players));localStorage.setItem("mpa_games",JSON.stringify(games))}
+function standings(){
+  const m={}; players.forEach(p=>m[p]={name:p,w:0,l:0,pf:0,pa:0});
+  games.forEach(g=>{if(g.s1==null||g.s2==null)return; if(!m[g.a]||!m[g.b])return;
+    m[g.a].pf+=+g.s1;m[g.a].pa+=+g.s2;m[g.b].pf+=+g.s2;m[g.b].pa+=+g.s1;
+    if(+g.s1>+g.s2)m[g.a].w++,m[g.b].l++; else if(+g.s2>+g.s1)m[g.b].w++,m[g.a].l++;
+  });
+  return Object.values(m).sort((x,y)=>y.w-x.w||(y.pf-y.pa)-(x.pf-x.pa));
+}
+function render(){
+  const st=standings(), played=games.filter(g=>g.s1!=null&&g.s2!=null).length;
+  playerCount.textContent=players.length;gameCount.textContent=games.length;playedCount.textContent=played;leaderName.textContent=st[0]?.name||"—";
+  const rows=st.map((p,i)=>`<div class="row"><div><b>${i+1}. ${p.name}</b><div class="sub">${p.w} wins • ${p.l} losses • ${p.pf-p.pa >=0?"+":""}${p.pf-p.pa} diff</div></div><span class="badge">${p.w}-${p.l}</span></div>`).join("");
+  standingsHome.innerHTML=rows||'<p class="sub">Add players to begin.</p>';
+  scheduleList.innerHTML=games.map(g=>`<div class="row"><div><b>${g.a} vs ${g.b}</b><div class="sub">${g.s1==null?"Not played":`Score: ${g.s1}–${g.s2}`}</div></div><span class="badge">${g.s1==null?"OPEN":"DONE"}</span></div>`).join("");
+  gameSelect.innerHTML=games.map(g=>`<option value="${g.id}">${g.a} vs ${g.b}</option>`).join("");
+  scoreList.innerHTML=games.filter(g=>g.s1!=null).map(g=>`<div class="row"><span>${g.a} vs ${g.b}</span><b>${g.s1}–${g.s2}</b></div>`).join("")||'<p class="sub">No scores entered yet.</p>';
+  playerList.innerHTML=players.map((p,i)=>`<div class="row"><span>${p}</span><button class="secondary" style="width:auto;padding:7px 10px" onclick="removePlayer(${i})">Remove</button></div>`).join("");
+}
+function removePlayer(i){players.splice(i,1);games=games.filter(g=>players.includes(g.a)&&players.includes(g.b));save();render()}
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{document.querySelectorAll("section").forEach(s=>s.classList.add("hidden"));document.getElementById(b.dataset.tab).classList.remove("hidden");document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));b.classList.add("active")});
+addPlayer.onclick=()=>{const n=newPlayer.value.trim();if(!n)return;if(players.includes(n))return alert("That player is already listed.");players.push(n);newPlayer.value="";save();render()};
+saveScore.onclick=()=>{const g=games.find(x=>x.id==gameSelect.value);if(!g)return;const a=Number(score1.value),b=Number(score2.value);if(!Number.isInteger(a)||!Number.isInteger(b)||a<0||b<0)return alert("Enter both scores.");g.s1=a;g.s2=b;save();score1.value="";score2.value="";render()};
+render();
+let deferred;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e;install.style.display="block"});
+installBtn.onclick=async()=>{if(deferred){deferred.prompt();await deferred.userChoice;deferred=null}install.style.display="none"};
+if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
+</script>
+</body>
+</html>
