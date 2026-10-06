@@ -81,6 +81,10 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
     <div class="card"><h2>Standings</h2><div id="standings"></div></div>
   </section>
 
+  <section id="analyticsTab" class="tab hidden">
+    <div class="card"><h2>Club Analytics</h2><div id="analytics"></div></div>
+  </section>
+
   <section id="adminTab" class="tab hidden">
     <div class="card">
       <h2>Admin Center</h2>
@@ -92,7 +96,14 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
       <div id="adminRoster" class="list"></div>
     </div>
     <div class="card">
-      <h2>Create Game</h2>
+      <h2>60-Point Round</h2>
+      <p class="muted">Choose 4, 5, or 6 players. The round automatically creates games totaling exactly 60 points.</p>
+      <div class="row"><select id="roundPlayerCount"><option value="4">4 players — 3 games to 20</option><option value="5">5 players — 4 games to 15</option><option value="6">6 players — 6 games to 10</option></select><input id="roundNumber" type="number" min="1" placeholder="Round number"></div>
+      <button onclick="generateRound()">Create 60-point round</button>
+      <div id="roundMsg"></div>
+    </div>
+    <div class="card">
+      <h2>Create Individual Game</h2>
       <div class="row"><select id="gameA"></select><select id="gameB"></select></div>
       <button onclick="createGame()">Create game</button>
       <div id="gameCreateMsg"></div>
@@ -164,7 +175,7 @@ async function startApp(user){
   buildNav(); await refreshAll();
 }
 function buildNav(){
-  const items=[['dashboard','Dashboard'],['roster','Roster'],['schedule','Schedule'],['standings','Standings']];
+  const items=[['dashboard','Dashboard'],['roster','Roster'],['schedule','Schedule'],['standings','Standings'],['analytics','Analytics']];
   if(profile.role==='admin')items.push(['admin','Admin']);
   $('nav').innerHTML=items.map((x,i)=>'<button class="'+(i===0?'active':'')+'" onclick="showTab(\''+x[0]+'\',this)">'+x[1]+'</button>').join('');
 }
@@ -176,7 +187,7 @@ function showTab(name,btn){
 async function refreshAll(){
   const [pr,gr]=await Promise.all([
     client.from('club_players').select('id,name,created_at').order('name'),
-    client.from('games').select('id,player_a,player_b,score_a,score_b,created_at,player_a_info:club_players!games_player_a_fkey(id,name),player_b_info:club_players!games_player_b_fkey(id,name)').order('created_at',{ascending:false})
+    client.from('games').select('id,player_a,player_b,score_a,score_b,round_number,court_number,target_score,created_at,player_a_info:club_players!games_player_a_fkey(id,name),player_b_info:club_players!games_player_b_fkey(id,name)').order('created_at',{ascending:false})
   ]);
   if(pr.error)throw pr.error;if(gr.error)throw gr.error;
   players=pr.data||[];games=gr.data||[];
@@ -188,12 +199,15 @@ function renderAll(){
   const gameHtml=games.length?games.map(gameCard).join(''):'<p class="muted">No games scheduled yet.</p>';
   $('schedule').innerHTML=gameHtml;$('dashGames').innerHTML=gameHtml;
   renderStandings();
+  renderAnalytics();
   if(profile.role==='admin'){renderAdmin();}
 }
 function gameCard(g){
   const a=g.player_a_info?.name||'Player A',b=g.player_b_info?.name||'Player B';
   const score=(g.score_a!==null&&g.score_b!==null)?'<span class="score">'+g.score_a+' – '+g.score_b+'</span>':'<span class="pill">Not scored</span>';
-  return '<div class="item"><strong>'+escapeHtml(a)+'</strong> vs <strong>'+escapeHtml(b)+'</strong><br>'+score+'</div>';
+  const round=g.round_number?'<span class="pill">Round '+g.round_number+(g.court_number?' • Court '+g.court_number:'')+'</span> ':'';
+  const target=g.target_score?'<span class="pill">First to '+g.target_score+'</span>':'';
+  return '<div class="item">'+round+target+'<br><strong>'+escapeHtml(a)+'</strong> vs <strong>'+escapeHtml(b)+'</strong><br>'+score+'</div>';
 }
 function renderStandings(){
   const stats={};players.forEach(p=>stats[p.id]={name:p.name,w:0,l:0,pf:0,pa:0});
@@ -206,13 +220,50 @@ function renderStandings(){
   const rows=Object.values(stats).sort((a,b)=>b.w-a.w||(b.pf-b.pa)-(a.pf-a.pa));
   $('standings').innerHTML=rows.length?'<table><thead><tr><th>Player</th><th>W</th><th>L</th><th>PF</th><th>PA</th></tr></thead><tbody>'+rows.map(r=>'<tr><td>'+escapeHtml(r.name)+'</td><td>'+r.w+'</td><td>'+r.l+'</td><td>'+r.pf+'</td><td>'+r.pa+'</td></tr>').join('')+'</tbody></table>':'<p class="muted">No players yet.</p>';
 }
+function renderAnalytics(){
+  const stats={};players.forEach(p=>stats[p.id]={name:p.name,games:0,w:0,l:0,pf:0,pa:0});
+  let completed=0,totalPoints=0,roundGames=0,roundPoints=0;
+  games.forEach(g=>{
+    const a=stats[g.player_a],b=stats[g.player_b];
+    if(g.round_number)roundGames++;
+    if(g.score_a!==null&&g.score_b!==null){
+      completed++;
+      totalPoints+=Number(g.score_a)+Number(g.score_b);
+      if(g.round_number)roundPoints+=Number(g.score_a)+Number(g.score_b);
+      if(a){a.games++;a.pf+=Number(g.score_a);a.pa+=Number(g.score_b);}
+      if(b){b.games++;b.pf+=Number(g.score_b);b.pa+=Number(g.score_a);}
+      if(Number(g.score_a)>Number(g.score_b)){if(a)a.w++;if(b)b.l++}
+      else if(Number(g.score_b)>Number(g.score_a)){if(b)b.w++;if(a)a.l++}
+    }
+  });
+  const totalDecisions=Object.values(stats).reduce((n,r)=>n+r.w+r.l,0);
+  const totalWins=Object.values(stats).reduce((n,r)=>n+r.w,0);
+  const totalLosses=Object.values(stats).reduce((n,r)=>n+r.l,0);
+  const winPct=totalDecisions?Math.round(totalWins/totalDecisions*100):0;
+  const lossPct=totalDecisions?Math.round(totalLosses/totalDecisions*100):0;
+  const top=[...Object.values(stats)].sort((a,b)=>b.w-a.w||(b.pf-b.pa)-(a.pf-a.pa)).slice(0,10);
+  $('analytics').innerHTML=
+    '<div class="row">'+
+      '<div class="item"><strong>'+players.length+'</strong><div class="muted">Total players</div></div>'+
+      '<div class="item"><strong>'+games.length+'</strong><div class="muted">Total games</div></div>'+
+      '<div class="item"><strong>'+completed+'</strong><div class="muted">Completed games</div></div>'+
+      '<div class="item"><strong>'+totalPoints+'</strong><div class="muted">Total points</div></div>'+
+    '</div>'+
+    '<div class="card"><h3>Overall results</h3><p><strong>'+winPct+'%</strong> wins • <strong>'+lossPct+'%</strong> losses. Ties are excluded.</p><p class="muted">60-point round games: '+roundGames+' • Points recorded in round games: '+roundPoints+'</p></div>'+
+    '<div class="card"><h3>Player performance</h3>'+
+    (top.length?'<table><thead><tr><th>Player</th><th>Games</th><th>W</th><th>L</th><th>Win %</th><th>PF</th><th>PA</th></tr></thead><tbody>'+
+      top.map(r=>{const d=r.w+r.l;return '<tr><td>'+escapeHtml(r.name)+'</td><td>'+r.games+'</td><td>'+r.w+'</td><td>'+r.l+'</td><td>'+ (d?Math.round(r.w/d*100):0)+'%</td><td>'+r.pf+'</td><td>'+r.pa+'</td></tr>'}).join('')+
+    '</tbody></table>':'<p class="muted">No player results yet.</p>')+
+    '</div>';
+}
 function renderAdmin(){
   $('adminRoster').innerHTML=players.map(p=>'<div class="item"><div class="row"><div>'+escapeHtml(p.name)+'</div><button class="danger small" onclick="removePlayer('+p.id+')">Remove</button></div></div>').join('');
   const opts='<option value="">Choose player</option>'+players.map(p=>'<option value="'+p.id+'">'+escapeHtml(p.name)+'</option>').join('');
   $('gameA').innerHTML=opts;$('gameB').innerHTML=opts;
   $('adminGames').innerHTML=games.length?games.map(g=>{
     const a=g.player_a_info?.name||'Player A',b=g.player_b_info?.name||'Player B';
-    return '<div class="item"><strong>'+escapeHtml(a)+' vs '+escapeHtml(b)+'</strong><div class="triple"><input id="sa_'+g.id+'" type="number" min="0" placeholder="Score A" value="'+(g.score_a??'')+'"><input id="sb_'+g.id+'" type="number" min="0" placeholder="Score B" value="'+(g.score_b??'')+'"><button onclick="saveScore('+g.id+')">Save score</button></div><button class="danger small" onclick="removeGame('+g.id+')">Delete game</button></div>';
+    const roundInfo=g.round_number?'<div class="muted">Round '+g.round_number+(g.court_number?' • Court '+g.court_number:'')+(g.target_score?' • First to '+g.target_score:'')+'</div>':'';
+    return '<div class="item"><strong>'+escapeHtml(a)+' vs '+escapeHtml(b)+'</strong>'+roundInfo+'<div class="triple"><input id="sa_'+g.id+'" type="number" min="0" placeholder="Score A" value="'+(g.score_a??'')+'"><input id="sb_'+g.id+'" type="number" min="0" placeholder="Score B" value="'+(g.score_b??'')+'"><button onclick="saveScore('+g.id+')">Save score</button></div><button class="danger small" onclick="removeGame('+g.id+')">Delete game</button></div>';
   }).join(''):'<p class="muted">No games yet.</p>';
 }
 async function addPlayer(){
@@ -232,9 +283,31 @@ async function createGame(){
   if(error){msg('gameCreateMsg',error.message);return}
   msg('gameCreateMsg','Game created.',true);await refreshAll();
 }
+function buildRoundPairings(list){
+  const n=list.length;
+  if(n===6)return [[0,1],[2,3],[4,5],[0,2],[1,4],[3,5]];
+  if(n===5)return [[0,1],[2,3],[4,0],[1,2]];
+  if(n===4)return [[0,1],[2,3],[0,2]];
+  return [];
+}
+async function generateRound(){
+  const count=Number($('roundPlayerCount').value), round=Number($('roundNumber').value);
+  if(!round||round<1){msg('roundMsg','Enter a round number.');return}
+  if(players.length<count){msg('roundMsg','You need at least '+count+' players before creating this round.');return}
+  const target=count===6?10:count===5?15:20;
+  const chosen=players.slice(0,count);
+  const pairs=buildRoundPairings(chosen);
+  const rows=pairs.map((p,i)=>({player_a:chosen[p[0]].id,player_b:chosen[p[1]].id,round_number:round,court_number:i+1,target_score:target}));
+  const {error}=await client.from('games').insert(rows);
+  if(error){msg('roundMsg',error.message);return}
+  msg('roundMsg','Round '+round+' created: '+rows.length+' games, '+target+' points each, 60 points total.',true);
+  await refreshAll();
+}
 async function saveScore(id){
   const a=$('sa_'+id).value,b=$('sb_'+id).value;
   if(a===''||b===''){alert('Enter both scores.');return}
+  const game=games.find(x=>x.id===id), target=game?.target_score?Number(game.target_score):null;
+  if(target && (Number(a)>target||Number(b)>target)){alert('For this round, neither score can be above '+target+'.');return}
   const {error}=await client.from('games').update({score_a:Number(a),score_b:Number(b)}).eq('id',id);
   if(error){alert(error.message);return}await refreshAll();
 }
