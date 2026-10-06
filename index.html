@@ -1,115 +1,262 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#0b6b3a">
-  <meta name="description" content="Moultrie Pickleball Association player app">
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icon.svg">
-  <title>Moultrie Pickleball Association</title>
-  <style>
-    :root{--green:#0b6b3a;--dark:#123;--bg:#f4f7f5;--card:#fff;--muted:#66736d;--line:#dce5df}
-    *{box-sizing:border-box} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--dark)}
-    header{background:var(--green);color:#fff;padding:22px 18px 18px;position:sticky;top:0;z-index:5;box-shadow:0 2px 8px #0002}
-    header h1{font-size:21px;margin:0 0 4px} header p{margin:0;opacity:.88;font-size:13px}
-    main{max-width:720px;margin:auto;padding:16px 14px 90px}.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:0 0 14px}
-    button,.tab{border:0;border-radius:12px;padding:12px 8px;font-weight:700;cursor:pointer}.tab{background:#e3ebe6;color:var(--green)}
-    .tab.active{background:var(--green);color:#fff}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:13px;box-shadow:0 2px 8px #00000008}
-    h2{font-size:18px;margin:0 0 12px}.sub{color:var(--muted);font-size:13px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .stat{background:#eef5f0;border-radius:12px;padding:12px}.stat b{display:block;font-size:22px;color:var(--green)}.stat span{font-size:12px;color:var(--muted)}
-    .row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}.row:last-child{border-bottom:0}
-    .badge{font-size:11px;font-weight:700;padding:5px 8px;border-radius:999px;background:#e8f2ec;color:var(--green)}
-    input,select{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;font-size:15px;background:#fff}
-    .primary{background:var(--green);color:#fff;width:100%}.secondary{background:#e7eee9;color:var(--green);width:100%}
-    table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:9px 6px;border-bottom:1px solid var(--line)}th{color:var(--muted)}
-    .hidden{display:none}.notice{padding:12px;border-radius:12px;background:#fff8df;color:#6b5510;font-size:13px;margin-bottom:12px}
-    .install{position:fixed;left:14px;right:14px;bottom:14px;background:#123;color:#fff;padding:13px 15px;border-radius:14px;display:none;box-shadow:0 5px 20px #0004;z-index:10}
-    .install button{float:right;background:#fff;color:#123;padding:7px 10px}
-    @media(min-width:600px){.grid{grid-template-columns:repeat(4,1fr)}}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f766e">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Moultrie Pickleball Association</title>
+<style>
+:root{--brand:#0f766e;--dark:#12302d;--bg:#f5f7f6;--card:#fff;--muted:#66736f;--danger:#b42318;--line:#dbe3e0}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--dark)}
+header{background:var(--brand);color:#fff;padding:18px 16px;position:sticky;top:0;z-index:10;box-shadow:0 2px 8px #0002}
+header h1{margin:0;font-size:20px}header p{margin:3px 0 0;font-size:13px;opacity:.9}
+main{max-width:900px;margin:auto;padding:16px 14px 50px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 1px 4px #0000000a}
+h2{font-size:19px;margin:4px 0 12px}h3{font-size:16px;margin:8px 0}
+input,select,button{width:100%;font:inherit;padding:12px;border-radius:10px;border:1px solid #cbd5d1;margin:5px 0}
+button{background:var(--brand);color:#fff;border:0;font-weight:700;cursor:pointer}button.secondary{background:#e7efed;color:var(--dark)}button.danger{background:var(--danger)}button.small{width:auto;padding:8px 11px;font-size:13px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.triple{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.nav{display:flex;gap:6px;overflow:auto;padding:8px 0}.nav button{white-space:nowrap;width:auto;padding:9px 13px;margin:0;background:#e5ecea;color:var(--dark)}.nav button.active{background:var(--brand);color:#fff}
+.hidden{display:none!important}.muted{color:var(--muted);font-size:13px}.pill{display:inline-block;background:#e7efed;border-radius:999px;padding:4px 9px;font-size:12px}
+.notice{padding:12px;border-radius:10px;background:#fff7d6;border:1px solid #eadf9a;margin:10px 0}.error{background:#fff0ef;border-color:#f1b7b2;color:#8d1f17}.success{background:#edf9f1;border-color:#b9dfc3;color:#1d6b35}
+.list{display:grid;gap:8px}.item{border:1px solid var(--line);border-radius:12px;padding:11px;background:#fff}.score{font-size:18px;font-weight:800}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:9px;border-bottom:1px solid var(--line)}th{font-size:12px;color:var(--muted)}
+.auth{max-width:430px;margin:40px auto}.brandmark{text-align:center;font-size:42px;margin-bottom:5px}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
+@media(max-width:600px){.row,.triple{grid-template-columns:1fr}main{padding:12px}}
+</style>
 </head>
 <body>
-<header><h1>🏓 Moultrie Pickleball Association</h1><p>Player App • Schedule • Scores • Standings</p></header>
+<header>
+  <h1>🏓 Moultrie Pickleball Association</h1>
+  <p id="userLine">Player App</p>
+</header>
+
 <main>
-  <nav class="tabs">
-    <button class="tab active" data-tab="home">Home</button>
-    <button class="tab" data-tab="schedule">Schedule</button>
-    <button class="tab" data-tab="scores">Scores</button>
-    <button class="tab" data-tab="players">Players</button>
-  </nav>
+<section id="setupScreen" class="card">
+  <h2>Connect the club database</h2>
+  <p class="muted">Enter the Supabase Project URL and publishable key once on this device. These are safe to use in the browser when Row Level Security is configured.</p>
+  <input id="supabaseUrl" placeholder="https://your-project.supabase.co">
+  <input id="supabaseKey" placeholder="Supabase publishable key" type="password">
+  <button onclick="connectSupabase()">Connect</button>
+  <div id="setupMsg"></div>
+</section>
 
-  <section id="home">
-    <div class="card"><h2>Welcome!</h2><p class="sub">Your club dashboard is ready. Use the tabs above to see games, enter results, and view standings.</p></div>
-    <div class="grid">
-      <div class="stat"><b id="playerCount">0</b><span>Players</span></div>
-      <div class="stat"><b id="gameCount">0</b><span>Games</span></div>
-      <div class="stat"><b id="playedCount">0</b><span>Played</span></div>
-      <div class="stat"><b id="leaderName">—</b><span>Leader</span></div>
+<section id="authScreen" class="auth card hidden">
+  <div class="brandmark">🏓</div>
+  <h2 id="authTitle">Sign in</h2>
+  <p class="muted">Sign in to access the Moultrie Pickleball Association app.</p>
+  <input id="email" type="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+  <input id="displayName" class="hidden" placeholder="Your name">
+  <button id="authBtn" onclick="submitAuth()">Sign in</button>
+  <button class="secondary" onclick="toggleAuthMode()" id="authToggle">Create account</button>
+  <div id="authMsg"></div>
+</section>
+
+<section id="appScreen" class="hidden">
+  <div class="card">
+    <div class="row">
+      <div><strong id="welcome">Welcome</strong><div class="muted" id="roleText"></div></div>
+      <button class="secondary small" onclick="signOut()">Sign out</button>
     </div>
-    <div class="card" style="margin-top:13px"><h2>Standings</h2><div id="standingsHome"></div></div>
+  </div>
+
+  <div class="nav" id="nav"></div>
+
+  <section id="dashboardTab" class="tab">
+    <div class="card"><h2>Club Dashboard</h2><p>Welcome to the Moultrie Pickleball Association player app.</p><div id="dashStats" class="row"></div></div>
+    <div class="card"><h2>Upcoming Games</h2><div id="dashGames" class="list"></div></div>
   </section>
 
-  <section id="schedule" class="hidden">
-    <div class="card"><h2>Round-Robin Schedule</h2><p class="sub">Games can be updated as your club adds players.</p><div id="scheduleList"></div></div>
+  <section id="rosterTab" class="tab hidden">
+    <div class="card"><h2>Player Roster</h2><div id="roster" class="list"></div></div>
   </section>
 
-  <section id="scores" class="hidden">
-    <div class="card"><h2>Enter Score</h2>
-      <div class="notice">Scores are stored on this phone for now. A shared club database can be connected during the next deployment step.</div>
-      <label class="sub">Game</label><select id="gameSelect"></select>
-      <div class="grid" style="margin-top:10px"><div><label class="sub">Team 1</label><input id="score1" type="number" min="0" inputmode="numeric" placeholder="0"></div><div><label class="sub">Team 2</label><input id="score2" type="number" min="0" inputmode="numeric" placeholder="0"></div></div>
-      <button class="primary" style="margin-top:10px" id="saveScore">Save Score</button>
+  <section id="scheduleTab" class="tab hidden">
+    <div class="card"><h2>Round-Robin Schedule</h2><div id="schedule" class="list"></div></div>
+  </section>
+
+  <section id="standingsTab" class="tab hidden">
+    <div class="card"><h2>Standings</h2><div id="standings"></div></div>
+  </section>
+
+  <section id="adminTab" class="tab hidden">
+    <div class="card">
+      <h2>Admin Center</h2>
+      <p class="muted">Only users with the admin role can use these controls. The database also blocks non-admin writes.</p>
     </div>
-    <div class="card"><h2>Recorded Scores</h2><div id="scoreList"></div></div>
+    <div class="card">
+      <h2>Manage Players</h2>
+      <div class="row"><input id="newPlayer" placeholder="Player name"><button onclick="addPlayer()">Add player</button></div>
+      <div id="adminRoster" class="list"></div>
+    </div>
+    <div class="card">
+      <h2>Create Game</h2>
+      <div class="row"><select id="gameA"></select><select id="gameB"></select></div>
+      <button onclick="createGame()">Create game</button>
+      <div id="gameCreateMsg"></div>
+    </div>
+    <div class="card">
+      <h2>Enter / Correct Scores</h2>
+      <div id="adminGames" class="list"></div>
+    </div>
   </section>
-
-  <section id="players" class="hidden">
-    <div class="card"><h2>Players</h2><div class="grid"><input id="newPlayer" placeholder="Player name"><button class="primary" id="addPlayer">Add Player</button></div><div id="playerList" style="margin-top:8px"></div></div>
-  </section>
+</section>
 </main>
+<footer>Moultrie Pickleball Association</footer>
 
-<div class="install" id="install"><span>Install the club app on your phone</span><button id="installBtn">Install</button></div>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const defaultPlayers=["Player 1","Player 2","Player 3","Player 4"];
-let players=JSON.parse(localStorage.getItem("mpa_players")||"null")||defaultPlayers;
-let games=JSON.parse(localStorage.getItem("mpa_games")||"null")||[
-  {id:1,a:"Player 1",b:"Player 2",s1:null,s2:null},
-  {id:2,a:"Player 3",b:"Player 4",s1:null,s2:null},
-  {id:3,a:"Player 1",b:"Player 3",s1:null,s2:null},
-  {id:4,a:"Player 2",b:"Player 4",s1:null,s2:null},
-  {id:5,a:"Player 1",b:"Player 4",s1:null,s2:null},
-  {id:6,a:"Player 2",b:"Player 3",s1:null,s2:null}
-];
-function save(){localStorage.setItem("mpa_players",JSON.stringify(players));localStorage.setItem("mpa_games",JSON.stringify(games))}
-function standings(){
-  const m={}; players.forEach(p=>m[p]={name:p,w:0,l:0,pf:0,pa:0});
-  games.forEach(g=>{if(g.s1==null||g.s2==null)return; if(!m[g.a]||!m[g.b])return;
-    m[g.a].pf+=+g.s1;m[g.a].pa+=+g.s2;m[g.b].pf+=+g.s2;m[g.b].pa+=+g.s1;
-    if(+g.s1>+g.s2)m[g.a].w++,m[g.b].l++; else if(+g.s2>+g.s1)m[g.b].w++,m[g.a].l++;
+let client=null, currentUser=null, profile=null, players=[], games=[], authMode='signin';
+
+const $=id=>document.getElementById(id);
+function msg(id,text,good=false){$(id).innerHTML=text?'<div class="notice '+(good?'success':'error')+'">'+escapeHtml(text)+'</div>':''}
+function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+
+function saved(){return {url:localStorage.getItem('mpa_supabase_url'),key:localStorage.getItem('mpa_supabase_key')}}
+async function connectSupabase(){
+  const url=$('supabaseUrl').value.trim(), key=$('supabaseKey').value.trim();
+  if(!url||!key){msg('setupMsg','Please enter both Supabase values.');return}
+  try{
+    client=window.supabase.createClient(url,key);
+    const {error}=await client.auth.getSession();
+    if(error) throw error;
+    localStorage.setItem('mpa_supabase_url',url);localStorage.setItem('mpa_supabase_key',key);
+    $('setupScreen').classList.add('hidden'); $('authScreen').classList.remove('hidden');
+  }catch(e){msg('setupMsg',e.message||'Could not connect.')}
+}
+function loadConnection(){
+  const s=saved();
+  if(s.url&&s.key){$('supabaseUrl').value=s.url;$('supabaseKey').value=s.key;client=window.supabase.createClient(s.url,s.key);$('setupScreen').classList.add('hidden');return true}
+  return false
+}
+function toggleAuthMode(){
+  authMode=authMode==='signin'?'signup':'signin';
+  $('authTitle').textContent=authMode==='signin'?'Sign in':'Create account';
+  $('authBtn').textContent=authMode==='signin'?'Sign in':'Create account';
+  $('authToggle').textContent=authMode==='signin'?'Create account':'Back to sign in';
+  $('displayName').classList.toggle('hidden',authMode==='signin');
+  msg('authMsg','');
+}
+async function submitAuth(){
+  const email=$('email').value.trim(), password=$('password').value, name=$('displayName').value.trim();
+  if(!email||!password){msg('authMsg','Enter your email and password.');return}
+  try{
+    let result;
+    if(authMode==='signin') result=await client.auth.signInWithPassword({email,password});
+    else result=await client.auth.signUp({email,password,options:{data:{display_name:name}}});
+    if(result.error) throw result.error;
+    if(authMode==='signup'&&!result.data.session){msg('authMsg','Account created. Check your email to confirm your account.',true);return}
+    await startApp(result.data.session?.user||result.data.user);
+  }catch(e){msg('authMsg',e.message||'Authentication failed.')}
+}
+async function startApp(user){
+  if(!user)return;
+  currentUser=user;
+  const {data,error}=await client.from('profiles').select('id,role,display_name').eq('id',user.id).single();
+  if(error) throw error;
+  profile=data;
+  $('authScreen').classList.add('hidden');$('appScreen').classList.remove('hidden');
+  $('welcome').textContent='Welcome, '+(profile.display_name||user.email.split('@')[0]);
+  $('userLine').textContent=user.email;
+  $('roleText').textContent=(profile.role==='admin'?'Administrator':'Player')+' • shared club data';
+  buildNav(); await refreshAll();
+}
+function buildNav(){
+  const items=[['dashboard','Dashboard'],['roster','Roster'],['schedule','Schedule'],['standings','Standings']];
+  if(profile.role==='admin')items.push(['admin','Admin']);
+  $('nav').innerHTML=items.map((x,i)=>'<button class="'+(i===0?'active':'')+'" onclick="showTab(\''+x[0]+'\',this)">'+x[1]+'</button>').join('');
+}
+function showTab(name,btn){
+  document.querySelectorAll('.tab').forEach(x=>x.classList.add('hidden'));
+  $(name+'Tab').classList.remove('hidden');
+  document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');
+}
+async function refreshAll(){
+  const [pr,gr]=await Promise.all([
+    client.from('club_players').select('id,name,created_at').order('name'),
+    client.from('games').select('id,player_a,player_b,score_a,score_b,created_at,player_a_info:club_players!games_player_a_fkey(id,name),player_b_info:club_players!games_player_b_fkey(id,name)').order('created_at',{ascending:false})
+  ]);
+  if(pr.error)throw pr.error;if(gr.error)throw gr.error;
+  players=pr.data||[];games=gr.data||[];
+  renderAll();
+}
+function renderAll(){
+  $('dashStats').innerHTML='<div class="item"><strong>'+players.length+'</strong><div class="muted">Players</div></div><div class="item"><strong>'+games.length+'</strong><div class="muted">Games</div></div>';
+  $('roster').innerHTML=players.length?players.map(p=>'<div class="item">'+escapeHtml(p.name)+'</div>').join(''):'<p class="muted">No players yet.</p>';
+  const gameHtml=games.length?games.map(gameCard).join(''):'<p class="muted">No games scheduled yet.</p>';
+  $('schedule').innerHTML=gameHtml;$('dashGames').innerHTML=gameHtml;
+  renderStandings();
+  if(profile.role==='admin'){renderAdmin();}
+}
+function gameCard(g){
+  const a=g.player_a_info?.name||'Player A',b=g.player_b_info?.name||'Player B';
+  const score=(g.score_a!==null&&g.score_b!==null)?'<span class="score">'+g.score_a+' – '+g.score_b+'</span>':'<span class="pill">Not scored</span>';
+  return '<div class="item"><strong>'+escapeHtml(a)+'</strong> vs <strong>'+escapeHtml(b)+'</strong><br>'+score+'</div>';
+}
+function renderStandings(){
+  const stats={};players.forEach(p=>stats[p.id]={name:p.name,w:0,l:0,pf:0,pa:0});
+  games.forEach(g=>{
+    if(g.score_a===null||g.score_b===null)return;
+    const a=stats[g.player_a],b=stats[g.player_b];if(!a||!b)return;
+    a.pf+=g.score_a;a.pa+=g.score_b;b.pf+=g.score_b;b.pa+=g.score_a;
+    if(g.score_a>g.score_b){a.w++;b.l++}else if(g.score_b>g.score_a){b.w++;a.l++}
   });
-  return Object.values(m).sort((x,y)=>y.w-x.w||(y.pf-y.pa)-(x.pf-x.pa));
+  const rows=Object.values(stats).sort((a,b)=>b.w-a.w||(b.pf-b.pa)-(a.pf-a.pa));
+  $('standings').innerHTML=rows.length?'<table><thead><tr><th>Player</th><th>W</th><th>L</th><th>PF</th><th>PA</th></tr></thead><tbody>'+rows.map(r=>'<tr><td>'+escapeHtml(r.name)+'</td><td>'+r.w+'</td><td>'+r.l+'</td><td>'+r.pf+'</td><td>'+r.pa+'</td></tr>').join('')+'</tbody></table>':'<p class="muted">No players yet.</p>';
 }
-function render(){
-  const st=standings(), played=games.filter(g=>g.s1!=null&&g.s2!=null).length;
-  playerCount.textContent=players.length;gameCount.textContent=games.length;playedCount.textContent=played;leaderName.textContent=st[0]?.name||"—";
-  const rows=st.map((p,i)=>`<div class="row"><div><b>${i+1}. ${p.name}</b><div class="sub">${p.w} wins • ${p.l} losses • ${p.pf-p.pa >=0?"+":""}${p.pf-p.pa} diff</div></div><span class="badge">${p.w}-${p.l}</span></div>`).join("");
-  standingsHome.innerHTML=rows||'<p class="sub">Add players to begin.</p>';
-  scheduleList.innerHTML=games.map(g=>`<div class="row"><div><b>${g.a} vs ${g.b}</b><div class="sub">${g.s1==null?"Not played":`Score: ${g.s1}–${g.s2}`}</div></div><span class="badge">${g.s1==null?"OPEN":"DONE"}</span></div>`).join("");
-  gameSelect.innerHTML=games.map(g=>`<option value="${g.id}">${g.a} vs ${g.b}</option>`).join("");
-  scoreList.innerHTML=games.filter(g=>g.s1!=null).map(g=>`<div class="row"><span>${g.a} vs ${g.b}</span><b>${g.s1}–${g.s2}</b></div>`).join("")||'<p class="sub">No scores entered yet.</p>';
-  playerList.innerHTML=players.map((p,i)=>`<div class="row"><span>${p}</span><button class="secondary" style="width:auto;padding:7px 10px" onclick="removePlayer(${i})">Remove</button></div>`).join("");
+function renderAdmin(){
+  $('adminRoster').innerHTML=players.map(p=>'<div class="item"><div class="row"><div>'+escapeHtml(p.name)+'</div><button class="danger small" onclick="removePlayer('+p.id+')">Remove</button></div></div>').join('');
+  const opts='<option value="">Choose player</option>'+players.map(p=>'<option value="'+p.id+'">'+escapeHtml(p.name)+'</option>').join('');
+  $('gameA').innerHTML=opts;$('gameB').innerHTML=opts;
+  $('adminGames').innerHTML=games.length?games.map(g=>{
+    const a=g.player_a_info?.name||'Player A',b=g.player_b_info?.name||'Player B';
+    return '<div class="item"><strong>'+escapeHtml(a)+' vs '+escapeHtml(b)+'</strong><div class="triple"><input id="sa_'+g.id+'" type="number" min="0" placeholder="Score A" value="'+(g.score_a??'')+'"><input id="sb_'+g.id+'" type="number" min="0" placeholder="Score B" value="'+(g.score_b??'')+'"><button onclick="saveScore('+g.id+')">Save score</button></div><button class="danger small" onclick="removeGame('+g.id+')">Delete game</button></div>';
+  }).join(''):'<p class="muted">No games yet.</p>';
 }
-function removePlayer(i){players.splice(i,1);games=games.filter(g=>players.includes(g.a)&&players.includes(g.b));save();render()}
-document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{document.querySelectorAll("section").forEach(s=>s.classList.add("hidden"));document.getElementById(b.dataset.tab).classList.remove("hidden");document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));b.classList.add("active")});
-addPlayer.onclick=()=>{const n=newPlayer.value.trim();if(!n)return;if(players.includes(n))return alert("That player is already listed.");players.push(n);newPlayer.value="";save();render()};
-saveScore.onclick=()=>{const g=games.find(x=>x.id==gameSelect.value);if(!g)return;const a=Number(score1.value),b=Number(score2.value);if(!Number.isInteger(a)||!Number.isInteger(b)||a<0||b<0)return alert("Enter both scores.");g.s1=a;g.s2=b;save();score1.value="";score2.value="";render()};
-render();
-let deferred;
-window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e;install.style.display="block"});
-installBtn.onclick=async()=>{if(deferred){deferred.prompt();await deferred.userChoice;deferred=null}install.style.display="none"};
-if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
+async function addPlayer(){
+  const name=$('newPlayer').value.trim();if(!name)return;
+  const {error}=await client.from('club_players').insert({name});
+  if(error){alert(error.message);return}$('newPlayer').value='';await refreshAll();
+}
+async function removePlayer(id){
+  if(!confirm('Remove this player? Games involving this player will also be removed.'))return;
+  const {error}=await client.from('club_players').delete().eq('id',id);
+  if(error){alert(error.message);return}await refreshAll();
+}
+async function createGame(){
+  const a=Number($('gameA').value),b=Number($('gameB').value);
+  if(!a||!b||a===b){msg('gameCreateMsg','Choose two different players.');return}
+  const {error}=await client.from('games').insert({player_a:a,player_b:b});
+  if(error){msg('gameCreateMsg',error.message);return}
+  msg('gameCreateMsg','Game created.',true);await refreshAll();
+}
+async function saveScore(id){
+  const a=$('sa_'+id).value,b=$('sb_'+id).value;
+  if(a===''||b===''){alert('Enter both scores.');return}
+  const {error}=await client.from('games').update({score_a:Number(a),score_b:Number(b)}).eq('id',id);
+  if(error){alert(error.message);return}await refreshAll();
+}
+async function removeGame(id){
+  if(!confirm('Delete this game?'))return;
+  const {error}=await client.from('games').delete().eq('id',id);
+  if(error){alert(error.message);return}await refreshAll();
+}
+async function signOut(){await client.auth.signOut();location.reload()}
+
+(async function(){
+  try{
+    if(loadConnection()){
+      const {data}=await client.auth.getSession();
+      if(data.session) await startApp(data.session.user);
+      else $('authScreen').classList.remove('hidden');
+    }
+  }catch(e){console.error(e);$('authScreen').classList.remove('hidden')}
+})();
+</script>
+<script>
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
 </html>
