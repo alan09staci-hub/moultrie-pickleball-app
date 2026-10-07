@@ -858,7 +858,10 @@ function buildRoundPairings(list){
 async function generateRound(){
   const count=Number($('roundPlayerCount').value);
   const round=Number($('roundNumber').value);
-
+if(![4,5,6].includes(count)){
+  msg('roundMsg','A court must have exactly 4, 5, or 6 players.');
+  return;
+}
   if(!round||round<1){
     msg('roundMsg','Enter a round number.');
     return;
