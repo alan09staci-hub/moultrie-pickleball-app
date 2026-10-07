@@ -1,4 +1,4 @@
-<!doctype html> 
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -8,31 +8,52 @@
 <title>Moultrie Pickleball Association</title>
 <style>
 :root{--brand:#0f766e;--dark:#12302d;--bg:#f5f7f6;--card:#fff;--muted:#66736f;--danger:#b42318;--line:#dbe3e0}
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--dark)}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--dark)}
 header{background:var(--brand);color:#fff;padding:18px 16px;position:sticky;top:0;z-index:10;box-shadow:0 2px 8px #0002}
-header h1{margin:0;font-size:20px}header p{margin:3px 0 0;font-size:13px;opacity:.9}
-main{max-width:900px;margin:auto;padding:16px 14px 50px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 1px 4px #0000000a}
-h2{font-size:19px;margin:4px 0 12px}h3{font-size:16px;margin:8px 0}
+header h1{margin:0;font-size:20px}
+header p{margin:3px 0 0;font-size:13px;opacity:.9}
+main{max-width:900px;margin:auto;padding:16px 14px 50px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 1px 4px #0000000a}
+h2{font-size:19px;margin:4px 0 12px}
+h3{font-size:16px;margin:8px 0}
 input,select,button{width:100%;font:inherit;padding:12px;border-radius:10px;border:1px solid #cbd5d1;margin:5px 0}
-button{background:var(--brand);color:#fff;border:0;font-weight:700;cursor:pointer}button.secondary{background:#e7efed;color:var(--dark)}button.danger{background:var(--danger)}button.small{width:auto;padding:8px 11px;font-size:13px}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.triple{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.nav{display:flex;gap:6px;overflow:auto;padding:8px 0}.nav button{white-space:nowrap;width:auto;padding:9px 13px;margin:0;background:#e5ecea;color:var(--dark)}.nav button.active{background:var(--brand);color:#fff}
-.hidden{display:none!important}.muted{color:var(--muted);font-size:13px}.pill{display:inline-block;background:#e7efed;border-radius:999px;padding:4px 9px;font-size:12px}
-.notice{padding:12px;border-radius:10px;background:#fff7d6;border:1px solid #eadf9a;margin:10px 0}.error{background:#fff0ef;border-color:#f1b7b2;color:#8d1f17}.success{background:#edf9f1;border-color:#b9dfc3;color:#1d6b35}
-.list{display:grid;gap:8px}.item{border:1px solid var(--line);border-radius:12px;padding:11px;background:#fff}.score{font-size:18px;font-weight:800}
-table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:9px;border-bottom:1px solid var(--line)}th{font-size:12px;color:var(--muted)}
-.auth{max-width:430px;margin:40px auto}.brandmark{text-align:center;font-size:42px;margin-bottom:5px}
+button{background:var(--brand);color:#fff;border:0;font-weight:700;cursor:pointer}
+button.secondary{background:#e7efed;color:var(--dark)}
+button.danger{background:var(--danger)}
+button.small{width:auto;padding:8px 11px;font-size:13px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.triple{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.nav{display:flex;gap:6px;overflow:auto;padding:8px 0}
+.nav button{white-space:nowrap;width:auto;padding:9px 13px;margin:0;background:#e5ecea;color:var(--dark)}
+.nav button.active{background:var(--brand);color:#fff}
+.hidden{display:none!important}
+.muted{color:var(--muted);font-size:13px}
+.pill{display:inline-block;background:#e7efed;border-radius:999px;padding:4px 9px;font-size:12px}
+.notice{padding:12px;border-radius:10px;background:#fff7d6;border:1px solid #eadf9a;margin:10px 0}
+.error{background:#fff0ef;border-color:#f1b7b2;color:#8d1f17}
+.success{background:#edf9f1;border-color:#b9dfc3;color:#1d6b35}
+.list{display:grid;gap:8px}
+.item{border:1px solid var(--line);border-radius:12px;padding:11px;background:#fff}
+.score{font-size:18px;font-weight:800}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:9px;border-bottom:1px solid var(--line)}
+th{font-size:12px;color:var(--muted)}
+.auth{max-width:430px;margin:40px auto}
+.brandmark{text-align:center;font-size:42px;margin-bottom:5px}
 footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 @media(max-width:600px){.row,.triple{grid-template-columns:1fr}main{padding:12px}}
 </style>
 </head>
 <body>
+
 <header>
   <h1>🏓 Moultrie Pickleball Association</h1>
   <p id="userLine">Player App</p>
 </header>
 
 <main>
+
 <section id="setupScreen" class="card">
   <h2>Connect the club database</h2>
   <p class="muted">Enter the Supabase Project URL and publishable key once on this device. These are safe to use in the browser when Row Level Security is configured.</p>
@@ -51,13 +72,27 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
   <input id="displayName" class="hidden" placeholder="Your name">
   <button id="authBtn" onclick="submitAuth()">Sign in</button>
   <button class="secondary" onclick="toggleAuthMode()" id="authToggle">Create account</button>
+  <button class="secondary" onclick="sendPasswordReset()">Forgot password?</button>
   <div id="authMsg"></div>
+</section>
+
+<section id="resetScreen" class="auth card hidden">
+  <div class="brandmark">🏓</div>
+  <h2>Set a new password</h2>
+  <p class="muted">Enter your new password below.</p>
+  <input id="newPassword" type="password" placeholder="New password">
+  <input id="confirmPassword" type="password" placeholder="Confirm new password">
+  <button onclick="updatePassword()">Save new password</button>
+  <div id="resetMsg"></div>
 </section>
 
 <section id="appScreen" class="hidden">
   <div class="card">
     <div class="row">
-      <div><strong id="welcome">Welcome</strong><div class="muted" id="roleText"></div></div>
+      <div>
+        <strong id="welcome">Welcome</strong>
+        <div class="muted" id="roleText"></div>
+      </div>
       <button class="secondary small" onclick="signOut()">Sign out</button>
     </div>
   </div>
@@ -65,24 +100,43 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
   <div class="nav" id="nav"></div>
 
   <section id="dashboardTab" class="tab">
-    <div class="card"><h2>Club Dashboard</h2><p>Welcome to the Moultrie Pickleball Association player app.</p><div id="dashStats" class="row"></div></div>
-    <div class="card"><h2>Upcoming Games</h2><div id="dashGames" class="list"></div></div>
+    <div class="card">
+      <h2>Club Dashboard</h2>
+      <p>Welcome to the Moultrie Pickleball Association player app.</p>
+      <div id="dashStats" class="row"></div>
+    </div>
+    <div class="card">
+      <h2>Upcoming Games</h2>
+      <div id="dashGames" class="list"></div>
+    </div>
   </section>
 
   <section id="rosterTab" class="tab hidden">
-    <div class="card"><h2>Player Roster</h2><div id="roster" class="list"></div></div>
+    <div class="card">
+      <h2>Player Roster</h2>
+      <div id="roster" class="list"></div>
+    </div>
   </section>
 
   <section id="scheduleTab" class="tab hidden">
-    <div class="card"><h2>Round-Robin Schedule</h2><div id="schedule" class="list"></div></div>
+    <div class="card">
+      <h2>Round-Robin Schedule</h2>
+      <div id="schedule" class="list"></div>
+    </div>
   </section>
 
   <section id="standingsTab" class="tab hidden">
-    <div class="card"><h2>Standings</h2><div id="standings"></div></div>
+    <div class="card">
+      <h2>Standings</h2>
+      <div id="standings"></div>
+    </div>
   </section>
 
   <section id="analyticsTab" class="tab hidden">
-    <div class="card"><h2>Club Analytics</h2><div id="analytics"></div></div>
+    <div class="card">
+      <h2>Club Analytics</h2>
+      <div id="analytics"></div>
+    </div>
   </section>
 
   <section id="adminTab" class="tab hidden">
@@ -90,246 +144,846 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
       <h2>Admin Center</h2>
       <p class="muted">Only users with the admin role can use these controls. The database also blocks non-admin writes.</p>
     </div>
+
     <div class="card">
       <h2>Manage Players</h2>
-      <div class="row"><input id="newPlayer" placeholder="Player name"><button onclick="addPlayer()">Add player</button></div>
+      <div class="row">
+        <input id="newPlayer" placeholder="Player name">
+        <button onclick="addPlayer()">Add player</button>
+      </div>
       <div id="adminRoster" class="list"></div>
     </div>
+
     <div class="card">
       <h2>60-Point Round</h2>
       <p class="muted">Choose 4, 5, or 6 players. The round automatically creates games totaling exactly 60 points.</p>
-      <div class="row"><select id="roundPlayerCount"><option value="4">4 players — 3 games to 20</option><option value="5">5 players — 4 games to 15</option><option value="6">6 players — 6 games to 10</option></select><input id="roundNumber" type="number" min="1" placeholder="Round number"></div>
+      <div class="row">
+        <select id="roundPlayerCount">
+          <option value="4">4 players — 3 games to 20</option>
+          <option value="5">5 players — 4 games to 15</option>
+          <option value="6">6 players — 6 games to 10</option>
+        </select>
+        <input id="roundNumber" type="number" min="1" placeholder="Round number">
+      </div>
       <button onclick="generateRound()">Create 60-point round</button>
       <div id="roundMsg"></div>
     </div>
+
     <div class="card">
       <h2>Create Individual Game</h2>
-      <div class="row"><select id="gameA"></select><select id="gameB"></select></div>
+      <div class="row">
+        <select id="gameA"></select>
+        <select id="gameB"></select>
+      </div>
       <button onclick="createGame()">Create game</button>
       <div id="gameCreateMsg"></div>
     </div>
+
     <div class="card">
       <h2>Enter / Correct Scores</h2>
       <div id="adminGames" class="list"></div>
     </div>
   </section>
 </section>
+
 </main>
+
 <footer>Moultrie Pickleball Association</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
-let client=null, currentUser=null, profile=null, players=[], games=[], authMode='signin';
+let client=null;
+let currentUser=null;
+let profile=null;
+let players=[];
+let games=[];
+let authMode='signin';
+let authListenerStarted=false;
 
 const $=id=>document.getElementById(id);
-function msg(id,text,good=false){$(id).innerHTML=text?'<div class="notice '+(good?'success':'error')+'">'+escapeHtml(text)+'</div>':''}
-function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 
-function saved(){return {url:localStorage.getItem('mpa_supabase_url'),key:localStorage.getItem('mpa_supabase_key')}}
+function msg(id,text,good=false){
+  $(id).innerHTML=text
+    ?'<div class="notice '+(good?'success':'error')+'">'+escapeHtml(text)+'</div>'
+    :'';
+}
+
+function escapeHtml(s){
+  return String(s??'').replace(/[&<>"']/g,m=>({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#39;'
+  }[m]));
+}
+
+function saved(){
+  return {
+    url:localStorage.getItem('mpa_supabase_url'),
+    key:localStorage.getItem('mpa_supabase_key')
+  };
+}
+
+function showResetScreen(){
+  $('setupScreen').classList.add('hidden');
+  $('authScreen').classList.add('hidden');
+  $('appScreen').classList.add('hidden');
+  $('resetScreen').classList.remove('hidden');
+  $('userLine').textContent='Password Recovery';
+}
+
+function watchAuthEvents(){
+  if(!client||authListenerStarted)return;
+
+  authListenerStarted=true;
+
+  client.auth.onAuthStateChange((event,session)=>{
+    if(event==='PASSWORD_RECOVERY'){
+      showResetScreen();
+    }
+  });
+}
+
 async function connectSupabase(){
-  const url=$('supabaseUrl').value.trim(), key=$('supabaseKey').value.trim();
-  if(!url||!key){msg('setupMsg','Please enter both Supabase values.');return}
+  const url=$('supabaseUrl').value.trim();
+  const key=$('supabaseKey').value.trim();
+
+  if(!url||!key){
+    msg('setupMsg','Please enter both Supabase values.');
+    return;
+  }
+
   try{
     client=window.supabase.createClient(url,key);
+    watchAuthEvents();
+
     const {error}=await client.auth.getSession();
-    if(error) throw error;
-    localStorage.setItem('mpa_supabase_url',url);localStorage.setItem('mpa_supabase_key',key);
-    $('setupScreen').classList.add('hidden'); $('authScreen').classList.remove('hidden');
-  }catch(e){msg('setupMsg',e.message||'Could not connect.')}
+    if(error)throw error;
+
+    localStorage.setItem('mpa_supabase_url',url);
+    localStorage.setItem('mpa_supabase_key',key);
+
+    $('setupScreen').classList.add('hidden');
+    $('authScreen').classList.remove('hidden');
+  }catch(e){
+    msg('setupMsg',e.message||'Could not connect.');
+  }
 }
+
 function loadConnection(){
   const s=saved();
-  if(s.url&&s.key){$('supabaseUrl').value=s.url;$('supabaseKey').value=s.key;client=window.supabase.createClient(s.url,s.key);$('setupScreen').classList.add('hidden');return true}
-  return false
+
+  if(s.url&&s.key){
+    $('supabaseUrl').value=s.url;
+    $('supabaseKey').value=s.key;
+
+    client=window.supabase.createClient(s.url,s.key);
+    watchAuthEvents();
+
+    $('setupScreen').classList.add('hidden');
+    return true;
+  }
+
+  return false;
 }
+
 function toggleAuthMode(){
   authMode=authMode==='signin'?'signup':'signin';
+
   $('authTitle').textContent=authMode==='signin'?'Sign in':'Create account';
   $('authBtn').textContent=authMode==='signin'?'Sign in':'Create account';
   $('authToggle').textContent=authMode==='signin'?'Create account':'Back to sign in';
   $('displayName').classList.toggle('hidden',authMode==='signin');
+
   msg('authMsg','');
 }
+
+async function sendPasswordReset(){
+  const email=$('email').value.trim();
+
+  if(!email){
+    msg('authMsg','Enter your email address first.');
+    return;
+  }
+
+  try{
+    const {error}=await client.auth.resetPasswordForEmail(email,{
+      redirectTo:window.location.origin+'/'
+    });
+
+    if(error)throw error;
+
+    msg(
+      'authMsg',
+      'Password reset email sent. Check your email and open the reset link.',
+      true
+    );
+  }catch(e){
+    msg('authMsg',e.message||'Could not send password reset email.');
+  }
+}
+
+async function updatePassword(){
+  const p1=$('newPassword').value;
+  const p2=$('confirmPassword').value;
+
+  if(p1.length<6){
+    msg('resetMsg','Password must be at least 6 characters.');
+    return;
+  }
+
+  if(p1!==p2){
+    msg('resetMsg','Passwords do not match.');
+    return;
+  }
+
+  try{
+    const {error}=await client.auth.updateUser({password:p1});
+
+    if(error)throw error;
+
+    msg('resetMsg','Password updated successfully. Returning to sign in.',true);
+
+    setTimeout(async()=>{
+      await client.auth.signOut();
+      window.location.href=window.location.origin+'/';
+    },1200);
+
+  }catch(e){
+    msg('resetMsg',e.message||'Could not update password.');
+  }
+}
+
 async function submitAuth(){
-  const email=$('email').value.trim(), password=$('password').value, name=$('displayName').value.trim();
-  if(!email||!password){msg('authMsg','Enter your email and password.');return}
+  const email=$('email').value.trim();
+  const password=$('password').value;
+  const name=$('displayName').value.trim();
+
+  if(!email||!password){
+    msg('authMsg','Enter your email and password.');
+    return;
+  }
+
   try{
     let result;
-    if(authMode==='signin') result=await client.auth.signInWithPassword({email,password});
-    else result=await client.auth.signUp({email,password,options:{data:{display_name:name}}});
-    if(result.error) throw result.error;
-    if(authMode==='signup'&&!result.data.session){msg('authMsg','Account created. Check your email to confirm your account.',true);return}
+
+    if(authMode==='signin'){
+      result=await client.auth.signInWithPassword({email,password});
+    }else{
+      result=await client.auth.signUp({
+        email,
+        password,
+        options:{data:{display_name:name}}
+      });
+    }
+
+    if(result.error)throw result.error;
+
+    if(authMode==='signup'&&!result.data.session){
+      msg('authMsg','Account created. Check your email to confirm your account.',true);
+      return;
+    }
+
     await startApp(result.data.session?.user||result.data.user);
-  }catch(e){msg('authMsg',e.message||'Authentication failed.')}
+
+  }catch(e){
+    msg('authMsg',e.message||'Authentication failed.');
+  }
 }
+
 async function startApp(user){
   if(!user)return;
+
   currentUser=user;
-  const {data,error}=await client.from('profiles').select('id,role,display_name').eq('id',user.id).single();
-  if(error) throw error;
+
+  const {data,error}=await client
+    .from('profiles')
+    .select('id,role,display_name')
+    .eq('id',user.id)
+    .single();
+
+  if(error)throw error;
+
   profile=data;
-  $('authScreen').classList.add('hidden');$('appScreen').classList.remove('hidden');
-  $('welcome').textContent='Welcome, '+(profile.display_name||user.email.split('@')[0]);
+
+  $('resetScreen').classList.add('hidden');
+  $('authScreen').classList.add('hidden');
+  $('appScreen').classList.remove('hidden');
+
+  $('welcome').textContent=
+    'Welcome, '+(profile.display_name||user.email.split('@')[0]);
+
   $('userLine').textContent=user.email;
-  $('roleText').textContent=(profile.role==='admin'?'Administrator':'Player')+' • shared club data';
-  buildNav(); await refreshAll();
+
+  $('roleText').textContent=
+    (profile.role==='admin'?'Administrator':'Player')+
+    ' • shared club data';
+
+  buildNav();
+  await refreshAll();
 }
+
 function buildNav(){
-  const items=[['dashboard','Dashboard'],['roster','Roster'],['schedule','Schedule'],['standings','Standings'],['analytics','Analytics']];
-  if(profile.role==='admin')items.push(['admin','Admin']);
-  $('nav').innerHTML=items.map((x,i)=>'<button class="'+(i===0?'active':'')+'" onclick="showTab(\''+x[0]+'\',this)">'+x[1]+'</button>').join('');
+  const items=[
+    ['dashboard','Dashboard'],
+    ['roster','Roster'],
+    ['schedule','Schedule'],
+    ['standings','Standings'],
+    ['analytics','Analytics']
+  ];
+
+  if(profile.role==='admin'){
+    items.push(['admin','Admin']);
+  }
+
+  $('nav').innerHTML=items.map((x,i)=>
+    '<button class="'+(i===0?'active':'')+
+    '" onclick="showTab(\''+x[0]+'\',this)">'+
+    x[1]+'</button>'
+  ).join('');
 }
+
 function showTab(name,btn){
   document.querySelectorAll('.tab').forEach(x=>x.classList.add('hidden'));
   $(name+'Tab').classList.remove('hidden');
-  document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');
+
+  document.querySelectorAll('.nav button')
+    .forEach(x=>x.classList.remove('active'));
+
+  btn.classList.add('active');
 }
+
 async function refreshAll(){
   const [pr,gr]=await Promise.all([
-    client.from('club_players').select('id,name,created_at').order('name'),
-    client.from('games').select('id,player_a,player_b,score_a,score_b,round_number,court_number,target_score,created_at,player_a_info:club_players!games_player_a_fkey(id,name),player_b_info:club_players!games_player_b_fkey(id,name)').order('created_at',{ascending:false})
+    client
+      .from('club_players')
+      .select('id,name,created_at')
+      .order('name'),
+
+    client
+      .from('games')
+      .select('id,player_a,player_b,score_a,score_b,round_number,court_number,target_score,created_at,player_a_info:club_players!games_player_a_fkey(id,name),player_b_info:club_players!games_player_b_fkey(id,name)')
+      .order('created_at',{ascending:false})
   ]);
-  if(pr.error)throw pr.error;if(gr.error)throw gr.error;
-  players=pr.data||[];games=gr.data||[];
+
+  if(pr.error)throw pr.error;
+  if(gr.error)throw gr.error;
+
+  players=pr.data||[];
+  games=gr.data||[];
+
   renderAll();
 }
+
 function renderAll(){
-  $('dashStats').innerHTML='<div class="item"><strong>'+players.length+'</strong><div class="muted">Players</div></div><div class="item"><strong>'+games.length+'</strong><div class="muted">Games</div></div>';
-  $('roster').innerHTML=players.length?players.map(p=>'<div class="item">'+escapeHtml(p.name)+'</div>').join(''):'<p class="muted">No players yet.</p>';
-  const gameHtml=games.length?games.map(gameCard).join(''):'<p class="muted">No games scheduled yet.</p>';
-  $('schedule').innerHTML=gameHtml;$('dashGames').innerHTML=gameHtml;
+  $('dashStats').innerHTML=
+    '<div class="item"><strong>'+players.length+
+    '</strong><div class="muted">Players</div></div>'+
+    '<div class="item"><strong>'+games.length+
+    '</strong><div class="muted">Games</div></div>';
+
+  $('roster').innerHTML=players.length
+    ?players.map(p=>
+      '<div class="item">'+escapeHtml(p.name)+'</div>'
+    ).join('')
+    :'<p class="muted">No players yet.</p>';
+
+  const gameHtml=games.length
+    ?games.map(gameCard).join('')
+    :'<p class="muted">No games scheduled yet.</p>';
+
+  $('schedule').innerHTML=gameHtml;
+  $('dashGames').innerHTML=gameHtml;
+
   renderStandings();
   renderAnalytics();
-  if(profile.role==='admin'){renderAdmin();}
+
+  if(profile.role==='admin'){
+    renderAdmin();
+  }
 }
+
 function gameCard(g){
-  const a=g.player_a_info?.name||'Player A',b=g.player_b_info?.name||'Player B';
-  const score=(g.score_a!==null&&g.score_b!==null)?'<span class="score">'+g.score_a+' – '+g.score_b+'</span>':'<span class="pill">Not scored</span>';
-  const round=g.round_number?'<span class="pill">Round '+g.round_number+(g.court_number?' • Court '+g.court_number:'')+'</span> ':'';
-  const target=g.target_score?'<span class="pill">First to '+g.target_score+'</span>':'';
-  return '<div class="item">'+round+target+'<br><strong>'+escapeHtml(a)+'</strong> vs <strong>'+escapeHtml(b)+'</strong><br>'+score+'</div>';
-}
-function renderStandings(){
-  const stats={};players.forEach(p=>stats[p.id]={name:p.name,w:0,l:0,pf:0,pa:0});
-  games.forEach(g=>{
-    if(g.score_a===null||g.score_b===null)return;
-    const a=stats[g.player_a],b=stats[g.player_b];if(!a||!b)return;
-    a.pf+=g.score_a;a.pa+=g.score_b;b.pf+=g.score_b;b.pa+=g.score_a;
-    if(g.score_a>g.score_b){a.w++;b.l++}else if(g.score_b>g.score_a){b.w++;a.l++}
-  });
-  const rows=Object.values(stats).sort((a,b)=>b.w-a.w||(b.pf-b.pa)-(a.pf-a.pa));
-  $('standings').innerHTML=rows.length?'<table><thead><tr><th>Player</th><th>W</th><th>L</th><th>PF</th><th>PA</th></tr></thead><tbody>'+rows.map(r=>'<tr><td>'+escapeHtml(r.name)+'</td><td>'+r.w+'</td><td>'+r.l+'</td><td>'+r.pf+'</td><td>'+r.pa+'</td></tr>').join('')+'</tbody></table>':'<p class="muted">No players yet.</p>';
-}
-function renderAnalytics(){
-  const stats={};players.forEach(p=>stats[p.id]={name:p.name,games:0,w:0,l:0,pf:0,pa:0});
-  let completed=0,totalPoints=0,roundGames=0,roundPoints=0;
-  games.forEach(g=>{
-    const a=stats[g.player_a],b=stats[g.player_b];
-    if(g.round_number)roundGames++;
-    if(g.score_a!==null&&g.score_b!==null){
-      completed++;
-      totalPoints+=Number(g.score_a)+Number(g.score_b);
-      if(g.round_number)roundPoints+=Number(g.score_a)+Number(g.score_b);
-      if(a){a.games++;a.pf+=Number(g.score_a);a.pa+=Number(g.score_b);}
-      if(b){b.games++;b.pf+=Number(g.score_b);b.pa+=Number(g.score_a);}
-      if(Number(g.score_a)>Number(g.score_b)){if(a)a.w++;if(b)b.l++}
-      else if(Number(g.score_b)>Number(g.score_a)){if(b)b.w++;if(a)a.l++}
-    }
-  });
-  const totalDecisions=Object.values(stats).reduce((n,r)=>n+r.w+r.l,0);
-  const totalWins=Object.values(stats).reduce((n,r)=>n+r.w,0);
-  const totalLosses=Object.values(stats).reduce((n,r)=>n+r.l,0);
-  const winPct=totalDecisions?Math.round(totalWins/totalDecisions*100):0;
-  const lossPct=totalDecisions?Math.round(totalLosses/totalDecisions*100):0;
-  const top=[...Object.values(stats)].sort((a,b)=>b.w-a.w||(b.pf-b.pa)-(a.pf-a.pa)).slice(0,10);
-  $('analytics').innerHTML=
-    '<div class="row">'+
-      '<div class="item"><strong>'+players.length+'</strong><div class="muted">Total players</div></div>'+
-      '<div class="item"><strong>'+games.length+'</strong><div class="muted">Total games</div></div>'+
-      '<div class="item"><strong>'+completed+'</strong><div class="muted">Completed games</div></div>'+
-      '<div class="item"><strong>'+totalPoints+'</strong><div class="muted">Total points</div></div>'+
-    '</div>'+
-    '<div class="card"><h3>Overall results</h3><p><strong>'+winPct+'%</strong> wins • <strong>'+lossPct+'%</strong> losses. Ties are excluded.</p><p class="muted">60-point round games: '+roundGames+' • Points recorded in round games: '+roundPoints+'</p></div>'+
-    '<div class="card"><h3>Player performance</h3>'+
-    (top.length?'<table><thead><tr><th>Player</th><th>Games</th><th>W</th><th>L</th><th>Win %</th><th>PF</th><th>PA</th></tr></thead><tbody>'+
-      top.map(r=>{const d=r.w+r.l;return '<tr><td>'+escapeHtml(r.name)+'</td><td>'+r.games+'</td><td>'+r.w+'</td><td>'+r.l+'</td><td>'+ (d?Math.round(r.w/d*100):0)+'%</td><td>'+r.pf+'</td><td>'+r.pa+'</td></tr>'}).join('')+
-    '</tbody></table>':'<p class="muted">No player results yet.</p>')+
+  const a=g.player_a_info?.name||'Player A';
+  const b=g.player_b_info?.name||'Player B';
+
+  const score=(g.score_a!==null&&g.score_b!==null)
+    ?'<span class="score">'+g.score_a+' – '+g.score_b+'</span>'
+    :'<span class="pill">Not scored</span>';
+
+  const round=g.round_number
+    ?'<span class="pill">Round '+g.round_number+
+      (g.court_number?' • Court '+g.court_number:'')+
+      '</span> '
+    :'';
+
+  const target=g.target_score
+    ?'<span class="pill">First to '+g.target_score+'</span>'
+    :'';
+
+  return '<div class="item">'+
+    round+target+'<br>'+
+    '<strong>'+escapeHtml(a)+'</strong> vs '+
+    '<strong>'+escapeHtml(b)+'</strong><br>'+
+    score+
     '</div>';
 }
+
+function renderStandings(){
+  const stats={};
+
+  players.forEach(p=>{
+    stats[p.id]={
+      name:p.name,
+      w:0,
+      l:0,
+      pf:0,
+      pa:0
+    };
+  });
+
+  games.forEach(g=>{
+    if(g.score_a===null||g.score_b===null)return;
+
+    const a=stats[g.player_a];
+    const b=stats[g.player_b];
+
+    if(!a||!b)return;
+
+    a.pf+=g.score_a;
+    a.pa+=g.score_b;
+    b.pf+=g.score_b;
+    b.pa+=g.score_a;
+
+    if(g.score_a>g.score_b){
+      a.w++;
+      b.l++;
+    }else if(g.score_b>g.score_a){
+      b.w++;
+      a.l++;
+    }
+  });
+
+  const rows=Object.values(stats).sort(
+    (a,b)=>b.w-a.w||(b.pf-b.pa)-(a.pf-a.pa)
+  );
+
+  $('standings').innerHTML=rows.length
+    ?'<table><thead><tr>'+
+      '<th>Player</th><th>W</th><th>L</th><th>PF</th><th>PA</th>'+
+      '</tr></thead><tbody>'+
+      rows.map(r=>
+        '<tr>'+
+        '<td>'+escapeHtml(r.name)+'</td>'+
+        '<td>'+r.w+'</td>'+
+        '<td>'+r.l+'</td>'+
+        '<td>'+r.pf+'</td>'+
+        '<td>'+r.pa+'</td>'+
+        '</tr>'
+      ).join('')+
+      '</tbody></table>'
+    :'<p class="muted">No players yet.</p>';
+}
+
+function renderAnalytics(){
+  const stats={};
+
+  players.forEach(p=>{
+    stats[p.id]={
+      name:p.name,
+      games:0,
+      w:0,
+      l:0,
+      pf:0,
+      pa:0
+    };
+  });
+
+  let completed=0;
+  let totalPoints=0;
+  let roundGames=0;
+  let roundPoints=0;
+
+  games.forEach(g=>{
+    const a=stats[g.player_a];
+    const b=stats[g.player_b];
+
+    if(g.round_number)roundGames++;
+
+    if(g.score_a!==null&&g.score_b!==null){
+      completed++;
+
+      totalPoints+=Number(g.score_a)+Number(g.score_b);
+
+      if(g.round_number){
+        roundPoints+=Number(g.score_a)+Number(g.score_b);
+      }
+
+      if(a){
+        a.games++;
+        a.pf+=Number(g.score_a);
+        a.pa+=Number(g.score_b);
+      }
+
+      if(b){
+        b.games++;
+        b.pf+=Number(g.score_b);
+        b.pa+=Number(g.score_a);
+      }
+
+      if(Number(g.score_a)>Number(g.score_b)){
+        if(a)a.w++;
+        if(b)b.l++;
+      }else if(Number(g.score_b)>Number(g.score_a)){
+        if(b)b.w++;
+        if(a)a.l++;
+      }
+    }
+  });
+
+  const totalDecisions=Object.values(stats)
+    .reduce((n,r)=>n+r.w+r.l,0);
+
+  const totalWins=Object.values(stats)
+    .reduce((n,r)=>n+r.w,0);
+
+  const totalLosses=Object.values(stats)
+    .reduce((n,r)=>n+r.l,0);
+
+  const winPct=totalDecisions
+    ?Math.round(totalWins/totalDecisions*100)
+    :0;
+
+  const lossPct=totalDecisions
+    ?Math.round(totalLosses/totalDecisions*100)
+    :0;
+
+  const top=[...Object.values(stats)]
+    .sort((a,b)=>b.w-a.w||(b.pf-b.pa)-(a.pf-a.pa))
+    .slice(0,10);
+
+  $('analytics').innerHTML=
+    '<div class="row">'+
+      '<div class="item"><strong>'+players.length+
+      '</strong><div class="muted">Total players</div></div>'+
+      '<div class="item"><strong>'+games.length+
+      '</strong><div class="muted">Total games</div></div>'+
+      '<div class="item"><strong>'+completed+
+      '</strong><div class="muted">Completed games</div></div>'+
+      '<div class="item"><strong>'+totalPoints+
+      '</strong><div class="muted">Total points</div></div>'+
+    '</div>'+
+
+    '<div class="card">'+
+      '<h3>Overall results</h3>'+
+      '<p><strong>'+winPct+'%</strong> wins • '+
+      '<strong>'+lossPct+'%</strong> losses. Ties are excluded.</p>'+
+      '<p class="muted">60-point round games: '+roundGames+
+      ' • Points recorded in round games: '+roundPoints+'</p>'+
+    '</div>'+
+
+    '<div class="card">'+
+      '<h3>Player performance</h3>'+
+      (top.length
+        ?'<table><thead><tr>'+
+          '<th>Player</th><th>Games</th><th>W</th><th>L</th>'+
+          '<th>Win %</th><th>PF</th><th>PA</th>'+
+          '</tr></thead><tbody>'+
+          top.map(r=>{
+            const d=r.w+r.l;
+
+            return '<tr>'+
+              '<td>'+escapeHtml(r.name)+'</td>'+
+              '<td>'+r.games+'</td>'+
+              '<td>'+r.w+'</td>'+
+              '<td>'+r.l+'</td>'+
+              '<td>'+(d?Math.round(r.w/d*100):0)+'%</td>'+
+              '<td>'+r.pf+'</td>'+
+              '<td>'+r.pa+'</td>'+
+              '</tr>';
+          }).join('')+
+          '</tbody></table>'
+        :'<p class="muted">No player results yet.</p>')+
+    '</div>';
+}
+
 function renderAdmin(){
-  $('adminRoster').innerHTML=players.map(p=>'<div class="item"><div class="row"><div>'+escapeHtml(p.name)+'</div><button class="danger small" onclick="removePlayer('+p.id+')">Remove</button></div></div>').join('');
-  const opts='<option value="">Choose player</option>'+players.map(p=>'<option value="'+p.id+'">'+escapeHtml(p.name)+'</option>').join('');
-  $('gameA').innerHTML=opts;$('gameB').innerHTML=opts;
-  $('adminGames').innerHTML=games.length?games.map(g=>{
-    const a=g.player_a_info?.name||'Player A',b=g.player_b_info?.name||'Player B';
-    const roundInfo=g.round_number?'<div class="muted">Round '+g.round_number+(g.court_number?' • Court '+g.court_number:'')+(g.target_score?' • First to '+g.target_score:'')+'</div>':'';
-    return '<div class="item"><strong>'+escapeHtml(a)+' vs '+escapeHtml(b)+'</strong>'+roundInfo+'<div class="triple"><input id="sa_'+g.id+'" type="number" min="0" placeholder="Score A" value="'+(g.score_a??'')+'"><input id="sb_'+g.id+'" type="number" min="0" placeholder="Score B" value="'+(g.score_b??'')+'"><button onclick="saveScore('+g.id+')">Save score</button></div><button class="danger small" onclick="removeGame('+g.id+')">Delete game</button></div>';
-  }).join(''):'<p class="muted">No games yet.</p>';
+  $('adminRoster').innerHTML=players.map(p=>
+    '<div class="item">'+
+      '<div class="row">'+
+        '<div>'+escapeHtml(p.name)+'</div>'+
+        '<button class="danger small" onclick="removePlayer('+p.id+')">'+
+          'Remove'+
+        '</button>'+
+      '</div>'+
+    '</div>'
+  ).join('');
+
+  const opts=
+    '<option value="">Choose player</option>'+
+    players.map(p=>
+      '<option value="'+p.id+'">'+escapeHtml(p.name)+'</option>'
+    ).join('');
+
+  $('gameA').innerHTML=opts;
+  $('gameB').innerHTML=opts;
+
+  $('adminGames').innerHTML=games.length
+    ?games.map(g=>{
+      const a=g.player_a_info?.name||'Player A';
+      const b=g.player_b_info?.name||'Player B';
+
+      const roundInfo=g.round_number
+        ?'<div class="muted">Round '+g.round_number+
+          (g.court_number?' • Court '+g.court_number:'')+
+          (g.target_score?' • First to '+g.target_score:'')+
+          '</div>'
+        :'';
+
+      return '<div class="item">'+
+        '<strong>'+escapeHtml(a)+' vs '+escapeHtml(b)+'</strong>'+
+        roundInfo+
+        '<div class="triple">'+
+          '<input id="sa_'+g.id+'" type="number" min="0" '+
+          'placeholder="Score A" value="'+(g.score_a??'')+'">'+
+          '<input id="sb_'+g.id+'" type="number" min="0" '+
+          'placeholder="Score B" value="'+(g.score_b??'')+'">'+
+          '<button onclick="saveScore('+g.id+')">Save score</button>'+
+        '</div>'+
+        '<button class="danger small" onclick="removeGame('+g.id+')">'+
+          'Delete game'+
+        '</button>'+
+      '</div>';
+    }).join('')
+    :'<p class="muted">No games yet.</p>';
 }
+
 async function addPlayer(){
-  const name=$('newPlayer').value.trim();if(!name)return;
-  const {error}=await client.from('club_players').insert({name});
-  if(error){alert(error.message);return}$('newPlayer').value='';await refreshAll();
+  const name=$('newPlayer').value.trim();
+
+  if(!name)return;
+
+  const {error}=await client
+    .from('club_players')
+    .insert({name});
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  $('newPlayer').value='';
+  await refreshAll();
 }
+
 async function removePlayer(id){
-  if(!confirm('Remove this player? Games involving this player will also be removed.'))return;
-  const {error}=await client.from('club_players').delete().eq('id',id);
-  if(error){alert(error.message);return}await refreshAll();
+  if(!confirm(
+    'Remove this player? Games involving this player will also be removed.'
+  ))return;
+
+  const {error}=await client
+    .from('club_players')
+    .delete()
+    .eq('id',id);
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  await refreshAll();
 }
+
 async function createGame(){
-  const a=Number($('gameA').value),b=Number($('gameB').value);
-  if(!a||!b||a===b){msg('gameCreateMsg','Choose two different players.');return}
-  const {error}=await client.from('games').insert({player_a:a,player_b:b});
-  if(error){msg('gameCreateMsg',error.message);return}
-  msg('gameCreateMsg','Game created.',true);await refreshAll();
+  const a=Number($('gameA').value);
+  const b=Number($('gameB').value);
+
+  if(!a||!b||a===b){
+    msg('gameCreateMsg','Choose two different players.');
+    return;
+  }
+
+  const {error}=await client
+    .from('games')
+    .insert({
+      player_a:a,
+      player_b:b
+    });
+
+  if(error){
+    msg('gameCreateMsg',error.message);
+    return;
+  }
+
+  msg('gameCreateMsg','Game created.',true);
+  await refreshAll();
 }
+
 function buildRoundPairings(list){
   const n=list.length;
-  if(n===6)return [[0,1],[2,3],[4,5],[0,2],[1,4],[3,5]];
-  if(n===5)return [[0,1],[2,3],[4,0],[1,2]];
-  if(n===4)return [[0,1],[2,3],[0,2]];
+
+  if(n===6){
+    return [
+      [0,1],
+      [2,3],
+      [4,5],
+      [0,2],
+      [1,4],
+      [3,5]
+    ];
+  }
+
+  if(n===5){
+    return [
+      [0,1],
+      [2,3],
+      [4,0],
+      [1,2]
+    ];
+  }
+
+  if(n===4){
+    return [
+      [0,1],
+      [2,3],
+      [0,2]
+    ];
+  }
+
   return [];
 }
+
 async function generateRound(){
-  const count=Number($('roundPlayerCount').value), round=Number($('roundNumber').value);
-  if(!round||round<1){msg('roundMsg','Enter a round number.');return}
-  if(players.length<count){msg('roundMsg','You need at least '+count+' players before creating this round.');return}
+  const count=Number($('roundPlayerCount').value);
+  const round=Number($('roundNumber').value);
+
+  if(!round||round<1){
+    msg('roundMsg','Enter a round number.');
+    return;
+  }
+
+  if(players.length<count){
+    msg(
+      'roundMsg',
+      'You need at least '+count+' players before creating this round.'
+    );
+    return;
+  }
+
   const target=count===6?10:count===5?15:20;
   const chosen=players.slice(0,count);
   const pairs=buildRoundPairings(chosen);
-  const rows=pairs.map((p,i)=>({player_a:chosen[p[0]].id,player_b:chosen[p[1]].id,round_number:round,court_number:i+1,target_score:target}));
-  const {error}=await client.from('games').insert(rows);
-  if(error){msg('roundMsg',error.message);return}
-  msg('roundMsg','Round '+round+' created: '+rows.length+' games, '+target+' points each, 60 points total.',true);
+
+  const rows=pairs.map((p,i)=>({
+    player_a:chosen[p[0]].id,
+    player_b:chosen[p[1]].id,
+    round_number:round,
+    court_number:i+1,
+    target_score:target
+  }));
+
+  const {error}=await client
+    .from('games')
+    .insert(rows);
+
+  if(error){
+    msg('roundMsg',error.message);
+    return;
+  }
+
+  msg(
+    'roundMsg',
+    'Round '+round+' created: '+rows.length+
+    ' games, '+target+' points each, 60 points total.',
+    true
+  );
+
   await refreshAll();
 }
+
 async function saveScore(id){
-  const a=$('sa_'+id).value,b=$('sb_'+id).value;
-  if(a===''||b===''){alert('Enter both scores.');return}
-  const game=games.find(x=>x.id===id), target=game?.target_score?Number(game.target_score):null;
-  if(target && (Number(a)>target||Number(b)>target)){alert('For this round, neither score can be above '+target+'.');return}
-  const {error}=await client.from('games').update({score_a:Number(a),score_b:Number(b)}).eq('id',id);
-  if(error){alert(error.message);return}await refreshAll();
+  const a=$('sa_'+id).value;
+  const b=$('sb_'+id).value;
+
+  if(a===''||b===''){
+    alert('Enter both scores.');
+    return;
+  }
+
+  const game=games.find(x=>x.id===id);
+  const target=game?.target_score
+    ?Number(game.target_score)
+    :null;
+
+  if(target&&(Number(a)>target||Number(b)>target)){
+    alert(
+      'For this round, neither score can be above '+target+'.'
+    );
+    return;
+  }
+
+  const {error}=await client
+    .from('games')
+    .update({
+      score_a:Number(a),
+      score_b:Number(b)
+    })
+    .eq('id',id);
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  await refreshAll();
 }
+
 async function removeGame(id){
   if(!confirm('Delete this game?'))return;
-  const {error}=await client.from('games').delete().eq('id',id);
-  if(error){alert(error.message);return}await refreshAll();
+
+  const {error}=await client
+    .from('games')
+    .delete()
+    .eq('id',id);
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  await refreshAll();
 }
-async function signOut(){await client.auth.signOut();location.reload()}
+
+async function signOut(){
+  await client.auth.signOut();
+  location.reload();
+}
 
 (async function(){
   try{
     if(loadConnection()){
       const {data}=await client.auth.getSession();
-      if(data.session) await startApp(data.session.user);
-      else $('authScreen').classList.remove('hidden');
+
+      if(data.session){
+        await startApp(data.session.user);
+      }else{
+        $('authScreen').classList.remove('hidden');
+      }
     }
-  }catch(e){console.error(e);$('authScreen').classList.remove('hidden')}
+  }catch(e){
+    console.error(e);
+    $('authScreen').classList.remove('hidden');
+  }
 })();
 </script>
+
 <script>
-if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
 </script>
+
 </body>
 </html>
