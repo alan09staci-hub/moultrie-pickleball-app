@@ -241,9 +241,21 @@ function watchAuthEvents(){
 
   client.auth.onAuthStateChange((event,session)=>{
     if(event==='PASSWORD_RECOVERY'){
+      sessionStorage.setItem('mpa_password_recovery','yes');
       showResetScreen();
     }
   });
+
+  const hash=window.location.hash;
+  const query=window.location.search;
+
+  if(
+    hash.includes('type=recovery') ||
+    query.includes('type=recovery') ||
+    sessionStorage.getItem('mpa_password_recovery')==='yes'
+  ){
+    showResetScreen();
+  }
 }
 
 async function connectSupabase(){
