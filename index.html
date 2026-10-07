@@ -158,12 +158,13 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
       <h2>60-Point Round</h2>
       <p class="muted">Choose 4, 5, or 6 players. The round automatically creates games totaling exactly 60 points.</p>
       <div class="row">
-        <select id="roundPlayerCount">
+        <select id="roundPlayerCount" onchange="renderRoundPlayerSelectors()">
           <option value="4">4 players — 3 games to 20</option>
           <option value="5">5 players — 4 games to 15</option>
           <option value="6">6 players — 6 games to 10</option>
         </select>
         <input id="roundNumber" type="number" min="1" placeholder="Round number">
+        <div id="roundPlayerSelectors"></div>
       </div>
       <button onclick="generateRound()">Create 60-point round</button>
       <div id="roundMsg"></div>
@@ -770,6 +771,7 @@ function renderAdmin(){
       '</div>';
     }).join('')
     :'<p class="muted">No games yet.</p>';
+  renderRoundPlayerSelectors();
 }
 
 async function addPlayer(){
@@ -832,7 +834,27 @@ async function createGame(){
   msg('gameCreateMsg','Game created.',true);
   await refreshAll();
 }
+function renderRoundPlayerSelectors(){
+  const box=$('roundPlayerSelectors');
+  if(!box)return;
 
+  const count=Number($('roundPlayerCount').value);
+
+  box.innerHTML='';
+
+  for(let i=0;i<count;i++){
+    const select=document.createElement('select');
+    select.className='roundPlayerSelect';
+
+    select.innerHTML=
+      '<option value="">Select player '+(i+1)+'</option>'+
+      players.map(p=>
+        '<option value="'+p.id+'">'+escapeHtml(p.name)+'</option>'
+      ).join('');
+
+    box.appendChild(select);
+  }
+}
 function buildRoundPairings(list){
   const n=list.length;
 
@@ -888,7 +910,21 @@ if(![4,5,6].includes(count)){
   }
 
   const target=count===6?10:count===5?15:20;
-  const chosen=players.slice(0,count);
+  const selectedIds=[...document.querySelectorAll('.roundPlayerSelect')]
+  .map(s=>s.value)
+  .filter(Boolean);
+
+if(selectedIds.length!==count){
+  msg('roundMsg','Select all '+count+' players for this round.');
+  return;
+}
+
+if(new Set(selectedIds).size!==count){
+  msg('roundMsg','Each player can only be selected once.');
+  return;
+}
+
+const chosen=selectedIds.map(id=>players.find(p=>String(p.id)===String(id)));
   const pairs=buildRoundPairings(chosen);
 
   const rows=pairs.map((p,i)=>({
