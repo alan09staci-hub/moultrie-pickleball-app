@@ -156,7 +156,11 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 
     <div class="card">
       <h2>60-Point Round</h2>
-      <p class="muted">Choose 4, 5, or 6 players. The round automatically creates games totaling exactly 60 points.</p>
+      <select id="roundMatchType">
+  <option value="doubles" selected>Doubles</option>
+  <option value="singles">Singles</option>
+      </select>
+<p class="muted">Choose 4, 5, or 6 players. The round automatically creates games totaling exactly 60 points.</p>
       <div class="row">
         <select id="roundPlayerCount" onchange="renderRoundPlayerSelectors()">
           <option value="4">4 players — 3 games to 20</option>
@@ -172,10 +176,16 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 
     <div class="card">
       <h2>Create Individual Game</h2>
-      <div class="row">
+      <select id="gameMatchType" onchange="renderIndividualGameSelectors()">
+  <option value="doubles" selected>Doubles</option>
+  <option value="singles">Singles</option>
+      </select>
+  <div class="row">
         <select id="gameA"></select>
         <select id="gameB"></select>
-      </div>
+        <select id="gameC"></select>
+        <select id="gameD"></select> 
+  </div>
       <button onclick="createGame()">Create game</button>
       <div id="gameCreateMsg"></div>
     </div>
@@ -477,7 +487,7 @@ async function refreshAll(){
 
     client
       .from('games')
-      .select('id,player_a,player_b,score_a,score_b,round_number,court_number,target_score,created_at,player_a_info:club_players!games_player_a_fkey(id,name),player_b_info:club_players!games_player_b_fkey(id,name)')
+.select('id,player_a,player_b,player_c,player_d,match_type,score_a,score_b,round_number,court_number,target_score,created_at,player_a_info:club_players!games_player_a_fkey(id,name),player_b_info:club_players!games_player_b_fkey(id,name),player_c_info:club_players!games_player_c_fkey(id,name),player_d_info:club_players!games_player_d_fkey(id,name)')
       .order('created_at',{ascending:false})
   ]);
 
@@ -560,23 +570,35 @@ function renderStandings(){
   games.forEach(g=>{
     if(g.score_a===null||g.score_b===null)return;
 
-    const a=stats[g.player_a];
-    const b=stats[g.player_b];
+    const teamA=[g.player_a];
+    const teamB=[g.player_b];
 
-    if(!a||!b)return;
-
-    a.pf+=g.score_a;
-    a.pa+=g.score_b;
-    b.pf+=g.score_b;
-    b.pa+=g.score_a;
-
-    if(g.score_a>g.score_b){
-      a.w++;
-      b.l++;
-    }else if(g.score_b>g.score_a){
-      b.w++;
-      a.l++;
+    if(g.match_type==='doubles'){
+      teamA.push(g.player_b);
+      teamB[0]=g.player_c;
+      teamB.push(g.player_d);
     }
+
+    const teamAStats=teamA.map(id=>stats[id]).filter(Boolean);
+    const teamBStats=teamB.map(id=>stats[id]).filter(Boolean);
+
+    if(!teamAStats.length||!teamBStats.length)return;
+
+    teamAStats.forEach(p=>{
+      p.pf+=g.score_a;
+      p.pa+=g.score_b;
+
+      if(g.score_a>g.score_b)p.w++;
+      if(g.score_b>g.score_a)p.l++;
+    });
+
+    teamBStats.forEach(p=>{
+      p.pf+=g.score_b;
+      p.pa+=g.score_a;
+
+      if(g.score_b>g.score_a)p.w++;
+      if(g.score_a>g.score_b)p.l++;
+    });
   });
 
   const rows=Object.values(stats).sort(
@@ -599,7 +621,6 @@ function renderStandings(){
       '</tbody></table>'
     :'<p class="muted">No players yet.</p>';
 }
-
 function renderAnalytics(){
   const stats={};
 
@@ -620,39 +641,49 @@ function renderAnalytics(){
   let roundPoints=0;
 
   games.forEach(g=>{
-    const a=stats[g.player_a];
-    const b=stats[g.player_b];
-
     if(g.round_number)roundGames++;
 
     if(g.score_a!==null&&g.score_b!==null){
       completed++;
 
-      totalPoints+=Number(g.score_a)+Number(g.score_b);
+      const scoreA=Number(g.score_a);
+      const scoreB=Number(g.score_b);
+
+      totalPoints+=scoreA+scoreB;
 
       if(g.round_number){
-        roundPoints+=Number(g.score_a)+Number(g.score_b);
+        roundPoints+=scoreA+scoreB;
       }
 
-      if(a){
-        a.games++;
-        a.pf+=Number(g.score_a);
-        a.pa+=Number(g.score_b);
+      const teamA=[g.player_a];
+      const teamB=[g.player_b];
+
+      if(g.match_type==='doubles'){
+        teamA.push(g.player_b);
+        teamB[0]=g.player_c;
+        teamB.push(g.player_d);
       }
 
-      if(b){
-        b.games++;
-        b.pf+=Number(g.score_b);
-        b.pa+=Number(g.score_a);
-      }
+      const teamAStats=teamA.map(id=>stats[id]).filter(Boolean);
+      const teamBStats=teamB.map(id=>stats[id]).filter(Boolean);
 
-      if(Number(g.score_a)>Number(g.score_b)){
-        if(a)a.w++;
-        if(b)b.l++;
-      }else if(Number(g.score_b)>Number(g.score_a)){
-        if(b)b.w++;
-        if(a)a.l++;
-      }
+      teamAStats.forEach(p=>{
+        p.games++;
+        p.pf+=scoreA;
+        p.pa+=scoreB;
+
+        if(scoreA>scoreB)p.w++;
+        if(scoreB>scoreA)p.l++;
+      });
+
+      teamBStats.forEach(p=>{
+        p.games++;
+        p.pf+=scoreB;
+        p.pa+=scoreA;
+
+        if(scoreB>scoreA)p.w++;
+        if(scoreA>scoreB)p.l++;
+      });
     }
   });
 
@@ -721,7 +752,13 @@ function renderAnalytics(){
         :'<p class="muted">No player results yet.</p>')+
     '</div>';
 }
+  function renderIndividualGameSelectors(){
+  const type=$('gameMatchType').value;
+  const isDoubles=type==='doubles';
 
+  $('gameC').style.display=isDoubles?'':'none';
+  $('gameD').style.display=isDoubles?'':'none';
+  }
 function renderAdmin(){
   $('adminRoster').innerHTML=players.map(p=>
     '<div class="item">'+
@@ -742,12 +779,14 @@ function renderAdmin(){
 
   $('gameA').innerHTML=opts;
   $('gameB').innerHTML=opts;
-
+  $('gameC').innerHTML=opts;
+  $('gameD').innerHTML=opts;
   $('adminGames').innerHTML=games.length
     ?games.map(g=>{
       const a=g.player_a_info?.name||'Player A';
       const b=g.player_b_info?.name||'Player B';
-
+      const c=g.player_c_info?.name||'Player C';
+      const d=g.player_d_info?.name||'Player D';
       const roundInfo=g.round_number
         ?'<div class="muted">Round '+g.round_number+
           (g.court_number?' • Court '+g.court_number:'')+
@@ -756,7 +795,12 @@ function renderAdmin(){
         :'';
 
       return '<div class="item">'+
-        '<strong>'+escapeHtml(a)+' vs '+escapeHtml(b)+'</strong>'+
+       '<strong>'+
+  (g.match_type==='doubles'
+    ? escapeHtml(a)+' + '+escapeHtml(b)+' vs '+escapeHtml(c)+' + '+escapeHtml(d)
+    : escapeHtml(a)+' vs '+escapeHtml(b)
+  )+
+'</strong>'+
         roundInfo+
         '<div class="triple">'+
           '<input id="sa_'+g.id+'" type="number" min="0" '+
@@ -771,6 +815,7 @@ function renderAdmin(){
       '</div>';
     }).join('')
     :'<p class="muted">No games yet.</p>';
+  renderIndividualGameSelectors();
   renderRoundPlayerSelectors();
 }
 
@@ -811,19 +856,41 @@ async function removePlayer(id){
 }
 
 async function createGame(){
+  const matchType=$('gameMatchType').value;
   const a=Number($('gameA').value);
   const b=Number($('gameB').value);
+  const c=Number($('gameC').value);
+  const d=Number($('gameD').value);
 
-  if(!a||!b||a===b){
-    msg('gameCreateMsg','Choose two different players.');
-    return;
+  if(matchType==='singles'){
+    if(!a||!b||a===b){
+      msg('gameCreateMsg','Choose two different players.');
+      return;
+    }
+  }
+
+  if(matchType==='doubles'){
+    const selected=[a,b,c,d];
+
+    if(selected.some(id=>!id)){
+      msg('gameCreateMsg','Choose all four players.');
+      return;
+    }
+
+    if(new Set(selected).size!==4){
+      msg('gameCreateMsg','Choose four different players.');
+      return;
+    }
   }
 
   const {error}=await client
     .from('games')
     .insert({
       player_a:a,
-      player_b:b
+      player_b:b,
+      player_c:matchType==='doubles' ? c : null,
+      player_d:matchType==='doubles' ? d : null,
+      match_type:matchType
     });
 
   if(error){
@@ -831,7 +898,14 @@ async function createGame(){
     return;
   }
 
-  msg('gameCreateMsg','Game created.',true);
+  msg(
+    'gameCreateMsg',
+    matchType==='doubles'
+      ? 'Doubles game created.'
+      : 'Singles game created.',
+    true
+  );
+
   await refreshAll();
 }
 function renderRoundPlayerSelectors(){
@@ -888,7 +962,39 @@ function buildRoundPairings(list){
 
   return [];
 }
+  function buildDoublesRoundPairings(list){
+  const n=list.length;
 
+  if(n===4){
+    return [
+      [0,1,2,3],
+      [0,2,1,3],
+      [0,3,1,2]
+    ];
+  }
+
+  if(n===5){
+    return [
+      [0,1,2,3],
+      [0,2,3,4],
+      [0,3,1,4],
+      [0,4,1,2]
+    ];
+  }
+
+  if(n===6){
+    return [
+      [0,1,2,3],
+      [4,5,0,2],
+      [1,3,4,5],
+      [0,3,1,4],
+      [2,5,0,4],
+      [1,2,3,5]
+    ];
+  }
+
+  return [];
+}
 async function generateRound(){
   const count=Number($('roundPlayerCount').value);
   const round=Number($('roundNumber').value);
@@ -925,15 +1031,21 @@ if(new Set(selectedIds).size!==count){
 }
 
 const chosen=selectedIds.map(id=>players.find(p=>String(p.id)===String(id)));
-  const pairs=buildRoundPairings(chosen);
+const matchType=$('roundMatchType').value;
+const pairs=matchType==='doubles'
+  ? buildDoublesRoundPairings(chosen)
+  : buildRoundPairings(chosen);
 
-  const rows=pairs.map((p,i)=>({
-    player_a:chosen[p[0]].id,
-    player_b:chosen[p[1]].id,
-    round_number:round,
-    court_number:i+1,
-    target_score:target
-  }));
+const rows=pairs.map((p,i)=>({
+  player_a:chosen[p[0]].id,
+  player_b:chosen[p[1]].id,
+  player_c:matchType==='doubles' ? chosen[p[2]].id : null,
+  player_d:matchType==='doubles' ? chosen[p[3]].id : null,
+  match_type:matchType,
+  round_number:round,
+  court_number:i+1,
+  target_score:target
+}));
 
   const {error}=await client
     .from('games')
