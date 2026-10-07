@@ -487,7 +487,7 @@ async function refreshAll(){
 
     client
       .from('games')
-.select('id,player_a,player_b,player_c,player_d,match_type,score_a,score_b,round_number,court_number,target_score,created_at,player_a_info:club_players!games_player_a_fkey(id,name),player_b_info:club_players!games_player_b_fkey(id,name),player_c_info:club_players!games_player_c_fkey(id,name),player_d_info:club_players!games_player_d_fkey(id,name)')
+.select('id,player_a,player_b,player_c,player_d,match_type,score_a,score_b,round_number,court_number,target_score,court_players,created_at,player_a_info:club_players!games_player_a_fkey(id,name),player_b_info:club_players!games_player_b_fkey(id,name),player_c_info:club_players!games_player_c_fkey(id,name),player_d_info:club_players!games_player_d_fkey(id,name)')
       .order('created_at',{ascending:false})
   ]);
 
@@ -787,6 +787,16 @@ function renderAdmin(){
       const b=g.player_b_info?.name||'Player B';
       const c=g.player_c_info?.name||'Player C';
       const d=g.player_d_info?.name||'Player D';
+      const byePlayers=[];
+      const playingIds=[g.player_a,g.player_b,g.player_c,g.player_d].filter(Boolean);
+      if(Array.isArray(g.court_players)){
+  g.court_players.forEach(id=>{
+    if(!playingIds.includes(Number(id))){
+      const player=players.find(p=>p.id===Number(id));
+      if(player)byePlayers.push(player.name);
+    }
+  });
+}
       const roundInfo=g.round_number
         ?'<div class="muted">Round '+g.round_number+
           (g.court_number?' • Court '+g.court_number:'')+
@@ -802,6 +812,9 @@ function renderAdmin(){
   )+
 '</strong>'+
         roundInfo+
+        (byePlayers.length
+  ?'<div class="item"><strong>BYE: '+byePlayers.map(escapeHtml).join(' + ')+'</strong></div>'
+  :'')+
         '<div class="triple">'+
           '<input id="sa_'+g.id+'" type="number" min="0" '+
           'placeholder="Score A" value="'+(g.score_a??'')+'">'+
@@ -1037,6 +1050,7 @@ const pairs=matchType==='doubles'
   : buildRoundPairings(chosen);
 
 const rows=pairs.map((p,i)=>({
+  court_players:selectedIds,
   player_a:chosen[p[0]].id,
   player_b:chosen[p[1]].id,
   player_c:matchType==='doubles' ? chosen[p[2]].id : null,
