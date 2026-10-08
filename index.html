@@ -160,12 +160,12 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
   <option value="doubles" selected>Doubles</option>
   <option value="singles">Singles</option>
       </select>
-<p class="muted">Choose 4, 5, or 6 players. The round automatically creates games totaling exactly 60 points.</p>
+<p class="muted">Choose 4, 5, or 6 players. Each player will have the opportunity to earn 60 points.</p>
       <div class="row">
         <select id="roundPlayerCount" onchange="renderRoundPlayerSelectors()">
           <option value="4">4 players — 3 games to 20</option>
-          <option value="5">5 players — 4 games to 15</option>
-          <option value="6">6 players — 6 games to 10</option>
+          <option value="5">5 players — 5 matches, each player plays 4 to 15</option>
+          <option value="6">6 players — 9 matches, each player plays 6 to 10</option>
         </select>
         <input id="roundNumber" type="number" min="1" placeholder="Round number">
         <div id="roundPlayerSelectors"></div>
@@ -986,25 +986,29 @@ function buildRoundPairings(list){
     ];
   }
 
-  if(n===5){
-    return [
-      [0,1,2,3],
-      [0,2,3,4],
-      [0,3,1,4],
-      [0,4,1,2]
-    ];
-  }
+ if(n===5){
+  return [
+    [1,2,3,4],
+    [0,2,3,4],
+    [0,1,3,4],
+    [0,1,2,4],
+    [0,1,2,3]
+  ];
+}
 
-  if(n===6){
-    return [
-      [0,1,2,3],
-      [4,5,0,2],
-      [1,3,4,5],
-      [0,3,1,4],
-      [2,5,0,4],
-      [1,2,3,5]
-    ];
-  }
+if(n===6){
+  return [
+    [2,3,4,5],
+    [0,1,4,5],
+    [0,1,2,3],
+    [1,3,4,5],
+    [0,2,3,5],
+    [0,1,2,4],
+    [1,2,3,5],
+    [0,2,4,5],
+    [0,1,3,4]
+  ];
+}
 
   return [];
 }
@@ -1073,7 +1077,7 @@ const rows=pairs.map((p,i)=>({
   msg(
     'roundMsg',
     'Round '+round+' created: '+rows.length+
-    ' games, '+target+' points each, 60 points total.',
+   ' games, '+target+' points each, 60 possible points per player.',
     true
   );
 
