@@ -220,6 +220,7 @@ let profile=null;
 let players=[];
 let games=[];
 let leagues=[];
+let leagueSessions=[];
 let authMode='signin';
 let authListenerStarted=false;
 
@@ -490,7 +491,7 @@ function showTab(name,btn){
 }
 
 async function refreshAll(){
-  const [pr,gr,lr]=await Promise.all([
+  const [pr,gr,lr,sr]=await Promise.all([
     client
       .from('club_players')
       .select('id,name,created_at')
@@ -504,16 +505,23 @@ async function refreshAll(){
     client
   .from('leagues')
   .select('id,name,start_date,created_at')
-  .order('name')
+  .order('name'),
+
+client
+  .from('league_sessions')
+  .select('id,league_id,week_number,play_date,status')
+  .order('week_number')
   ]);
 
   if(pr.error)throw pr.error;
   if(gr.error)throw gr.error;
   if(lr.error)throw lr.error;
+  if(sr.error)throw sr.error;
 
   players=pr.data||[];
   games=gr.data||[];
   leagues=lr.data||[];
+  leagueSessions=sr.data||[];
 
   renderLeagues();
   renderAll();
@@ -928,13 +936,33 @@ const seasonDates=date=>{
       })+'</div>';
   }).join('');
 };
+  const leagueWeekDates=league=>{
+  const sessions=leagueSessions.filter(
+    s=>String(s.league_id)===String(league.id)
+  );
+
+  if(!sessions.length)return weeklyDates(league.start_date);
+
+  return sessions
+    .sort((a,b)=>a.week_number-b.week_number)
+    .map(s=>
+      '<div class="item">Week '+s.week_number+
+      ' — '+new Date(s.play_date+'T12:00:00')
+        .toLocaleDateString('en-US',{
+          weekday:'long',
+          month:'long',
+          day:'numeric',
+          year:'numeric'
+        })+'</div>'
+    ).join('');
+};
   area.innerHTML=leagues.length
     ? leagues.map(league=>
         '<div class="item">'+
  '<strong>'+escapeHtml(league.name)+'</strong>'+
 '<div class="muted">Season: '+seasonDates(league.start_date)+'</div>'+
 '<button class="secondary small" onclick="editLeague('+league.id+')">Edit League</button>'+
-'<div class="list">'+weeklyDates(league.start_date)+'</div></div>'
+'<div class="list">'+leagueWeekDates(league)+'</div></div>'
       ).join('')
     : '<p class="muted">No leagues created yet.</p>';
 }
