@@ -953,7 +953,9 @@ const seasonDates=date=>{
           month:'long',
           day:'numeric',
           year:'numeric'
-        })+'</div>'
+               })+
+      ' <button class="secondary small" onclick="editSessionDate('+s.id+')">Edit Date</button>'+
+      '</div>'
     ).join('');
 };
   area.innerHTML=leagues.length
@@ -986,6 +988,35 @@ const seasonDates=date=>{
   const {error}=await client
     .from('leagues')
     .update({start_date:startDate})
+    .eq('id',id);
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  await refreshAll();
+}
+  async function editSessionDate(id){
+  const session=leagueSessions.find(s=>s.id===id);
+  if(!session)return;
+
+  const newDate=prompt(
+    'Enter the new playing date (YYYY-MM-DD):',
+    session.play_date
+  );
+
+  if(newDate===null)return;
+
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(newDate) ||
+     Number.isNaN(new Date(newDate+'T12:00:00').getTime())){
+    alert('Please enter a valid date, such as 2026-10-15.');
+    return;
+  }
+
+  const {error}=await client
+    .from('league_sessions')
+    .update({play_date:newDate})
     .eq('id',id);
 
   if(error){
