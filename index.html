@@ -910,12 +910,31 @@ const seasonDates=date=>{
   });
   return format(start)+' – '+format(end);
 };
+  const weeklyDates=date=>{
+  if(!date)return '';
+
+  const start=new Date(date+'T12:00:00');
+
+  return Array.from({length:8},(_,i)=>{
+    const day=new Date(start);
+    day.setDate(day.getDate()+i*7);
+
+    return '<div class="item">Week '+(i+1)+
+      ' — '+day.toLocaleDateString('en-US',{
+        weekday:'long',
+        month:'long',
+        day:'numeric',
+        year:'numeric'
+      })+'</div>';
+  }).join('');
+};
   area.innerHTML=leagues.length
     ? leagues.map(league=>
         '<div class="item">'+
  '<strong>'+escapeHtml(league.name)+'</strong>'+
 '<div class="muted">Season: '+seasonDates(league.start_date)+'</div>'+
-'<button class="secondary small" onclick="editLeague('+league.id+')">Edit League</button></div>'
+'<button class="secondary small" onclick="editLeague('+league.id+')">Edit League</button>'+
+'<div class="list">'+weeklyDates(league.start_date)+'</div></div>'
       ).join('')
     : '<p class="muted">No leagues created yet.</p>';
 }
