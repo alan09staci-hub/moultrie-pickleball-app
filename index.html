@@ -503,7 +503,7 @@ async function refreshAll(){
 
     client
   .from('leagues')
-  .select('id,name,created_at')
+  .select('id,name,start_date,created_at')
   .order('name')
   ]);
 
@@ -871,7 +871,7 @@ async function addPlayer(){
 
   async function createLeague(){
   const name=$('newLeagueName').value.trim();
-
+  const startDate=$('newLeagueStartDate').value;
   if(!name){
     alert('Please enter a league name.');
     return;
@@ -879,7 +879,7 @@ async function addPlayer(){
 
   const {error}=await client
     .from('leagues')
-    .insert({name});
+    .insert({name,start_date:startDate});
 
   if(error){
     alert(error.message);
@@ -887,6 +887,7 @@ async function addPlayer(){
   }
 
   $('newLeagueName').value='';
+  $('newLeagueStartDate').value='';
   alert('League created successfully!');
   await refreshAll();
 }
@@ -896,7 +897,9 @@ function renderLeagues(){
 
   area.innerHTML=leagues.length
     ? leagues.map(league=>
-        '<div class="item">'+escapeHtml(league.name)+'</div>'
+        '<div class="item">'+
+  '<strong>'+escapeHtml(league.name)+'</strong>'+
+  '<div class="muted">Start date: '+(league.start_date||'Not set')+'</div></div>'
       ).join('')
     : '<p class="muted">No leagues created yet.</p>';
 }
