@@ -218,6 +218,7 @@ let currentUser=null;
 let profile=null;
 let players=[];
 let games=[];
+let leagues=[];
 let authMode='signin';
 let authListenerStarted=false;
 
@@ -488,7 +489,7 @@ function showTab(name,btn){
 }
 
 async function refreshAll(){
-  const [pr,gr]=await Promise.all([
+  const [pr,gr,lr]=await Promise.all([
     client
       .from('club_players')
       .select('id,name,created_at')
@@ -497,15 +498,23 @@ async function refreshAll(){
     client
       .from('games')
 .select('id,player_a,player_b,player_c,player_d,match_type,score_a,score_b,round_number,court_number,target_score,court_players,created_at,player_a_info:club_players!games_player_a_fkey(id,name),player_b_info:club_players!games_player_b_fkey(id,name),player_c_info:club_players!games_player_c_fkey(id,name),player_d_info:club_players!games_player_d_fkey(id,name)')
-      .order('created_at',{ascending:false})
+      .order('created_at',{ascending:false}),
+
+    client
+  .from('leagues')
+  .select('id,name,created_at')
+  .order('name')
   ]);
 
   if(pr.error)throw pr.error;
   if(gr.error)throw gr.error;
+  if(lr.error)throw lr.error;
 
   players=pr.data||[];
   games=gr.data||[];
+  leagues=lr.data||[];
 
+  renderLeagues();
   renderAll();
 }
 
@@ -859,6 +868,37 @@ async function addPlayer(){
   await refreshAll();
 }
 
+  async function createLeague(){
+  const name=$('newLeagueName').value.trim();
+
+  if(!name){
+    alert('Please enter a league name.');
+    return;
+  }
+
+  const {error}=await client
+    .from('leagues')
+    .insert({name});
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  $('newLeagueName').value='';
+  alert('League created successfully!');
+  await refreshAll();
+}
+function renderLeagues(){
+  const area=$('adminLeagues');
+  if(!area)return;
+
+  area.innerHTML=leagues.length
+    ? leagues.map(league=>
+        '<div class="item">'+escapeHtml(league.name)+'</div>'
+      ).join('')
+    : '<p class="muted">No leagues created yet.</p>';
+}
 async function removePlayer(id){
   if(!confirm(
     'Remove this player? Games involving this player will also be removed.'
