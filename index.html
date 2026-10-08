@@ -152,6 +152,15 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
       <input id="newLeagueStartDate" type="date" aria-label="League start date">
       <button onclick="createLeague()">Create League</button>
       <div id="adminLeagues" class="list"></div>
+      <h3>League Player Registration</h3>
+<p>Assign existing club players to a league.</p>
+
+<select id="registrationLeague"></select>
+<select id="registrationPlayer"></select>
+
+<button onclick="registerLeaguePlayer()">Register Player</button>
+
+<div id="leagueRegistrations" class="list"></div>
      </div>
     
     <div class="card">
@@ -221,6 +230,7 @@ let players=[];
 let games=[];
 let leagues=[];
 let leagueSessions=[];
+let leagueRegistrations=[];
 let authMode='signin';
 let authListenerStarted=false;
 
@@ -491,7 +501,7 @@ function showTab(name,btn){
 }
 
 async function refreshAll(){
-  const [pr,gr,lr,sr]=await Promise.all([
+  const [pr,gr,lr,sr,rr]=await Promise.all([
     client
       .from('club_players')
       .select('id,name,created_at')
@@ -510,20 +520,28 @@ async function refreshAll(){
 client
   .from('league_sessions')
   .select('id,league_id,week_number,play_date,status')
-  .order('week_number')
+ .order('week_number'),
+
+client
+  .from('league_registrations')
+  .select('id,league_id,player_id,registered_at')
+  .order('registered_at',{ascending:false})
   ]);
 
   if(pr.error)throw pr.error;
   if(gr.error)throw gr.error;
   if(lr.error)throw lr.error;
   if(sr.error)throw sr.error;
+  if(rr.error)throw rr.error;
 
   players=pr.data||[];
   games=gr.data||[];
   leagues=lr.data||[];
   leagueSessions=sr.data||[];
+  leagueRegistrations=rr.data||[];
 
   renderLeagues();
+  renderLeagueRegistrations();
   renderAll();
 }
 
@@ -905,6 +923,34 @@ async function addPlayer(){
   alert('League created successfully!');
   await refreshAll();
 }
+  async function registerLeaguePlayer(){
+  const leagueId=Number($('registrationLeague').value);
+  const playerId=Number($('registrationPlayer').value);
+
+  if(!leagueId||!playerId){
+    alert('Please select a league and player.');
+    return;
+  }
+
+  const {error}=await client
+    .from('league_registrations')
+    .insert({
+      league_id:leagueId,
+      player_id:playerId
+    });
+
+  if(error){
+    if(error.code==='23505'){
+      alert('This player is already registered for this league.');
+    }else{
+      alert(error.message);
+    }
+    return;
+  }
+
+  alert('Player registered successfully!');
+  await refreshAll();
+}
 function renderLeagues(){
   const area=$('adminLeagues');
   if(!area)return;
@@ -967,6 +1013,39 @@ const seasonDates=date=>{
 '<div class="list">'+leagueWeekDates(league)+'</div></div>'
       ).join('')
     : '<p class="muted">No leagues created yet.</p>';
+}
+  function renderLeagueRegistrations(){
+  const leagueSelect=$('registrationLeague');
+  const playerSelect=$('registrationPlayer');
+
+  if(!leagueSelect||!playerSelect)return;
+
+  leagueSelect.innerHTML=leagues.map(l=>
+    '<option value="'+l.id+'">'+escapeHtml(l.name)+'</option>'
+  ).join('');
+
+  playerSelect.innerHTML=players.map(p=>
+    '<option value="'+p.id+'">'+escapeHtml(p.name)+'</option>'
+  ).join('');
+      const area=$('leagueRegistrations');
+  if(!area)return;
+
+  area.innerHTML=leagues.map(league=>{
+    const registered=leagueRegistrations.filter(
+      r=>String(r.league_id)===String(league.id)
+    );
+
+    return '<div class="item">'+
+      '<strong>'+escapeHtml(league.name)+'</strong>'+
+      '<div class="muted">'+registered.length+' registered players</div>'+
+      registered.map(r=>{
+        const player=players.find(
+          p=>String(p.id)===String(r.player_id)
+        );
+        return '<div>'+escapeHtml(player?.name||'Unknown player')+'</div>';
+      }).join('')+
+      '</div>';
+  }).join('');
 }
   async function editLeague(id){
   const league=leagues.find(l=>l.id===id);
