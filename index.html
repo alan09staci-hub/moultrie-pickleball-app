@@ -582,7 +582,8 @@ function renderStandings(){
       w:0,
       l:0,
       pf:0,
-      pa:0
+      pa:0,
+      possible:0
     };
   });
 
@@ -606,6 +607,7 @@ function renderStandings(){
     teamAStats.forEach(p=>{
       p.pf+=g.score_a;
       p.pa+=g.score_b;
+      p.possible+=Number(g.target_score)||Math.max(Number(g.score_a),Number(g.score_b));
 
       if(g.score_a>g.score_b)p.w++;
       if(g.score_b>g.score_a)p.l++;
@@ -614,6 +616,7 @@ function renderStandings(){
     teamBStats.forEach(p=>{
       p.pf+=g.score_b;
       p.pa+=g.score_a;
+      p.possible+=Number(g.target_score)||Math.max(Number(g.score_a),Number(g.score_b));
 
       if(g.score_b>g.score_a)p.w++;
       if(g.score_a>g.score_b)p.l++;
@@ -621,22 +624,25 @@ function renderStandings(){
   });
 
   const rows=Object.values(stats).sort(
-    (a,b)=>b.w-a.w||(b.pf-b.pa)-(a.pf-a.pa)
-  );
+  (a,b)=>(b.possible?b.pf/b.possible:0)-(a.possible?a.pf/a.possible:0)
+);
 
   $('standings').innerHTML=rows.length
     ?'<table><thead><tr>'+
-      '<th>Player</th><th>W</th><th>L</th><th>PF</th><th>PA</th>'+
+      '<th>Rank</th><th>Player</th><th>Earned</th><th>Possible</th><th>E/P %</th><th>W</th><th>L</th><th>Against</th>'+
       '</tr></thead><tbody>'+
-      rows.map(r=>
-        '<tr>'+
-        '<td>'+escapeHtml(r.name)+'</td>'+
-        '<td>'+r.w+'</td>'+
-        '<td>'+r.l+'</td>'+
-        '<td>'+r.pf+'</td>'+
-        '<td>'+r.pa+'</td>'+
-        '</tr>'
-      ).join('')+
+      rows.map((r,i)=>
+  '<tr>'+
+  '<td>'+(i+1)+'</td>'+
+  '<td>'+escapeHtml(r.name)+'</td>'+
+  '<td>'+r.pf+'</td>'+
+  '<td>'+r.possible+'</td>'+
+  '<td>'+(r.possible?(r.pf/r.possible*100).toFixed(2):'0.00')+'%</td>'+
+  '<td>'+r.w+'</td>'+
+  '<td>'+r.l+'</td>'+
+  '<td>'+r.pa+'</td>'+
+  '</tr>'
+).join('')+
       '</tbody></table>'
     :'<p class="muted">No players yet.</p>';
 }
