@@ -900,12 +900,21 @@ async function addPlayer(){
 function renderLeagues(){
   const area=$('adminLeagues');
   if(!area)return;
-
+const seasonDates=date=>{
+  if(!date)return 'Dates not set';
+  const start=new Date(date+'T12:00:00');
+  const end=new Date(start);
+  end.setDate(end.getDate()+49);
+  const format=d=>d.toLocaleDateString('en-US',{
+    month:'long',day:'numeric',year:'numeric'
+  });
+  return format(start)+' – '+format(end);
+};
   area.innerHTML=leagues.length
     ? leagues.map(league=>
         '<div class="item">'+
   '<strong>'+escapeHtml(league.name)+'</strong>'+
-  '<div class="muted">Start date: '+(league.start_date||'Not set')+'</div></div>'
+'<div class="muted">Season: '+seasonDates(league.start_date)+'</div></div>'
       ).join('')
     : '<p class="muted">No leagues created yet.</p>';
 }
