@@ -913,10 +913,40 @@ const seasonDates=date=>{
   area.innerHTML=leagues.length
     ? leagues.map(league=>
         '<div class="item">'+
-  '<strong>'+escapeHtml(league.name)+'</strong>'+
-'<div class="muted">Season: '+seasonDates(league.start_date)+'</div></div>'
+ '<strong>'+escapeHtml(league.name)+'</strong>'+
+'<div class="muted">Season: '+seasonDates(league.start_date)+'</div>'+
+'<button class="secondary small" onclick="editLeague('+league.id+')">Edit League</button></div>'
       ).join('')
     : '<p class="muted">No leagues created yet.</p>';
+}
+  async function editLeague(id){
+  const league=leagues.find(l=>l.id===id);
+  if(!league)return;
+
+  const startDate=prompt(
+    'Enter the league start date (YYYY-MM-DD):',
+    league.start_date||''
+  );
+
+  if(startDate===null)return;
+
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(startDate) ||
+     Number.isNaN(new Date(startDate+'T12:00:00').getTime())){
+    alert('Please enter a valid date, such as 2026-10-08.');
+    return;
+  }
+
+  const {error}=await client
+    .from('leagues')
+    .update({start_date:startDate})
+    .eq('id',id);
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  await refreshAll();
 }
 async function removePlayer(id){
   if(!confirm(
