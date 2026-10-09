@@ -166,8 +166,8 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
     <hr>
 <h3>Weekly Player RSVP</h3>
 <p>Manage who is Playing or Not Playing each week.</p>
-<select id="rsvpLeague"></select>
-<select id="rsvpWeek"></select>
+<select id="rsvpLeague" onchange="renderWeeklyRsvp()"></select>
+<select id="rsvpWeek" onchange="renderWeeklyRsvpPlayers()"></select>
 <div id="weeklyRsvpPlayers" class="list"></div>
   </div>
     
@@ -238,6 +238,7 @@ let games=[];
 let leagues=[];
 let leagueSessions=[];
 let leagueRegistrations=[];
+let leagueRsvps=[];
 let authMode='signin';
 let authListenerStarted=false;
 
@@ -508,7 +509,7 @@ function showTab(name,btn){
 }
 
 async function refreshAll(){
-  const [pr,gr,lr,sr,rr]=await Promise.all([
+  const [pr,gr,lr,sr,rr,rv]=await Promise.all([
     client
       .from('club_players')
       .select('id,name,created_at')
@@ -532,7 +533,11 @@ client
 client
   .from('league_registrations')
   .select('id,league_id,player_id,registered_at')
-  .order('registered_at',{ascending:false})
+   .order('registered_at',{ascending:false}),
+
+client
+  .from('league_rsvps')
+  .select('id,session_id,player_id,status,updated_at')
   ]);
 
   if(pr.error)throw pr.error;
@@ -540,15 +545,18 @@ client
   if(lr.error)throw lr.error;
   if(sr.error)throw sr.error;
   if(rr.error)throw rr.error;
+  if(rv.error)throw rv.error;
 
   players=pr.data||[];
   games=gr.data||[];
   leagues=lr.data||[];
   leagueSessions=sr.data||[];
   leagueRegistrations=rr.data||[];
+  leagueRsvps=rv.data||[];
 
   renderLeagues();
   renderLeagueRegistrations();
+  renderWeeklyRsvp();
   renderAll();
 }
 
@@ -1053,6 +1061,76 @@ const seasonDates=date=>{
   escapeHtml(player?.name||'Unknown player')+
   ' <button class="secondary small" onclick="removeLeaguePlayer('+r.id+')">Remove</button></div>';
       }).join('')+
+      '</div>';
+  }).join('');
+}
+  function renderWeeklyRsvp(){
+  const leagueSelect=$('rsvpLeague');
+  const weekSelect=$('rsvpWeek');
+
+  if(!leagueSelect||!weekSelect)return;
+
+  const selectedLeague=leagueSelect.value;
+  const selectedWeek=weekSelect.value;
+
+  leagueSelect.innerHTML=leagues.map(l=>
+    '<option value="'+l.id+'">'+escapeHtml(l.name)+'</option>'
+  ).join('');
+
+  if(selectedLeague && leagues.some(l=>String(l.id)===selectedLeague)){
+    leagueSelect.value=selectedLeague;
+  }
+
+  const sessions=leagueSessions.filter(
+    s=>String(s.league_id)===leagueSelect.value
+  ).sort((a,b)=>a.week_number-b.week_number);
+
+  weekSelect.innerHTML=sessions.map(s=>
+    '<option value="'+s.id+'">Week '+s.week_number+
+    ' — '+escapeHtml(s.play_date)+'</option>'
+  ).join('');
+
+  if(selectedWeek && sessions.some(s=>String(s.id)===selectedWeek)){
+    weekSelect.value=selectedWeek;
+  }
+    renderWeeklyRsvpPlayers();
+}
+  function renderWeeklyRsvpPlayers(){
+  const area=$('weeklyRsvpPlayers');
+  if(!area)return;
+
+  const leagueId=$('rsvpLeague').value;
+  const sessionId=$('rsvpWeek').value;
+
+  if(!leagueId||!sessionId){
+    area.innerHTML='<p class="muted">Select a league and week.</p>';
+    return;
+  }
+
+  const registered=leagueRegistrations.filter(
+    r=>String(r.league_id)===leagueId
+  );
+
+  if(!registered.length){
+    area.innerHTML='<p class="muted">No players registered for this league.</p>';
+    return;
+  }
+
+  area.innerHTML=registered.map(r=>{
+    const player=players.find(
+      p=>String(p.id)===String(r.player_id)
+    );
+
+    const rsvp=leagueRsvps.find(
+      v=>String(v.session_id)===sessionId &&
+         String(v.player_id)===String(r.player_id)
+    );
+
+    const status=rsvp?.status||'No response';
+
+    return '<div class="item">'+
+      '<strong>'+escapeHtml(player?.name||'Unknown player')+'</strong>'+
+      '<div class="muted">Status: '+escapeHtml(status)+'</div>'+
       '</div>';
   }).join('');
 }
