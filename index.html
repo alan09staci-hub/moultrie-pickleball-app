@@ -1042,10 +1042,28 @@ const seasonDates=date=>{
         const player=players.find(
           p=>String(p.id)===String(r.player_id)
         );
-        return '<div>'+escapeHtml(player?.name||'Unknown player')+'</div>';
+        return '<div>'+
+  escapeHtml(player?.name||'Unknown player')+
+  ' <button class="secondary small" onclick="removeLeaguePlayer('+r.id+')">Remove</button></div>';
       }).join('')+
       '</div>';
   }).join('');
+}
+  async function removeLeaguePlayer(id){
+  if(!confirm('Remove this player from the league?'))return;
+
+  const {error}=await client
+    .from('league_registrations')
+    .delete()
+    .eq('id',id);
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  alert('Player removed from league.');
+  await refreshAll();
 }
   async function editLeague(id){
   const league=leagues.find(l=>l.id===id);
