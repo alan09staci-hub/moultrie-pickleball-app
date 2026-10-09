@@ -161,10 +161,17 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 <button onclick="registerLeaguePlayer()">Register Player</button>
 
 <div id="leagueRegistrations" class="list"></div>
-     </div>
     
-    <div class="card">
-      
+    
+    <hr>
+<h3>Weekly Player RSVP</h3>
+<p>Manage who is Playing or Not Playing each week.</p>
+<select id="rsvpLeague"></select>
+<select id="rsvpWeek"></select>
+<div id="weeklyRsvpPlayers" class="list"></div>
+  </div>
+    
+   <div class="card">
       <h2>Manage Players</h2>
       <div class="row">
         <input id="newPlayer" placeholder="Player name">
