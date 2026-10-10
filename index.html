@@ -636,17 +636,17 @@ if(profile.role==='admin'){
     return '<div class="item">'+
   '<strong>'+escapeHtml(p.name)+'</strong>'+
   '<div>DUPR ID: '+escapeHtml(p.dupr_id||'Not entered')+'</div>'+
-  '<div><label>DUPR ID: <input id="duprId_'+p.id+'" type="text" value="'+escapeHtml(p.dupr_id||'')+'" placeholder="Enter DUPR ID"></label></div>'+
+  '<div><input id="duprId_'+p.id+'" type="text" value="'+escapeHtml(p.dupr_id||'')+'" placeholder="Update DUPR ID"></div>'+
   '<div>Official DUPR doubles rating: '+escapeHtml(official)+'</div>'+
-  '<div><label>Official doubles rating: <input id="duprRating_'+p.id+'" type="number" min="2" max="8" step="0.01" value="'+(p.dupr_doubles_rating==null?'':escapeHtml(p.dupr_doubles_rating))+'" placeholder="Enter rating"></label></div>'+
+  '<div><input id="duprRating_'+p.id+'" type="number" min="2" max="8" step="0.01" value="'+(p.dupr_doubles_rating==null?'':escapeHtml(p.dupr_doubles_rating))+'" placeholder="Update DUPR rating"></div>'+
   '<div>MPA provisional rating: '+escapeHtml(provisional)+'</div>'+
-  '<div><label>MPA provisional rating: <input id="mpaRating_'+p.id+'" type="number" min="2" max="8" step="0.01" value="'+(p.mpa_provisional_rating==null?'':escapeHtml(p.mpa_provisional_rating))+'" placeholder="Enter provisional rating"></label></div>'+
+  '<div><input id="mpaRating_'+p.id+'" type="number" min="2" max="8" step="0.01" value="'+(p.mpa_provisional_rating==null?'':escapeHtml(p.mpa_provisional_rating))+'" placeholder="Update MPA provisional rating"></div>'+
   '<div>Verification: '+escapeHtml(p.rating_verification_status||'unverified')+'</div>'+
-  '<div><label>Rating status: <select id="ratingStatus_'+p.id+'">'+
+  '<div><select id="ratingStatus_'+p.id+'">'+
   '<option value="unverified" '+(p.rating_verification_status==='unverified'?'selected':'')+'>Unverified</option>'+
   '<option value="dupr_verified" '+(p.rating_verification_status==='dupr_verified'?'selected':'')+'>Official DUPR rating manually verified</option>'+
   '<option value="mpa_provisional_approved" '+(p.rating_verification_status==='mpa_provisional_approved'?'selected':'')+'>MPA provisional rating approved</option>'+
-  '</select></label></div>'+
+ '</select></div>'+
   '<button class="small" onclick="saveDuprRating('+p.id+')">Save DUPR Info</button>'+
   '</div>';
 }).join('');
