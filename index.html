@@ -665,13 +665,21 @@ function renderPlayerLeagues(){
       const response=rsvp
         ?(rsvp.status==='playing'?'Playing':'Not Playing')
         :'No response';
-
+const buttons=status==='Open'
+  ?'<div style="margin-top:8px">'+
+    '<button class="small" onclick="savePlayerRsvp('+
+      s.id+',\'playing\')">Playing</button> '+
+    '<button class="secondary small" onclick="savePlayerRsvp('+
+      s.id+',\'not_playing\')">Not Playing</button>'+
+    '</div>'
+  :'';
       return '<div class="item">'+
         '<strong>Week '+s.week_number+'</strong> — '+
         escapeHtml(date)+' at '+escapeHtml(time)+
         '<div>OPT IN: '+escapeHtml(status)+'</div>'+
         '<div>Your response: '+escapeHtml(response)+'</div>'+
-        '</div>';
+buttons+
+'</div>';
     }).join('');
 
     return '<div class="card">'+
@@ -679,6 +687,64 @@ function renderPlayerLeagues(){
       (weeks||'<p class="muted">No sessions scheduled.</p>')+
       '</div>';
   }).join('');
+}
+  async function savePlayerRsvp(sessionId,status){
+  try{
+    if(!currentUser)throw new Error('Please sign in.');
+
+    if(!['playing','not_playing'].includes(status)){
+      throw new Error('Invalid response.');
+    }
+
+    const myPlayer=players.find(p=>
+      String(p.user_id)===String(currentUser.id)
+    );
+
+    if(!myPlayer){
+      throw new Error('Your account is not linked to a player.');
+    }
+
+    const session=leagueSessions.find(s=>
+      String(s.id)===String(sessionId)
+    );
+
+    if(!session){
+      throw new Error('League session not found.');
+    }
+
+    const registered=leagueRegistrations.some(r=>
+      String(r.player_id)===String(myPlayer.id) &&
+      String(r.league_id)===String(session.league_id)
+    );
+
+    if(!registered){
+      throw new Error('You are not registered for this league.');
+    }
+
+    const result=await client.rpc('league_opt_in_status',{
+      p_session_id:session.id
+    });
+
+    if(result.error)throw result.error;
+
+    if(result.data!=='Open'){
+      throw new Error('The OPT IN window is not open.');
+    }
+
+    const {error}=await client.from('league_rsvps').upsert({
+      session_id:session.id,
+      player_id:myPlayer.id,
+      status:status,
+      updated_at:new Date().toISOString()
+    },{onConflict:'session_id,player_id'});
+
+    if(error)throw error;
+
+    await refreshAll();
+    alert('Your league response has been saved.');
+  }catch(err){
+    alert('Could not save response: '+err.message);
+  }
 }
 function gameCard(g){
   const a=g.player_a_info?.name||'Player A';
