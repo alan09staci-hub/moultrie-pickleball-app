@@ -149,9 +149,16 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 
   <section id="adminTab" class="tab hidden">
     <div class="card">
-      <h2>Admin Center</h2>
-      <p class="muted">Only users with the admin role can use these controls. The database also blocks non-admin writes.</p>
-    </div>
+     <h2>Admin Center</h2>
+      
+<p class="muted">Only users with the admin role can use these controls. The database also blocks non-admin writes.</p>
+
+<button onclick="calculateMPARankings()">
+  Recalculate MPA Rankings
+</button>
+
+  <div id="rankingMsg"></div>
+     </div>
 
     <div class="card">
       <h2>League Management</h2>
