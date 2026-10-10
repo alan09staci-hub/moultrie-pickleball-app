@@ -526,7 +526,7 @@ function showTab(name,btn){
 
 async function refreshAll(){
   const [pr,gr,lr,sr,rr,rv]=await Promise.all([
-   client.from('club_players').select('id,name,user_id,created_at').order('name'),
+   client.from('club_players').select('id,name,user_id,created_at,dupr_id,dupr_doubles_rating,mpa_provisional_rating,rating_verification_status').order('name'),
 
     client
       .from('games')
