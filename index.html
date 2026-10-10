@@ -527,7 +527,7 @@ async function refreshAll(){
 
 client
   .from('league_sessions')
-  .select('id,league_id,week_number,play_date,status')
+  .select('id,league_id,week_number,play_date,start_time,status')
  .order('week_number'),
 
 client
@@ -1015,6 +1015,7 @@ const seasonDates=date=>{
           day:'numeric',
           year:'numeric'
                })+
+            ' — '+(s.start_time ? new Date('2000-01-01T'+s.start_time).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) : 'Time not set')+
       ' <button class="secondary small" onclick="editSessionDate('+s.id+')">Edit Date</button>'+
       '</div>'
     ).join('');
