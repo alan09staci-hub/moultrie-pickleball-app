@@ -124,7 +124,14 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
       <div id="schedule" class="list"></div>
     </div>
   </section>
-
+<section id="leagueTab" class="tab hidden">
+  <div class="card">
+    <h2>My League</h2>
+    <div id="playerLeagues" class="list">
+      <p class="muted">League information coming soon.</p>
+    </div>
+  </div>
+</section>
   <section id="standingsTab" class="tab hidden">
     <div class="card">
       <h2>Standings</h2>
@@ -484,10 +491,10 @@ function buildNav(){
     ['dashboard','Dashboard'],
     ['roster','Roster'],
     ['schedule','Schedule'],
+    ['league','League'],
     ['standings','Standings'],
     ['analytics','Analytics']
   ];
-
   if(profile.role==='admin'){
     items.push(['admin','Admin']);
   }
