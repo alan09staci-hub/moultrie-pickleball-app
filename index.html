@@ -611,9 +611,8 @@ function renderAll(){
   renderStandings();
   renderAnalytics();
 
- if(profile.role==='admin'){
+if(profile.role==='admin'){
   renderAdmin();
-  renderDuprPlayers();
 }
 }
   function renderDuprPlayers(){
@@ -1028,7 +1027,9 @@ function renderAdmin(){
         '</button>'+
       '</div>'+
     '</div>'
-  ).join('');
+   ).join('');
+
+  renderDuprPlayers();
 
   const opts=
     '<option value="">Choose player</option>'+
