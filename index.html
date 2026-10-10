@@ -687,6 +687,178 @@ if(profile.role==='admin'){
     alert('Could not save DUPR information: '+err.message);
   }
 }
+  async function calculateMPARankings(){
+  const msg=$('rankingMsg');
+
+  try{
+    if(!profile || profile.role!=='admin'){
+      throw new Error('Admin access required.');
+    }
+
+    const {data:playersData,error:playersError}=await client
+  .from('club_players')
+ .select('id,name,current_mpa_rank,previous_mpa_rank,initial_dupr_seed');
+
+if(playersError)throw playersError;
+
+const {data:gamesData,error:gamesError}=await client
+  .from('games')
+  .select('id,player_a,player_b,player_c,player_d,score_a,score_b,match_type')
+  .not('score_a','is',null)
+  .not('score_b','is',null);
+
+if(gamesError)throw gamesError;
+
+const stats={};
+
+playersData.forEach(player=>{
+  stats[player.id]={
+    id:player.id,
+    name:player.name,
+    wins:0,
+    losses:0,
+    games:0,
+    pointsFor:0,
+    pointsAgainst:0,
+    pointDifference:0,
+    previousRank:player.current_mpa_rank||null
+  };
+});
+gamesData.forEach(game=>{
+
+  if(game.match_type!=='doubles') return;
+
+  const teamA=[
+    game.player_a,
+    game.player_b
+  ].filter(Boolean);
+
+  const teamB=[
+    game.player_c,
+    game.player_d
+  ].filter(Boolean);
+
+  const scoreA=Number(game.score_a);
+  const scoreB=Number(game.score_b);
+
+  const teamAWon=scoreA>scoreB;
+
+  teamA.forEach(id=>{
+    if(!stats[id])return;
+
+    stats[id].games++;
+    stats[id].pointsFor+=scoreA;
+    stats[id].pointsAgainst+=scoreB;
+    stats[id].pointDifference+=scoreA-scoreB;
+
+    if(teamAWon){
+      stats[id].wins++;
+    }else{
+      stats[id].losses++;
+    }
+  });
+
+  teamB.forEach(id=>{
+    if(!stats[id])return;
+
+    stats[id].games++;
+    stats[id].pointsFor+=scoreB;
+    stats[id].pointsAgainst+=scoreA;
+    stats[id].pointDifference+=scoreB-scoreA;
+
+    if(teamAWon){
+      stats[id].losses++;
+    }else{
+      stats[id].wins++;
+    }
+  });
+
+});
+    Object.values(stats).forEach(player=>{
+
+  const winPercent=player.games
+    ? player.wins/player.games
+    : 0;
+
+  const totalPoints=player.pointsFor+player.pointsAgainst;
+
+  const pointPercent=totalPoints
+    ? player.pointsFor/totalPoints
+    : 0;
+
+  const differentialFactor=
+    Math.max(
+      Math.min(player.pointDifference/100,1),
+      -1
+    );
+
+  player.mpaScore=
+    (winPercent*50)+
+    (pointPercent*40)+
+    (differentialFactor*10);
+
+});
+    const rankedPlayers=Object.values(stats)
+  .sort((a,b)=>b.mpaScore-a.mpaScore);
+
+rankedPlayers.forEach((player,index)=>{
+  player.rawRank=index+1;
+});
+rankedPlayers.forEach(player=>{
+
+  const previousRank =
+    player.previousRank ||
+    player.initial_dupr_seed ||
+    player.rawRank;
+
+  let movement =
+    previousRank - player.rawRank;
+
+  if(movement > 6){
+    movement = 6;
+  }
+
+  if(movement < -6){
+    movement = -6;
+  }
+
+  player.finalRank =
+    previousRank - movement;
+
+  player.rankChange = movement;
+
+});
+    msg.innerHTML='Updating '+rankedPlayers.length+' player rankings...';
+
+for(const player of rankedPlayers){
+
+  const {error}=await client
+    .from('club_players')
+    .update({
+      previous_mpa_rank: player.previousRank,
+      current_mpa_rank: player.finalRank,
+      mpa_rating_score: player.mpaScore,
+      mpa_wins: player.wins,
+      mpa_losses: player.losses,
+      mpa_games_played: player.games,
+      mpa_points_for: player.pointsFor,
+      mpa_points_against: player.pointsAgainst,
+      mpa_point_difference: player.pointDifference,
+      mpa_rank_change: player.rankChange
+    })
+    .eq('id',player.id);
+
+  if(error)throw error;
+}
+msg.innerHTML=
+  'MPA rankings updated successfully for '+
+  rankedPlayers.length+
+  ' players.';
+
+  }catch(err){
+    msg.innerHTML='Error: '+err.message;
+  }
+}
 function renderPlayerLeagues(){
   const container=$('playerLeagues');
   if(!container)return;
