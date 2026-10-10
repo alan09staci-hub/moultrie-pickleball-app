@@ -533,7 +533,7 @@ function showTab(name,btn){
 
 async function refreshAll(){
   const [pr,gr,lr,sr,rr,rv]=await Promise.all([
-   client.from('club_players').select('id,name,user_id,created_at,dupr_id,dupr_doubles_rating,mpa_provisional_rating,rating_verification_status').order('name'),
+  client.from('club_players').select('id,name,user_id,created_at,dupr_id,dupr_doubles_rating,mpa_provisional_rating,rating_verification_status,current_mpa_rank,previous_mpa_rank,mpa_rank_change').order('name'),
 
     client
       .from('games')
@@ -1027,9 +1027,10 @@ function renderStandings(){
   const stats={};
 
   players.forEach(p=>{
-    stats[p.id]={
-      name:p.name,
-      w:0,
+  stats[p.id]={
+    name:p.name,
+    mpaRank:p.current_mpa_rank,
+    w:0,
       l:0,
       pf:0,
       pa:0,
@@ -1073,9 +1074,17 @@ function renderStandings(){
     });
   });
 
-  const rows=Object.values(stats).sort(
-  (a,b)=>(b.possible?b.pf/b.possible:0)-(a.possible?a.pf/a.possible:0)
-);
+  const rows=Object.values(stats).sort((a,b)=>{
+  const rankA=Number(a.mpaRank);
+  const rankB=Number(b.mpaRank);
+
+  if(rankA>0 && rankB>0)return rankA-rankB;
+  if(rankA>0)return -1;
+  if(rankB>0)return 1;
+
+  return (b.possible?b.pf/b.possible:0)-
+         (a.possible?a.pf/a.possible:0);
+});
 
   $('standings').innerHTML=rows.length
     ?'<table><thead><tr>'+
