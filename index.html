@@ -1128,11 +1128,30 @@ const seasonDates=date=>{
 
     const status=rsvp?.status||'No response';
 
-    return '<div class="item">'+
-      '<strong>'+escapeHtml(player?.name||'Unknown player')+'</strong>'+
-      '<div class="muted">Status: '+escapeHtml(status)+'</div>'+
-      '</div>';
+return '<div class="item">'+
+  '<strong>'+escapeHtml(player?.name||'Unknown player')+'</strong>'+
+  '<div class="muted">Status: '+escapeHtml(status)+'</div>'+
+  '<button class="secondary small" onclick="saveWeeklyRsvp('+sessionId+','+r.player_id+',\'playing\')">Playing</button> '+
+  '<button class="secondary small" onclick="saveWeeklyRsvp('+sessionId+','+r.player_id+',\'not_playing\')">Not Playing</button>'+
+  '</div>';
   }).join('');
+}
+  async function saveWeeklyRsvp(sessionId,playerId,status){
+  const {error}=await client
+    .from('league_rsvps')
+    .upsert({
+      session_id:sessionId,
+      player_id:playerId,
+      status:status,
+      updated_at:new Date().toISOString()
+    },{onConflict:'session_id,player_id'});
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  await refreshAll();
 }
   async function removeLeaguePlayer(id){
   if(!confirm('Remove this player from the league?'))return;
