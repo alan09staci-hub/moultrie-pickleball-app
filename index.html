@@ -651,6 +651,35 @@ if(profile.role==='admin'){
   '</div>';
 }).join('');
   }
+  async function saveDuprRating(playerId){
+  try{
+    if(!profile || profile.role!=='admin'){
+      throw new Error('Admin access required.');
+    }
+
+    const duprId=document.getElementById('duprId_'+playerId).value.trim();
+    const duprRating=document.getElementById('duprRating_'+playerId).value;
+    const mpaRating=document.getElementById('mpaRating_'+playerId).value;
+    const status=document.getElementById('ratingStatus_'+playerId).value;
+
+    const {error}=await client
+      .from('club_players')
+      .update({
+        dupr_id:duprId||null,
+        dupr_doubles_rating:duprRating||null,
+        mpa_provisional_rating:mpaRating||null,
+        rating_verification_status:status
+      })
+      .eq('id',playerId);
+
+    if(error)throw error;
+
+    await refreshAll();
+    alert('DUPR information saved.');
+  }catch(err){
+    alert('Could not save DUPR information: '+err.message);
+  }
+}
 function renderPlayerLeagues(){
   const container=$('playerLeagues');
   if(!container)return;
