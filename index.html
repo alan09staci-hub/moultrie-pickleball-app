@@ -611,9 +611,37 @@ function renderAll(){
   renderStandings();
   renderAnalytics();
 
-  if(profile.role==='admin'){
-    renderAdmin();
+ if(profile.role==='admin'){
+  renderAdmin();
+  renderDuprPlayers();
+}
+}
+  function renderDuprPlayers(){
+  const container=$('duprPlayerList');
+  if(!container)return;
+
+  if(!players.length){
+    container.innerHTML='<p class="muted">No players yet.</p>';
+    return;
   }
+
+  container.innerHTML=players.map(p=>{
+    const official=p.dupr_doubles_rating==null
+      ?'Not rated'
+      :Number(p.dupr_doubles_rating).toFixed(2);
+
+    const provisional=p.mpa_provisional_rating==null
+      ?'Not assigned'
+      :Number(p.mpa_provisional_rating).toFixed(2);
+
+    return '<div class="item">'+
+      '<strong>'+escapeHtml(p.name)+'</strong>'+
+      '<div>DUPR ID: '+escapeHtml(p.dupr_id||'Not entered')+'</div>'+
+      '<div>Official DUPR doubles rating: '+escapeHtml(official)+'</div>'+
+      '<div>MPA provisional rating: '+escapeHtml(provisional)+'</div>'+
+      '<div>Verification: '+escapeHtml(p.rating_verification_status||'unverified')+'</div>'+
+      '</div>';
+  }).join('');
 }
 function renderPlayerLeagues(){
   const container=$('playerLeagues');
