@@ -127,8 +127,9 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 <section id="leagueTab" class="tab hidden">
   <div class="card">
     <h2>My League</h2>
+    <p class="muted">View your league schedule and weekly OPT IN status.</p>
     <div id="playerLeagues" class="list">
-      <p class="muted">League information coming soon.</p>
+      <p class="muted">Loading league information...</p>
     </div>
   </div>
 </section>
@@ -518,10 +519,7 @@ function showTab(name,btn){
 
 async function refreshAll(){
   const [pr,gr,lr,sr,rr,rv]=await Promise.all([
-    client
-      .from('club_players')
-      .select('id,name,created_at')
-      .order('name'),
+   client.from('club_players').select('id,name,user_id,created_at').order('name'),
 
     client
       .from('games')
@@ -602,7 +600,7 @@ function renderAll(){
 
   $('schedule').innerHTML=gameHtml;
   $('dashGames').innerHTML=gameHtml;
-
+  renderPlayerLeagues();
   renderStandings();
   renderAnalytics();
 
@@ -610,7 +608,78 @@ function renderAll(){
     renderAdmin();
   }
 }
+function renderPlayerLeagues(){
+  const container=$('playerLeagues');
+  if(!container)return;
 
+  const myPlayer=players.find(p=>
+    String(p.user_id)===String(currentUser.id)
+  );
+
+  if(!myPlayer){
+    container.innerHTML=
+      '<p class="muted">Your account is not linked to a player yet.</p>';
+    return;
+  }
+
+  const myLeagueIds=new Set(
+    leagueRegistrations
+      .filter(r=>String(r.player_id)===String(myPlayer.id))
+      .map(r=>String(r.league_id))
+  );
+
+  const myLeagues=leagues.filter(l=>
+    myLeagueIds.has(String(l.id))
+  );
+
+  if(!myLeagues.length){
+    container.innerHTML=
+      '<p class="muted">You are not registered for a league yet.</p>';
+    return;
+  }
+
+  container.innerHTML=myLeagues.map(league=>{
+    const sessions=leagueSessions
+      .filter(s=>String(s.league_id)===String(league.id))
+      .sort((a,b)=>a.week_number-b.week_number);
+
+    const weeks=sessions.map(s=>{
+      const date=new Date(s.play_date+'T12:00:00')
+        .toLocaleDateString('en-US',{
+          weekday:'long',month:'long',day:'numeric',year:'numeric'
+        });
+
+      const time=s.start_time
+        ?new Date('2000-01-01T'+s.start_time)
+          .toLocaleTimeString('en-US',{
+            hour:'numeric',minute:'2-digit'
+          })
+        :'Time not set';
+
+      const status=leagueOptInStatuses[s.id]||'Unavailable';
+      const rsvp=leagueRsvps.find(r=>
+        String(r.session_id)===String(s.id) &&
+        String(r.player_id)===String(myPlayer.id)
+      );
+
+      const response=rsvp
+        ?(rsvp.status==='playing'?'Playing':'Not Playing')
+        :'No response';
+
+      return '<div class="item">'+
+        '<strong>Week '+s.week_number+'</strong> — '+
+        escapeHtml(date)+' at '+escapeHtml(time)+
+        '<div>OPT IN: '+escapeHtml(status)+'</div>'+
+        '<div>Your response: '+escapeHtml(response)+'</div>'+
+        '</div>';
+    }).join('');
+
+    return '<div class="card">'+
+      '<h3>'+escapeHtml(league.name)+'</h3>'+
+      (weeks||'<p class="muted">No sessions scheduled.</p>')+
+      '</div>';
+  }).join('');
+}
 function gameCard(g){
   const a=g.player_a_info?.name||'Player A';
   const b=g.player_b_info?.name||'Player B';
