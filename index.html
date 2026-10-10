@@ -239,6 +239,7 @@ let leagues=[];
 let leagueSessions=[];
 let leagueRegistrations=[];
 let leagueRsvps=[];
+let leagueOptInStatuses={};
 let authMode='signin';
 let authListenerStarted=false;
 
@@ -553,6 +554,21 @@ client
   leagueSessions=sr.data||[];
   leagueRegistrations=rr.data||[];
   leagueRsvps=rv.data||[];
+  leagueOptInStatuses={};
+
+const optInResults=await Promise.all(
+  leagueSessions.map(s=>
+    client.rpc('league_opt_in_status',{
+      p_session_id:s.id
+    })
+  )
+);
+
+leagueSessions.forEach((s,i)=>{
+  leagueOptInStatuses[s.id]=optInResults[i].error
+    ? 'Unavailable'
+    : optInResults[i].data;
+});
 
   renderLeagues();
   renderLeagueRegistrations();
@@ -1016,6 +1032,7 @@ const seasonDates=date=>{
           year:'numeric'
                })+
             ' — '+(s.start_time ? new Date('2000-01-01T'+s.start_time).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) : 'Time not set')+
+      ' — OPT IN: '+escapeHtml(leagueOptInStatuses[s.id]||'Unavailable')+
       ' <button class="secondary small" onclick="editSessionDate('+s.id+')">Edit Date</button>'+
       ' <button class="secondary small" onclick="editSessionTime('+s.id+')">Edit Time</button>'+
       '</div>'
