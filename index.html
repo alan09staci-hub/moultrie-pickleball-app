@@ -1017,6 +1017,7 @@ const seasonDates=date=>{
                })+
             ' — '+(s.start_time ? new Date('2000-01-01T'+s.start_time).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) : 'Time not set')+
       ' <button class="secondary small" onclick="editSessionDate('+s.id+')">Edit Date</button>'+
+      ' <button class="secondary small" onclick="editSessionTime('+s.id+')">Edit Time</button>'+
       '</div>'
     ).join('');
 };
@@ -1219,6 +1220,36 @@ return '<div class="item">'+
   const {error}=await client
     .from('league_sessions')
     .update({play_date:newDate})
+    .eq('id',id);
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  await refreshAll();
+}
+  async function editSessionTime(id){
+  const session=leagueSessions.find(s=>s.id===id);
+  if(!session)return;
+
+  const currentTime=(session.start_time||'18:30').slice(0,5);
+
+  const newTime=prompt(
+    'Enter the new game start time (HH:MM, 24-hour format):',
+    currentTime
+  );
+
+  if(newTime===null)return;
+
+  if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(newTime)){
+    alert('Please enter a valid time, such as 18:30 for 6:30 PM.');
+    return;
+  }
+
+  const {error}=await client
+    .from('league_sessions')
+    .update({start_time:newTime})
     .eq('id',id);
 
   if(error){
