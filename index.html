@@ -164,6 +164,10 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
   </button>
 
   <div id="week1SeedPreview"></div>
+
+      <button onclick="previewWeek1Courts()">Preview Week 1 Courts</button>
+<div id="week1CourtPreview"></div>
+      
      </div>
 
     <div class="card">
@@ -775,6 +779,39 @@ if(profile.role==='admin'){
         ' — Rating: '+p.rating.toFixed(2)+'</li>'
       ).join('')+
       '</ol>';
+
+  }catch(err){
+    output.textContent='Error: '+err.message;
+  }
+}
+  async function previewWeek1Courts(){
+  const output=$('week1CourtPreview');
+  output.textContent='Loading Week 1 court assignments...';
+
+  try{
+    const seeds=await calculateWeek1Seeds();
+
+    if(seeds.length!==5){
+      throw new Error('This first preview requires exactly 5 players opted in.');
+    }
+
+    const pairs=buildDoublesRoundPairings(seeds);
+
+    output.innerHTML=
+      '<h3>Week 1 — Court 1 (Preview Only)</h3>'+
+      '<p>5 players · 5 doubles matches · 15 points per match</p>'+
+      pairs.map((p,i)=>{
+        const playing=new Set(p);
+        const resting=seeds.find((_,index)=>!playing.has(index));
+
+        return '<p><strong>Match '+(i+1)+'</strong>: '+
+          escapeHtml(seeds[p[0]].name)+' &amp; '+
+          escapeHtml(seeds[p[1]].name)+' vs '+
+          escapeHtml(seeds[p[2]].name)+' &amp; '+
+          escapeHtml(seeds[p[3]].name)+
+          '<br>Resting: '+escapeHtml(resting.name)+'</p>';
+      }).join('')+
+      '<p><em>Preview only — no games have been created.</em></p>';
 
   }catch(err){
     output.textContent='Error: '+err.message;
