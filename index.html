@@ -157,7 +157,13 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
   Recalculate MPA Rankings
 </button>
 
-  <div id="rankingMsg"></div>
+   <div id="rankingMsg"></div>
+
+  <button onclick="previewWeek1Seeds()">
+    Preview Week 1 Seeds
+  </button>
+
+  <div id="week1SeedPreview"></div>
      </div>
 
     <div class="card">
@@ -726,6 +732,26 @@ if(profile.role==='admin'){
     ...player,
     seed:index+1
   }));
+}
+  async function previewWeek1Seeds(){
+  const output=$('week1SeedPreview');
+  output.textContent='Loading Week 1 seeds...';
+
+  try{
+    const seeds=await calculateWeek1Seeds();
+
+    output.innerHTML=
+      '<h3>Week 1 Starting Seeds — Preview Only</h3>'+
+      '<ol>'+
+      seeds.map(p=>
+        '<li>'+escapeHtml(p.name)+
+        ' — Rating: '+p.rating.toFixed(2)+'</li>'
+      ).join('')+
+      '</ol>';
+
+  }catch(err){
+    output.textContent='Error: '+err.message;
+  }
 }
   async function calculateMPARankings(){
   const msg=$('rankingMsg');
