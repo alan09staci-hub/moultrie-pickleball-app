@@ -697,14 +697,41 @@ if(profile.role==='admin'){
   if(!profile || profile.role!=='admin'){
     throw new Error('Admin access required.');
   }
+  const league=leagues.find(l=>
+    l.name==='Moultrie Fall 2026'
+  );
+  if(!league)throw new Error('League not found.');
 
+  const session=leagueSessions.find(s=>
+    String(s.league_id)===String(league.id) &&
+    Number(s.week_number)===1
+  );
+  if(!session)throw new Error('Week 1 session not found.');
+
+  const registeredIds=new Set(
+    leagueRegistrations
+      .filter(r=>String(r.league_id)===String(league.id))
+      .map(r=>String(r.player_id))
+  );
+
+  const playingIds=new Set(
+    leagueRsvps
+      .filter(r=>
+        String(r.session_id)===String(session.id) &&
+        r.status==='playing' &&
+        registeredIds.has(String(r.player_id))
+      )
+      .map(r=>String(r.player_id))
+  );
   const {data,error}=await client
     .from('club_players')
     .select('id,name,dupr_doubles_rating,mpa_provisional_rating,rating_verification_status');
 
   if(error)throw error;
 
-  const seededPlayers=data.map(player=>{
+   const seededPlayers=data
+    .filter(player=>playingIds.has(String(player.id)))
+    .map(player=>{
     let rating=null;
 
     if(player.rating_verification_status==='dupr_verified'){
