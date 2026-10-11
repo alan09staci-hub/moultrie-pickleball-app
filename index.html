@@ -687,6 +687,46 @@ if(profile.role==='admin'){
     alert('Could not save DUPR information: '+err.message);
   }
 }
+  async function calculateWeek1Seeds(){
+  if(!profile || profile.role!=='admin'){
+    throw new Error('Admin access required.');
+  }
+
+  const {data,error}=await client
+    .from('club_players')
+    .select('id,name,dupr_doubles_rating,mpa_provisional_rating,rating_verification_status');
+
+  if(error)throw error;
+
+  const seededPlayers=data.map(player=>{
+    let rating=null;
+
+    if(player.rating_verification_status==='dupr_verified'){
+      rating=Number(player.dupr_doubles_rating);
+    }else if(player.rating_verification_status==='mpa_provisional_approved'){
+      rating=Number(player.mpa_provisional_rating);
+    }
+
+    if(!rating || rating<=0){
+      throw new Error('Missing approved rating for '+player.name);
+    }
+
+    return {
+      id:player.id,
+      name:player.name,
+      rating:rating
+    };
+  });
+
+  seededPlayers.sort((a,b)=>
+    b.rating-a.rating || a.name.localeCompare(b.name)
+  );
+
+  return seededPlayers.map((player,index)=>({
+    ...player,
+    seed:index+1
+  }));
+}
   async function calculateMPARankings(){
   const msg=$('rankingMsg');
 
