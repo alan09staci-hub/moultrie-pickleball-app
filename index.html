@@ -690,15 +690,17 @@ if(profile.role==='admin'){
   async function calculateMPARankings(){
   const msg=$('rankingMsg');
 
+    msg.textContent='MPA ranking recalculation is temporarily disabled while Week 1 seeding is being prepared.';
+return;
+
   try{
     if(!profile || profile.role!=='admin'){
       throw new Error('Admin access required.');
     }
 
-    const {data:playersData,error:playersError}=await client
+   const {data:playersData,error:playersError}=await client
   .from('club_players')
- .select('id,name,current_mpa_rank,previous_mpa_rank,initial_dupr_seed');
-
+  .select('id,name,current_mpa_rank,previous_mpa_rank,dupr_doubles_rating,mpa_provisional_rating,rating_verification_status');
 if(playersError)throw playersError;
 
 const {data:gamesData,error:gamesError}=await client
