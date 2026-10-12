@@ -799,20 +799,62 @@ if(profile.role==='admin'){
       );
     }
 
-    // Use the fewest courts that can hold all players.
-    const courtCount=Math.ceil(total/6);
-    const baseSize=Math.floor(total/courtCount);
-    const extra=total%courtCount;
+   // Prefer five-player courts, then four-player courts.
+// Use one six-player court when needed.
+let courtSizes=[];
 
-    if(baseSize<4){
-      throw new Error('Unable to form valid courts.');
-    }
+if(total<=6){
+  courtSizes=[total];
+}else{
+const courtCount=total<16
+  ?Math.ceil(total/5)
+  :(total===22 || total===23 || total===24)
+    ?5
+    :Math.min(6,Math.max(4,Math.round(total/5)));
+
+  // Start with four players on every court.
+ courtSizes=Array(courtCount).fill(4);
+
+if(total===21){
+  courtSizes=[6,5,5,5];
+}
+
+ let remaining=total-courtSizes.reduce((sum,size)=>sum+size,0);
+  
+if(total===22){
+  courtSizes=[5,5,4,4,4];
+  remaining=0;
+}
+
+if(total===23){
+  courtSizes=[5,5,5,4,4];
+  remaining=0;
+}
+
+  // Add a fifth player to courts first.
+  for(let i=0;i<courtCount && remaining>0;i++){
+    courtSizes[i]++;
+    remaining--;
+  }
+
+  // Add a sixth player only if necessary.
+  for(let i=0;i<courtCount && remaining>0;i++){
+    courtSizes[i]++;
+    remaining--;
+  }
+  if(remaining!==0 || courtSizes.some(size=>size<4 || size>6)){
+  throw new Error('Unable to form valid courts for '+total+' players.');
+}
+}
+
+const courtCount=courtSizes.length;
+
 
     let offset=0;
     let html='<h3>Week 1 Court Assignments — Preview Only</h3>';
 
     for(let court=0;court<courtCount;court++){
-      const size=baseSize+(court<extra?1:0);
+     const size=courtSizes[court];
       const group=seeds.slice(offset,offset+size);
       offset+=size;
 
