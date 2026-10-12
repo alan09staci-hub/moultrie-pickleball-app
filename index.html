@@ -896,7 +896,7 @@ const courtCount=courtSizes.length;
     alert('Administrator access required.');
     return;
   }
-
+ try{
  const seeds=await calculateWeek1Seeds();
 
 if(seeds.length<4){
@@ -905,6 +905,9 @@ if(seeds.length<4){
 }
 
 alert('Found '+seeds.length+' eligible Week 1 players. No matches saved.');
+   }catch(err){
+  alert('Week 1 check failed: '+err.message);
+}
 }
   async function calculateMPARankings(){
   const msg=$('rankingMsg');
