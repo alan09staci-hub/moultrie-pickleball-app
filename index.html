@@ -784,34 +784,65 @@ if(profile.role==='admin'){
     output.textContent='Error: '+err.message;
   }
 }
-  async function previewWeek1Courts(){
+ async function previewWeek1Courts(){
   const output=$('week1CourtPreview');
   output.textContent='Loading Week 1 court assignments...';
 
   try{
     const seeds=await calculateWeek1Seeds();
+    const total=seeds.length;
 
-    if(seeds.length!==5){
-      throw new Error('This first preview requires exactly 5 players opted in.');
+    if(total<4 || total>36 || total===7){
+      throw new Error(
+        'Court assignments require 4–36 players, except 7. '+
+        'Each court must have 4, 5, or 6 players.'
+      );
     }
 
-    const pairs=buildDoublesRoundPairings(seeds);
+    // Use the fewest courts that can hold all players.
+    const courtCount=Math.ceil(total/6);
+    const baseSize=Math.floor(total/courtCount);
+    const extra=total%courtCount;
 
-    output.innerHTML=
-      '<h3>Week 1 — Court 1 (Preview Only)</h3>'+
-      '<p>5 players · 5 doubles matches · 15 points per match</p>'+
-      pairs.map((p,i)=>{
+    if(baseSize<4){
+      throw new Error('Unable to form valid courts.');
+    }
+
+    let offset=0;
+    let html='<h3>Week 1 Court Assignments — Preview Only</h3>';
+
+    for(let court=0;court<courtCount;court++){
+      const size=baseSize+(court<extra?1:0);
+      const group=seeds.slice(offset,offset+size);
+      offset+=size;
+
+      const target=size===4?20:size===5?15:10;
+      const pairs=buildDoublesRoundPairings(group);
+
+      html+='<h4>Court '+(court+1)+'</h4>'+
+        '<p>'+size+' players · '+pairs.length+
+        ' doubles matches · '+target+' points per match</p>'+
+        '<p><strong>Players:</strong> '+
+        group.map(p=>escapeHtml(p.name)).join(', ')+'</p>';
+
+      html+=pairs.map((p,i)=>{
         const playing=new Set(p);
-        const resting=seeds.find((_,index)=>!playing.has(index));
+        const byes=group.filter((_,index)=>!playing.has(index));
 
         return '<p><strong>Match '+(i+1)+'</strong>: '+
-          escapeHtml(seeds[p[0]].name)+' &amp; '+
-          escapeHtml(seeds[p[1]].name)+' vs '+
-          escapeHtml(seeds[p[2]].name)+' &amp; '+
-          escapeHtml(seeds[p[3]].name)+
-          '<br>Bye: '+escapeHtml(resting.name)+'</p>';
-      }).join('')+
-      '<p><em>Preview only — no games have been created.</em></p>';
+          escapeHtml(group[p[0]].name)+' &amp; '+
+          escapeHtml(group[p[1]].name)+' vs '+
+          escapeHtml(group[p[2]].name)+' &amp; '+
+          escapeHtml(group[p[3]].name)+
+          (byes.length
+            ? '<br>Bye: '+byes.map(b=>escapeHtml(b.name)).join(', ')
+            : '')+
+          '</p>';
+      }).join('');
+    }
+
+    html+='<p><em>Preview only — no games have been created.</em></p>';
+    output.innerHTML=html;
 
   }catch(err){
     output.textContent='Error: '+err.message;
