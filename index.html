@@ -890,6 +890,22 @@ const courtCount=courtSizes.length;
     output.textContent='Error: '+err.message;
   }
 }
+
+  async function createWeek1LeagueMatches(){
+  if(!profile || profile.role!=='admin'){
+    alert('Administrator access required.');
+    return;
+  }
+
+ const seeds=await calculateWeek1Seeds();
+
+if(seeds.length<4){
+  alert('At least four players must be marked Playing.');
+  return;
+}
+
+alert('Found '+seeds.length+' eligible Week 1 players. No matches saved.');
+}
   async function calculateMPARankings(){
   const msg=$('rankingMsg');
 
