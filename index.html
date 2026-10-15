@@ -810,49 +810,44 @@ let courtSizes=[];
 if(total<=6){
   courtSizes=[total];
 }else{
-const courtCount=total<16
-  ?Math.ceil(total/5)
-  :(total===22 || total===23 || total===24)
-    ?5
-    :Math.min(6,Math.max(4,Math.round(total/5)));
+  let best=null;
 
-  // Start with four players on every court.
- courtSizes=Array(courtCount).fill(4);
+  for(let courts=2;courts<=6;courts++){
+    for(let sixes=0;sixes<=courts;sixes++){
+      for(let fives=0;fives<=courts-sixes;fives++){
+        const fours=courts-sixes-fives;
 
-if(total===21){
-  courtSizes=[6,5,5,5];
-}
+        if(6*sixes+5*fives+4*fours!==total){
+          continue;
+        }
 
- let remaining=total-courtSizes.reduce((sum,size)=>sum+size,0);
-  
-if(total===22){
-  courtSizes=[5,5,4,4,4];
-  remaining=0;
-}
+        const sizes=[
+          ...Array(sixes).fill(6),
+          ...Array(fives).fill(5),
+          ...Array(fours).fill(4)
+        ];
 
-if(total===23){
-  courtSizes=[5,5,5,4,4];
-  remaining=0;
-}
+        // Prefer fewer six-player courts,
+        // then fewer courts overall.
+        const score=sixes*100+courts;
 
-  // Add a fifth player to courts first.
-  for(let i=0;i<courtCount && remaining>0;i++){
-    courtSizes[i]++;
-    remaining--;
+        if(!best || score<best.score){
+          best={sizes,score};
+        }
+      }
+    }
   }
 
-  // Add a sixth player only if necessary.
-  for(let i=0;i<courtCount && remaining>0;i++){
-    courtSizes[i]++;
-    remaining--;
+  if(!best){
+    throw new Error(
+      'Unable to form valid courts for '+total+' players.'
+    );
   }
-  if(remaining!==0 || courtSizes.some(size=>size<4 || size>6)){
-  throw new Error('Unable to form valid courts for '+total+' players.');
-}
+
+  courtSizes=best.sizes;
 }
 
 const courtCount=courtSizes.length;
-
 
     let offset=0;
     let html='<h3>Week 1 Court Assignments — Preview Only</h3>';
