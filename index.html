@@ -160,9 +160,12 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 </div>
 
     <h3>My Matches</h3>
-    <div id="playerMatches">
-      Your scheduled matches will appear here.
-    </div>
+   <div id="playerMatches">
+  <button onclick="showPlayerMatches()">
+    View My Matches
+  </button>
+  <p>Your court assignments and matches will appear here once scheduled.</p>
+</div>
 
     <h3>My Standings</h3>
     <div id="playerStandings">
@@ -584,7 +587,18 @@ function showTab(name,btn){
     alert('League tab not found.');
   }
 }
+  
+function showPlayerMatches(){
+  const scheduleButton=Array.from(
+    document.querySelectorAll('#nav button')
+  ).find(button=>button.textContent.trim()==='Schedule');
 
+  if(scheduleButton){
+    showTab('schedule',scheduleButton);
+  }else{
+    alert('Schedule tab not found.');
+  }
+}
 async function refreshAll(){
   const [pr,gr,lr,sr,rr,rv]=await Promise.all([
   client.from('club_players').select('id,name,user_id,created_at,dupr_id,dupr_doubles_rating,mpa_provisional_rating,rating_verification_status,current_mpa_rank,previous_mpa_rank,mpa_rank_change').order('name'),
