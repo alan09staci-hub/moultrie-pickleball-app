@@ -147,6 +147,28 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
     </div>
   </section>
 
+<section id="playerTab" class="tab hidden">
+  <div class="card">
+    <h2>My Player Dashboard</h2>
+    <p>My league participation, matches, scores, and standings.</p>
+
+    <h3>My Weekly Opt-In</h3>
+    <div id="playerOptIn">
+      Your weekly participation will appear here.
+    </div>
+
+    <h3>My Matches</h3>
+    <div id="playerMatches">
+      Your scheduled matches will appear here.
+    </div>
+
+    <h3>My Standings</h3>
+    <div id="playerStandings">
+      Your league results will appear here.
+    </div>
+  </div>
+</section>
+  
   <section id="adminTab" class="tab hidden">
     <div class="card">
      <h2>Admin Center</h2>
@@ -526,9 +548,10 @@ function buildNav(){
     ['schedule','Schedule'],
     ['league','League'],
     ['standings','Standings'],
-    ['analytics','Analytics']
-  ];
-  if(profile.role==='admin'){
+   ['analytics','Analytics'],
+['player','Player']
+];
+if(profile.role==='admin'){
     items.push(['admin','Admin']);
   }
 
