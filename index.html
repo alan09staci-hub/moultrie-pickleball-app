@@ -153,9 +153,11 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
     <p>My league participation, matches, scores, and standings.</p>
 
     <h3>My Weekly Opt-In</h3>
-    <div id="playerOptIn">
-      Your weekly participation will appear here.
-    </div>
+   <div id="playerOptIn">
+  <button onclick="showPlayerLeagueOptIn()">
+    View My Weekly Opt-In
+  </button>
+</div>
 
     <h3>My Matches</h3>
     <div id="playerMatches">
@@ -570,6 +572,17 @@ function showTab(name,btn){
     .forEach(x=>x.classList.remove('active'));
 
   btn.classList.add('active');
+}
+  function showPlayerLeagueOptIn(){
+  const leagueButton=Array.from(
+    document.querySelectorAll('#nav button')
+  ).find(button=>button.textContent.trim()==='League');
+
+  if(leagueButton){
+    showTab('league',leagueButton);
+  }else{
+    alert('League tab not found.');
+  }
 }
 
 async function refreshAll(){
