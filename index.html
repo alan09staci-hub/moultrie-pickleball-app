@@ -167,6 +167,10 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 
       <button onclick="previewWeek1Courts()">Preview Week 1 Courts</button>
 <div id="week1CourtPreview"></div>
+      <button onclick="openWeek1MatchScoring()">
+  SCORE — Week 1 Matches
+</button>
+<div id="week1MatchScoring"></div>
       <button onclick="createWeek1LeagueMatches()">
   Test Week 1 Player Check
 </button>
@@ -948,6 +952,42 @@ alert(
   alert('Week 1 check failed: '+err.message);
 }
 }
+function openWeek1MatchScoring(){
+  const area=document.getElementById('week1MatchScoring');
+  if(!area)return;
+
+  area.innerHTML=`
+    <div style="border:1px solid #ddd;border-radius:12px;padding:16px;margin-top:16px">
+      <h3>MATCHES</h3>
+      <h4>Group 1: 5 Players</h4>
+      <hr>
+      <h2>Match 1</h2>
+      <p>1 to 15 by 1</p>
+
+      <h3>Team 1</h3>
+      <p>Seth Berl &amp; Alan Cortez</p>
+      <input type="number" min="0" max="15" placeholder="Score"
+        style="width:90px;padding:12px;font-size:20px">
+
+      <h3 style="text-align:center">VS</h3>
+
+      <h3>Team 2</h3>
+      <p>Lane Weir &amp; Roy Reeves</p>
+      <input type="number" min="0" max="15" placeholder="Score"
+        style="width:90px;padding:12px;font-size:20px">
+
+      <p><strong>BYE:</strong> Jason Cox</p>
+
+      <button disabled style="margin-top:16px">
+        SAVE — NEXT MATCH
+      </button>
+      <p style="font-size:12px">
+        Preview only — scores are not saved yet.
+      </p>
+    </div>
+  `;
+}
+  
   async function calculateMPARankings(){
   const msg=$('rankingMsg');
 
