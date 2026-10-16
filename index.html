@@ -921,7 +921,29 @@ if(seeds.length<4){
   return;
 }
 
-alert('Found '+seeds.length+' eligible Week 1 players. No matches saved.');
+const courtPlayers=seeds.slice(0,5);
+
+if(seeds.length!==5){
+  alert('This test currently requires exactly 5 players.');
+  return;
+}
+
+const pairings=buildDoublesRoundPairings(courtPlayers);
+
+const preparedMatches=pairings.map((pair,index)=>({
+  court_number:1,
+  round_number:index+1,
+  target_score:15,
+  player_a:courtPlayers[pair[0]].id,
+  player_b:courtPlayers[pair[1]].id,
+  player_c:courtPlayers[pair[2]].id,
+  player_d:courtPlayers[pair[3]].id
+}));
+
+alert(
+  'Prepared '+preparedMatches.length+
+  ' Week 1 doubles matches. No matches saved.'
+);
    }catch(err){
   alert('Week 1 check failed: '+err.message);
 }
