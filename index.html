@@ -985,18 +985,41 @@ if(seeds.length!==5){
 const pairings=buildDoublesRoundPairings(courtPlayers);
 
 const preparedMatches=pairings.map((pair,index)=>({
+  league_id:league.id,
+  session_id:session.id,
   court_number:1,
   round_number:index+1,
   target_score:15,
+  match_type:'doubles',
   player_a:courtPlayers[pair[0]].id,
   player_b:courtPlayers[pair[1]].id,
   player_c:courtPlayers[pair[2]].id,
-  player_d:courtPlayers[pair[3]].id
+ player_d:courtPlayers[pair[3]].id,
+court_players:courtPlayers.map(p=>p.id)
 }));
+   
+const {data:existingMatches,error:existingError}=await client
+  .from('games')
+  .select('id')
+  .eq('league_id',league.id)
+  .eq('session_id',session.id);
+
+if(existingError)throw existingError;
+
+if(existingMatches.length>0){
+  alert('Week 1 matches already exist. No duplicates created.');
+  return;
+}
+const {data:savedMatches,error:saveError}=await client
+  .from('games')
+  .insert(preparedMatches)
+  .select('id');
+
+if(saveError)throw saveError;
 
 alert(
-  'Prepared '+preparedMatches.length+
-  ' Week 1 doubles matches. No matches saved.'
+  'Successfully saved '+savedMatches.length+
+  ' Week 1 doubles matches!'
 );
    }catch(err){
   alert('Week 1 check failed: '+err.message);
