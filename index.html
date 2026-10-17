@@ -2434,6 +2434,19 @@ async function saveScore(id){
     return;
   }
 
+  
+  const scoreA=Number(a);
+  const scoreB=Number(b);
+
+  if(
+    !Number.isInteger(scoreA) ||
+    !Number.isInteger(scoreB) ||
+    scoreA<0 ||
+    scoreB<0
+  ){
+    alert('Enter valid whole-number scores.');
+    return;
+  }
   const game=games.find(x=>x.id===id);
   const target=game?.target_score
     ?Number(game.target_score)
@@ -2445,7 +2458,14 @@ async function saveScore(id){
     );
     return;
   }
-
+  
+  if(target && !(
+    (scoreA===target && scoreB<target) ||
+    (scoreB===target && scoreA<target)
+  )){
+    alert('One team must reach '+target+' points to win.');
+    return;
+  }
   const {error}=await client
     .from('games')
     .update({
