@@ -1779,7 +1779,7 @@ function renderAdmin(){
   $('gameC').innerHTML=opts;
   $('gameD').innerHTML=opts;
   $('adminGames').innerHTML=games.length
-    ?games.map(g=>{
+  ?games.slice().sort((a,b)=>(a.round_number||0)-(b.round_number||0)).map(g=>{
       const a=g.player_a_info?.name||'Player A';
       const b=g.player_b_info?.name||'Player B';
       const c=g.player_c_info?.name||'Player C';
@@ -1813,9 +1813,9 @@ function renderAdmin(){
   ?'<div class="item"><strong>BYE: '+byePlayers.map(escapeHtml).join(' + ')+'</strong></div>'
   :'')+
         '<div class="triple">'+
-          '<input id="sa_'+g.id+'" type="number" min="0" '+
+         '<input id="sa_'+g.id+'" type="text" inputmode="numeric" '+
           'placeholder="Score A" value="'+(g.score_a??'')+'">'+
-          '<input id="sb_'+g.id+'" type="number" min="0" '+
+        '<input id="sb_'+g.id+'" type="text" inputmode="numeric" '+
           'placeholder="Score B" value="'+(g.score_b??'')+'">'+
           '<button onclick="saveScore('+g.id+')">Save score</button>'+
         '</div>'+
