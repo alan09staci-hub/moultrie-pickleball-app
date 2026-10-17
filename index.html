@@ -721,13 +721,73 @@ if(profile.role==='admin'){
     return;
   }
 
-  container.innerHTML=myGames
+    container.innerHTML=myGames
     .slice()
     .sort((a,b)=>(a.round_number||0)-(b.round_number||0))
-    .map(g=>gameCard(g))
+    .map(g=>{
+      const alreadyScored=
+        g.score_a!==null || g.score_b!==null;
+
+      return gameCard(g)+(
+        alreadyScored
+          ?'<p class="muted">Score recorded. Contact an administrator for corrections.</p>'
+          :'<div class="triple">'+
+             '<input id="psa_'+g.id+'" type="number" min="0" max="'+g.target_score+'" placeholder="Team A score">'+
+             '<input id="psb_'+g.id+'" type="number" min="0" max="'+g.target_score+'" placeholder="Team B score">'+
+             '<button onclick="submitPlayerMatchScore('+g.id+')">Submit score</button>'+
+           '</div>'
+      );
+    })
     .join('');
 }
-  
+  async function submitPlayerMatchScore(id){
+  const a=$('psa_'+id).value;
+  const b=$('psb_'+id).value;
+
+  if(a==='' || b===''){
+    alert('Enter both team scores.');
+    return;
+  }
+
+  const game=games.find(g=>String(g.id)===String(id));
+
+  if(!game){
+    alert('Match not found.');
+    return;
+  }
+
+  const scoreA=Number(a);
+  const scoreB=Number(b);
+  const target=Number(game.target_score);
+
+  if(!Number.isInteger(scoreA) ||
+     !Number.isInteger(scoreB) ||
+     scoreA<0 || scoreB<0 ||
+     !(
+       (scoreA===target && scoreB<target) ||
+       (scoreB===target && scoreA<target)
+     )){
+    alert('One team must score exactly '+target+
+          '. The other team must score less.');
+    return;
+  }
+
+  const {error}=await client.rpc(
+    'submit_player_match_score',{
+      p_game_id:id,
+      p_score_a:scoreA,
+      p_score_b:scoreB
+    }
+  );
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  alert('Match score submitted successfully!');
+  await refreshAll();
+}
   function renderDuprPlayers(){
   const container=$('duprPlayerList');
   if(!container)return;
