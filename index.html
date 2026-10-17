@@ -1956,6 +1956,8 @@ const seasonDates=date=>{
                })+
             ' — '+(s.start_time ? new Date('2000-01-01T'+s.start_time).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) : 'Time not set')+
       ' — OPT IN: '+escapeHtml(leagueOptInStatuses[s.id]||'Unavailable')+
+      ' — GAME NIGHT: '+escapeHtml(s.status||'scheduled')+
+      ' <button class="secondary small" onclick="completeGameNight('+s.id+')">Complete Game Night</button>'+
       ' <button class="secondary small" onclick="editSessionDate('+s.id+')">Edit Date</button>'+
       ' <button class="secondary small" onclick="editSessionTime('+s.id+')">Edit Time</button>'+
       '</div>'
@@ -1970,6 +1972,46 @@ const seasonDates=date=>{
 '<div class="list">'+leagueWeekDates(league)+'</div></div>'
       ).join('')
     : '<p class="muted">No leagues created yet.</p>';
+}
+  async function completeGameNight(sessionId){
+  const session=leagueSessions.find(
+    s=>String(s.id)===String(sessionId)
+  );
+
+  if(!session){
+    alert('League week not found.');
+    return;
+  }
+
+  if(session.status==='completed'){
+    alert('This game night is already completed.');
+    return;
+  }
+      const weekGames=games.filter(g=>
+    String(g.session_id)===String(sessionId) &&
+    String(g.league_id)===String(session.league_id)
+  );
+
+  if(!weekGames.length){
+    alert('Cannot complete Week '+session.week_number+
+      ': no games have been scheduled.');
+    return;
+  }
+
+  const unfinishedGames=weekGames.filter(g=>
+    g.score_a===null || g.score_b===null
+  );
+
+  if(unfinishedGames.length){
+    alert('Cannot complete Week '+session.week_number+
+      ': '+unfinishedGames.length+' games still need scores.');
+    return;
+  }
+
+  alert(
+    'Week '+session.week_number+
+    ' cannot be completed yet. Attendance verification and final score checks must be added first.'
+  );
 }
   function renderLeagueRegistrations(){
   const leagueSelect=$('registrationLeague');
