@@ -688,6 +688,7 @@ function renderAll(){
   $('schedule').innerHTML=gameHtml;
   $('dashGames').innerHTML=gameHtml;
   renderPlayerLeagues();
+  renderPlayerMatchScores();
   renderStandings();
   renderAnalytics();
 
@@ -695,6 +696,38 @@ if(profile.role==='admin'){
   renderAdmin();
 }
 }
+  function renderPlayerMatchScores(){
+  const container=$('playerMatchScores');
+  if(!container)return;
+
+  const myPlayer=players.find(p=>
+    String(p.user_id)===String(currentUser.id)
+  );
+
+  if(!myPlayer){
+    container.innerHTML=
+      '<p class="muted">Your account is not linked to a player.</p>';
+    return;
+  }
+
+  const myGames=games.filter(g=>
+    [g.player_a,g.player_b,g.player_c,g.player_d]
+      .some(id=>String(id)===String(myPlayer.id))
+  );
+
+  if(!myGames.length){
+    container.innerHTML=
+      '<p class="muted">You have no assigned matches yet.</p>';
+    return;
+  }
+
+  container.innerHTML=myGames
+    .slice()
+    .sort((a,b)=>(a.round_number||0)-(b.round_number||0))
+    .map(g=>gameCard(g))
+    .join('');
+}
+  
   function renderDuprPlayers(){
   const container=$('duprPlayerList');
   if(!container)return;
