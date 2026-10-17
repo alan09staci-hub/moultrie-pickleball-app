@@ -2425,6 +2425,9 @@ if(scoringStarted){
     return a.name.localeCompare(b.name);
   });
       const courtChart={
+    4:[4],
+    5:[5],
+    6:[6],
     8:[4,4],
     9:[5,4],
     10:[5,5],
@@ -2458,7 +2461,7 @@ if(scoringStarted){
       const courtSizes=courtChart[eligiblePlayers.length];
 
   if(!courtSizes){
-    area.innerHTML='<p class="muted">Automatic court assignments require 8 to 36 opted-in players.</p>';
+   area.innerHTML='<p class="muted">Automatic court assignments require 4 to 36 opted-in players, except 7 players. Seven players cannot be divided into courts of 4, 5, or 6.</p>';
     return;
   }
 
@@ -2482,7 +2485,9 @@ if(scoringStarted){
   '<div class="item">'+
     '<h3>Court '+court.courtNumber+'</h3>'+
     '<p class="muted">'+court.players.length+
-    ' players — Games to '+court.targetScore+'</p>'+
+   ' players — '+(court.players.length===4?3:court.players.length===5?4:6)+
+' games per player — Games to '+court.targetScore+
+' — 60 possible points per player</p>'+
     court.players.map(player=>
       '<div>'+escapeHtml(player.name)+
       ' — Rank '+(Number(player.current_mpa_rank)>0
