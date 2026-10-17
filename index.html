@@ -251,7 +251,18 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 </p>
 <div id="duprPlayerList" class="list"></div>
     </div>
-
+    
+<div class="card">
+  <h2>Automatic Court Assignments</h2>
+  <p class="muted">
+    Assign opted-in players to Courts 1–6 based on their MPA rankings.
+    Five-player courts are preferred.
+  </p>
+    <button onclick="generateAutomaticCourts()">
+    Generate Court Assignments
+  </button>
+  <div id="automaticCourtResults"></div>
+</div>
     <div class="card">
       <h2>60-Point Round</h2>
       <select id="roundMatchType">
@@ -269,7 +280,8 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
         <div id="roundPlayerSelectors"></div>
       </div>
       <button onclick="generateRound()">Create 60-point round</button>
-      <div id="roundMsg"></div>
+<button class="secondary" onclick="printCourtRollCall()">Print Court Roll Call</button>
+<div id="roundMsg"></div>
     </div>
 
     <div class="card">
@@ -610,7 +622,7 @@ async function refreshAll(){
 
     client
       .from('games')
-.select('id,player_a,player_b,player_c,player_d,match_type,score_a,score_b,round_number,court_number,target_score,court_players,created_at,player_a_info:club_players!games_player_a_fkey(id,name),player_b_info:club_players!games_player_b_fkey(id,name),player_c_info:club_players!games_player_c_fkey(id,name),player_d_info:club_players!games_player_d_fkey(id,name)')
+.select('id,player_a,player_b,player_c,player_d,match_type,score_a,score_b,round_number,court_number,target_score,court_players,league_id,session_id,created_at,player_a_info:club_players!games_player_a_fkey(id,name),player_b_info:club_players!games_player_b_fkey(id,name),player_c_info:club_players!games_player_c_fkey(id,name),player_d_info:club_players!games_player_d_fkey(id,name)')
       .order('created_at',{ascending:false}),
 
     client
@@ -1585,18 +1597,14 @@ function renderStandings(){
     });
   });
 
-  const rows=Object.values(stats).sort((a,b)=>{
-  const rankA=Number(a.mpaRank);
-  const rankB=Number(b.mpaRank);
+   const rows=Object.values(stats).sort((a,b)=>{
+    const percentA=a.possible?a.pf/a.possible:0;
+    const percentB=b.possible?b.pf/b.possible:0;
 
-  if(rankA>0 && rankB>0)return rankA-rankB;
-  if(rankA>0)return -1;
-  if(rankB>0)return 1;
+    if(percentA!==percentB)return percentB-percentA;
 
-  return (b.possible?b.pf/b.possible:0)-
-         (a.possible?a.pf/a.possible:0);
-});
-
+    return (b.pf-b.pa)-(a.pf-a.pa);
+  });
   $('standings').innerHTML=rows.length
     ?'<table><thead><tr>'+
       '<th>Rank</th><th>Player</th><th>Earned</th><th>Possible</th><th>E/P %</th><th>W</th><th>L</th><th>Against</th>'+
@@ -1607,7 +1615,7 @@ function renderStandings(){
   '<td>'+escapeHtml(r.name)+'</td>'+
   '<td>'+r.pf+'</td>'+
   '<td>'+r.possible+'</td>'+
-  '<td>'+(r.possible?(r.pf/r.possible*100).toFixed(2):'0.00')+'%</td>'+
+  '<td>'+(r.possible?(r.pf/r.possible*100).toFixed(3):'0.000')+'%</td>'+
   '<td>'+r.w+'</td>'+
   '<td>'+r.l+'</td>'+
   '<td>'+r.pa+'</td>'+
@@ -2353,6 +2361,138 @@ if(n===6){
 
   return [];
 }
+  function generateAutomaticCourts(){
+  const area=$('automaticCourtResults');
+  const leagueId=$('rsvpLeague').value;
+  const sessionId=$('rsvpWeek').value;
+    const selectedSession=leagueSessions.find(s=>
+  String(s.id)===String(sessionId) &&
+  String(s.league_id)===String(leagueId)
+);
+
+  if(!area)return;
+
+ if(!leagueId||!sessionId||!selectedSession){
+    area.innerHTML='<p class="muted">Please select a league and week first.</p>';
+    return;
+  }
+    const scoringStarted=games.some(g=>
+  String(g.session_id)===String(sessionId) &&
+  String(g.league_id)===String(leagueId) &&
+  g.score_a!==null &&
+  g.score_b!==null
+);
+
+if(scoringStarted){
+  area.innerHTML='<p class="muted">Scoring has started for this week. Court assignments are locked.</p>';
+  return;
+}
+
+  const optedIn=leagueRsvps.filter(r=>
+    String(r.session_id)===String(sessionId) &&
+    r.status==='playing'
+  );
+    
+  const registeredIds=new Set(
+    leagueRegistrations
+      .filter(r=>String(r.league_id)===String(leagueId))
+      .map(r=>String(r.player_id))
+  );
+
+   const seenPlayers=new Set();
+
+  const eligiblePlayers=optedIn
+    .filter(r=>registeredIds.has(String(r.player_id)))
+    .filter(r=>{
+      const id=String(r.player_id);
+      if(seenPlayers.has(id))return false;
+      seenPlayers.add(id);
+      return true;
+    })
+    .map(r=>players.find(p=>String(p.id)===String(r.player_id)))
+    .filter(Boolean);
+      eligiblePlayers.sort((a,b)=>{
+    const rankA=Number(a.current_mpa_rank);
+    const rankB=Number(b.current_mpa_rank);
+
+    const validA=rankA>0;
+    const validB=rankB>0;
+
+    if(validA&&!validB)return -1;
+    if(!validA&&validB)return 1;
+    if(validA&&validB&&rankA!==rankB)return rankA-rankB;
+
+    return a.name.localeCompare(b.name);
+  });
+      const courtChart={
+    8:[4,4],
+    9:[5,4],
+    10:[5,5],
+    11:[6,5],
+    12:[4,4,4],
+    13:[5,4,4],
+    14:[5,5,4],
+    15:[5,5,5],
+    16:[6,5,5],
+    17:[5,4,4,4],
+    18:[5,5,4,4],
+    19:[5,5,5,4],
+    20:[5,5,5,5],
+    21:[6,5,5,5],
+    22:[5,5,4,4,4],
+    23:[5,5,5,4,4],
+    24:[5,5,5,5,4],
+    25:[5,5,5,5,5],
+    26:[6,5,5,5,5],
+    27:[5,5,5,4,4,4],
+    28:[5,5,5,5,4,4],
+    29:[5,5,5,5,5,4],
+    30:[5,5,5,5,5,5],
+    31:[6,5,5,5,5,5],
+    32:[6,6,5,5,5,5],
+    33:[6,6,6,5,5,5],
+    34:[6,6,6,6,5,5],
+    35:[6,6,6,6,6,5],
+    36:[6,6,6,6,6,6]
+  };
+      const courtSizes=courtChart[eligiblePlayers.length];
+
+  if(!courtSizes){
+    area.innerHTML='<p class="muted">Automatic court assignments require 8 to 36 opted-in players.</p>';
+    return;
+  }
+
+  let position=0;
+
+  const courtAssignments=courtSizes.map((size,index)=>{
+    const courtPlayers=eligiblePlayers.slice(position,position+size);
+    position+=size;
+
+    return {
+      courtNumber:index+1,
+      players:courtPlayers,
+      targetScore:size===5?15:size===6?10:20
+    };
+  });
+ area.innerHTML=
+  '<h3>Week '+selectedSession.week_number+' — Court Assignments</h3>'+
+  '<p class="muted">'+eligiblePlayers.length+
+  ' players assigned across '+courtAssignments.length+' courts</p>'+
+  courtAssignments.map(court=>
+  '<div class="item">'+
+    '<h3>Court '+court.courtNumber+'</h3>'+
+    '<p class="muted">'+court.players.length+
+    ' players — Games to '+court.targetScore+'</p>'+
+    court.players.map(player=>
+      '<div>'+escapeHtml(player.name)+
+      ' — Rank '+(Number(player.current_mpa_rank)>0
+        ?player.current_mpa_rank:'Unranked')+
+      '</div>'
+    ).join('')+
+  '</div>'
+).join('');
+}
+  
 async function generateRound(){
   const count=Number($('roundPlayerCount').value);
   const round=Number($('roundNumber').value);
@@ -2423,6 +2563,22 @@ const rows=pairs.map((p,i)=>({
   );
 
   await refreshAll();
+}
+  function printCourtRollCall(){
+  const selectedIds=[
+    ...document.querySelectorAll('.roundPlayerSelect')
+  ]
+    .map(s=>s.value)
+    .filter(Boolean);
+
+  if(!selectedIds.length){
+    alert('Select the court players before printing.');
+    return;
+  }
+
+  const selectedPlayers=selectedIds
+    .map(id=>players.find(p=>String(p.id)===String(id)))
+    .filter(Boolean);
 }
 
 async function saveScore(id){
