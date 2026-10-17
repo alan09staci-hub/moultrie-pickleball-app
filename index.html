@@ -323,6 +323,7 @@ let leagues=[];
 let leagueSessions=[];
 let leagueRegistrations=[];
 let leagueRsvps=[];
+let leagueAttendance=[];
 let leagueOptInStatuses={};
 let authMode='signin';
 let authListenerStarted=false;
@@ -617,7 +618,7 @@ function showPlayerMatches(){
   }
 }
 async function refreshAll(){
-  const [pr,gr,lr,sr,rr,rv]=await Promise.all([
+ const [pr,gr,lr,sr,rr,rv,ar]=await Promise.all([
   client.from('club_players').select('id,name,user_id,created_at,dupr_id,dupr_doubles_rating,mpa_provisional_rating,rating_verification_status,current_mpa_rank,previous_mpa_rank,mpa_rank_change').order('name'),
 
     client
@@ -642,8 +643,11 @@ client
 
 client
   .from('league_rsvps')
-  .select('id,session_id,player_id,status,updated_at')
-  ]);
+  .select('id,session_id,player_id,status,updated_at'),
+client
+  .from('league_attendance')
+  .select('id,session_id,player_id,status,verified_at')
+]);
 
   if(pr.error)throw pr.error;
   if(gr.error)throw gr.error;
@@ -651,6 +655,7 @@ client
   if(sr.error)throw sr.error;
   if(rr.error)throw rr.error;
   if(rv.error)throw rv.error;
+  if(ar.error)throw ar.error;
 
   players=pr.data||[];
   games=gr.data||[];
@@ -658,6 +663,7 @@ client
   leagueSessions=sr.data||[];
   leagueRegistrations=rr.data||[];
   leagueRsvps=rv.data||[];
+  leagueAttendance=ar.data||[];
   leagueOptInStatuses={};
 
 const optInResults=await Promise.all(
