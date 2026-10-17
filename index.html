@@ -1381,8 +1381,23 @@ buttons+
   }
 }
 function gameCard(g){
-  const a=g.player_a_info?.name||'Player A';
-  const b=g.player_b_info?.name||'Player B';
+ const playingIds=[
+  g.player_a,
+  g.player_b,
+  g.player_c,
+  g.player_d
+].map(String);
+
+const byePlayers=(g.court_players||[])
+  .filter(id=>!playingIds.includes(String(id)))
+  .map(id=>players.find(p=>String(p.id)===String(id)))
+  .filter(Boolean);
+
+const byeHtml=byePlayers.length
+  ?'<div class="pill">BYE: '+
+    byePlayers.map(p=>escapeHtml(p.name)).join(', ')+
+    '</div>'
+  :'';
 
   const score=(g.score_a!==null&&g.score_b!==null)
     ?'<span class="score">'+g.score_a+' – '+g.score_b+'</span>'
@@ -1412,8 +1427,10 @@ function gameCard(g){
   ?' & <strong>'+escapeHtml(g.player_d_info?.name||'Player D')+'</strong>'
   :'')+
 '<br>'+
-    score+
-    '</div>';
+byeHtml+
+'<br>'+
+score+
+'</div>';
 }
 
 function renderStandings(){
