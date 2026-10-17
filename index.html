@@ -1400,8 +1400,18 @@ function gameCard(g){
 
   return '<div class="item">'+
     round+target+'<br>'+
-    '<strong>'+escapeHtml(a)+'</strong> vs '+
-    '<strong>'+escapeHtml(b)+'</strong><br>'+
+  '<strong>'+escapeHtml(a)+
+(g.match_type==='doubles'?' & '+escapeHtml(b):'')+
+'</strong> vs '+
+'<strong>'+escapeHtml(
+  g.match_type==='doubles'
+    ?(g.player_c_info?.name||'Player C')
+    :b
+)+'</strong>'+
+(g.match_type==='doubles'
+  ?' & <strong>'+escapeHtml(g.player_d_info?.name||'Player D')+'</strong>'
+  :'')+
+'<br>'+
     score+
     '</div>';
 }
