@@ -1998,11 +1998,33 @@ const seasonDates=date=>{
     return;
   }
 
-  if(session.status==='completed'){
+     if(session.status==='completed'){
     alert('This game night is already completed.');
     return;
   }
-      const weekGames=games.filter(g=>
+    
+      const registeredPlayers=leagueRegistrations.filter(r=>
+    String(r.league_id)===String(session.league_id)
+  );
+
+  const unverifiedPlayers=registeredPlayers.filter(r=>
+    !leagueAttendance.some(a=>
+      String(a.session_id)===String(sessionId) &&
+      String(a.player_id)===String(r.player_id) &&
+      (a.status==='present' || a.status==='absent')
+    )
+  );
+
+  if(unverifiedPlayers.length){
+    alert(
+      'Cannot complete Week '+session.week_number+
+      ': '+unverifiedPlayers.length+
+      ' players still need attendance verification.'
+    );
+    return;
+  }
+
+  const weekGames=games.filter(g=>
     String(g.session_id)===String(sessionId) &&
     String(g.league_id)===String(session.league_id)
   );
