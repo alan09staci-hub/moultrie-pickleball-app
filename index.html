@@ -234,7 +234,16 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 <select id="rsvpLeague" onchange="renderWeeklyRsvp()"></select>
 <select id="rsvpWeek" onchange="renderWeeklyRsvpPlayers()"></select>
 <div id="weeklyRsvpPlayers" class="list"></div>
-  </div>
+      <hr>
+<h3>Game Night Attendance</h3>
+<p class="muted">
+  Record which players actually attended each league week.
+  Attendance is separate from weekly RSVP.
+</p>
+<div id="gameNightAttendance" class="list">
+  <p class="muted">Select a league and week above to manage attendance.</p>
+</div>
+</div>
     
    <div class="card">
       <h2>Manage Players</h2>
@@ -2089,6 +2098,8 @@ const seasonDates=date=>{
   const area=$('weeklyRsvpPlayers');
   if(!area)return;
 
+    renderGameNightAttendance();
+
   const leagueId=$('rsvpLeague').value;
   const sessionId=$('rsvpWeek').value;
 
@@ -2124,6 +2135,44 @@ return '<div class="item">'+
   '<button class="secondary small" onclick="saveWeeklyRsvp('+sessionId+','+r.player_id+',\'playing\')">Playing</button> '+
   '<button class="secondary small" onclick="saveWeeklyRsvp('+sessionId+','+r.player_id+',\'not_playing\')">Not Playing</button>'+
   '</div>';
+  }).join('');
+}
+  function renderGameNightAttendance(){
+  const area=$('gameNightAttendance');
+  if(!area)return;
+
+  const leagueId=$('rsvpLeague')?.value;
+  const sessionId=$('rsvpWeek')?.value;
+
+  if(!leagueId||!sessionId){
+    area.innerHTML='<p class="muted">Select a league and week above.</p>';
+    return;
+  }
+
+   const registered=leagueRegistrations.filter(
+    r=>String(r.league_id)===String(leagueId)
+  );
+
+  if(!registered.length){
+    area.innerHTML='<p class="muted">No players registered for this league.</p>';
+    return;
+  }
+
+  area.innerHTML=registered.map(r=>{
+    const player=players.find(
+      p=>String(p.id)===String(r.player_id)
+    );
+
+    const attendance=leagueAttendance.find(
+      a=>String(a.session_id)===String(sessionId) &&
+         String(a.player_id)===String(r.player_id)
+    );
+
+    return '<div class="item">'+
+      '<strong>'+escapeHtml(player?.name||'Unknown player')+'</strong>'+
+      '<div class="muted">Attendance: '+
+      escapeHtml(attendance?.status||'unverified')+'</div>'+
+      '</div>';
   }).join('');
 }
   async function saveWeeklyRsvp(sessionId,playerId,status){
