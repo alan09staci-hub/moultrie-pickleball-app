@@ -2172,8 +2172,62 @@ return '<div class="item">'+
       '<strong>'+escapeHtml(player?.name||'Unknown player')+'</strong>'+
       '<div class="muted">Attendance: '+
       escapeHtml(attendance?.status||'unverified')+'</div>'+
+      '<button class="secondary small" onclick="saveGameNightAttendance('+sessionId+','+r.player_id+',\'present\')">Present</button> '+
+'<button class="secondary small" onclick="saveGameNightAttendance('+sessionId+','+r.player_id+',\'absent\')">Absent</button>'+
       '</div>';
   }).join('');
+}
+  async function saveGameNightAttendance(sessionId,playerId,status){
+      if(!profile || profile.role!=='admin'){
+    alert('Administrator access required.');
+    return;
+  }
+    
+  const session=leagueSessions.find(
+    s=>String(s.id)===String(sessionId)
+  );
+
+  if(!session){
+    alert('Game night not found.');
+    return;
+  }
+      const registered=leagueRegistrations.some(r=>
+    String(r.league_id)===String(session.league_id) &&
+    String(r.player_id)===String(playerId)
+  );
+
+  if(!registered){
+    alert('This player is not registered for this league.');
+    return;
+  }
+
+  if(session.status==='completed'){
+    alert('Attendance is locked for completed game nights.');
+    return;
+  }
+
+  if(status!=='present' && status!=='absent'){
+    alert('Invalid attendance status.');
+    return;
+  }
+
+   try{
+    const {error}=await client
+      .from('league_attendance')
+      .upsert({
+        session_id:session.id,
+        player_id:playerId,
+        status:status,
+        verified_at:new Date().toISOString()
+      },{onConflict:'session_id,player_id'});
+
+    if(error)throw error;
+
+    await refreshAll();
+    alert('Game night attendance saved successfully.');
+  }catch(err){
+    alert('Could not save attendance: '+err.message);
+  }
 }
   async function saveWeeklyRsvp(sessionId,playerId,status){
   const {error}=await client
