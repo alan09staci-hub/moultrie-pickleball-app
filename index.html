@@ -2044,6 +2044,22 @@ const seasonDates=date=>{
       ': '+unfinishedGames.length+' games still need scores.');
     return;
   }
+      const invalidGames=weekGames.filter(g=>
+    !Number.isInteger(Number(g.score_a)) ||
+    !Number.isInteger(Number(g.score_b)) ||
+    Number(g.score_a)<0 ||
+    Number(g.score_b)<0 ||
+    Number(g.score_a)===Number(g.score_b)
+  );
+
+  if(invalidGames.length){
+    alert(
+      'Cannot complete Week '+session.week_number+
+      ': '+invalidGames.length+
+      ' games have invalid scores.'
+    );
+    return;
+  }
 
    alert(
     'Week '+session.week_number+
