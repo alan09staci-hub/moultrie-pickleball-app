@@ -2690,6 +2690,44 @@ if(scoringStarted){
   '</div>'
 ).join('');
 }
+
+  function prepareAutomaticCourtGames(courtAssignments,leagueId,sessionId){
+  const rows=[];
+
+  for(const court of courtAssignments){
+    const chosen=court.players;
+    const pairs=buildDoublesRoundPairings(chosen);
+
+    const expectedGames=
+      chosen.length===4?3:
+      chosen.length===5?5:
+      chosen.length===6?9:0;
+
+    if(pairs.length!==expectedGames){
+      throw new Error(
+        'Incorrect game count for Court '+court.courtNumber
+      );
+    }
+
+    pairs.forEach((p,index)=>{
+      rows.push({
+        league_id:leagueId,
+        session_id:sessionId,
+        court_number:court.courtNumber,
+        round_number:index+1,
+        court_players:chosen.map(player=>player.id),
+        player_a:chosen[p[0]].id,
+        player_b:chosen[p[1]].id,
+        player_c:chosen[p[2]].id,
+        player_d:chosen[p[3]].id,
+        match_type:'doubles',
+        target_score:court.targetScore
+      });
+    });
+  }
+
+  return rows;
+}
   
 async function generateRound(){
   const count=Number($('roundPlayerCount').value);
