@@ -2675,7 +2675,10 @@ if(scoringStarted){
   '<div class="item">'+
     '<h3>Court '+court.courtNumber+'</h3>'+
     '<p class="muted">'+court.players.length+
-   ' players — '+(court.players.length===4?3:court.players.length===5?4:6)+
+' players — '+
+(court.players.length===4?3:court.players.length===5?5:9)+
+' total games — '+
+(court.players.length===4?3:court.players.length===5?4:6)+
 ' games per player — Games to '+court.targetScore+
 ' — 60 possible points per player</p>'+
     court.players.map(player=>
