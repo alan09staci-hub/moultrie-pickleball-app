@@ -2045,9 +2045,10 @@ const seasonDates=date=>{
     return;
   }
 
-  alert(
+   alert(
     'Week '+session.week_number+
-    ' cannot be completed yet. Attendance verification and final score checks must be added first.'
+    ' passed the attendance and scheduled-game score checks. '+
+    'Official completion remains disabled until final validation is implemented.'
   );
 }
   function renderLeagueRegistrations(){
