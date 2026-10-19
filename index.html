@@ -2798,6 +2798,10 @@ async function saveScore(id){
     alert('Enter valid whole-number scores.');
     return;
   }
+    if(scoreA===scoreB){
+    alert('A game cannot end in a tie.');
+    return;
+  }
   const game=games.find(x=>x.id===id);
   const target=game?.target_score
     ?Number(game.target_score)
