@@ -2725,7 +2725,33 @@ if(scoringStarted){
       });
     });
   }
+    
+  for(const court of courtAssignments){
+    const expectedGamesPerPlayer=
+      court.players.length===4?3:
+      court.players.length===5?4:
+      court.players.length===6?6:0;
 
+    for(const player of court.players){
+      const playerGames=rows.filter(g=>
+        g.court_number===court.courtNumber &&
+        [g.player_a,g.player_b,g.player_c,g.player_d]
+          .some(id=>String(id)===String(player.id))
+      );
+
+      if(
+        playerGames.length!==expectedGamesPerPlayer ||
+        playerGames.length*Number(court.targetScore)!==60
+      ){
+        throw new Error(
+          'Court '+court.courtNumber+
+          ': '+player.name+
+          ' does not have exactly 60 possible points.'
+        );
+      }
+    }
+  }
+    
   return rows;
 }
   
