@@ -2727,8 +2727,10 @@ findName(game.player_d)+'</p>'+
     
       }).join('')+
       '<p><strong>Schedule validated: 60 possible points per player.</strong></p>'+
-      '<button type="button" onclick="alert(\'Automatic game saving is not enabled yet. No games were saved.\')">'+
+    
+      '<button type="button" onclick="confirmAutomaticGameSave()">'+
       'Save Automatic Games</button>';
+
   }catch(error){
     area.innerHTML+='<div class="notice error">'+
       escapeHtml(error.message)+'</div>';
@@ -2856,6 +2858,19 @@ async function saveAutomaticCourtGames(rows,leagueId,sessionId){
   alert('Success! '+preparedRows.length+' games were saved to the league schedule.');
   return true;
 }
+  
+async function confirmAutomaticGameSave(){
+  if(!profile || profile.role!=='admin'){
+    alert('Administrator access required.');
+    return;
+  }
+
+  alert(
+    'Automatic game saving is still in safety mode. '+
+    'No games were saved.'
+  );
+}
+
   
   
 async function generateRound(){
