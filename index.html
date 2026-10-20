@@ -2689,7 +2689,36 @@ if(scoringStarted){
     ).join('')+
   '</div>'
 ).join('');
-}
+    
+  try{
+    const previewRows=prepareAutomaticCourtGames(
+      courtAssignments,leagueId,sessionId
+    );
+
+    area.innerHTML+='<h3>Automatic Game Preview</h3>'+
+      '<p class="muted">Preview only — no games saved.</p>'+
+      previewRows.map(game=>{
+        const findName=id=>{
+          const player=players.find(p=>String(p.id)===String(id));
+          return escapeHtml(player?player.name:'Unknown player');
+        };
+
+        return '<div class="item">'+
+          '<strong>Court '+game.court_number+
+          ' — Game '+game.round_number+'</strong>'+
+          '<p>'+findName(game.player_a)+' &amp; '+
+          findName(game.player_b)+' vs '+
+          findName(game.player_c)+' &amp; '+
+          findName(game.player_d)+'</p>'+
+          '<p>First to '+game.target_score+'</p>'+
+          '</div>';
+      }).join('')+
+      '<p><strong>Schedule validated: 60 possible points per player.</strong></p>';
+  }catch(error){
+    area.innerHTML+='<div class="notice error">'+
+      escapeHtml(error.message)+'</div>';
+  }
+  }
 
   function prepareAutomaticCourtGames(courtAssignments,leagueId,sessionId){
   const rows=[];
@@ -2754,6 +2783,65 @@ if(scoringStarted){
     
   return rows;
 }
+
+ 
+async function saveAutomaticCourtGames(rows,leagueId,sessionId){
+  if(!profile || profile.role!=='admin'){
+    alert('Administrator access required.');
+    return false;
+  }
+
+  const session=leagueSessions.find(s=>
+    String(s.id)===String(sessionId) &&
+    String(s.league_id)===String(leagueId)
+  );
+
+  if(!session || session.status==='completed'){
+    alert('This league week cannot be scheduled.');
+    return false;
+  }
+
+  if(!Array.isArray(rows) || !rows.length){
+    alert('No games were prepared.');
+    return false;
+  }
+
+  const {data:existingGames,error:checkError}=await client
+    .from('games')
+    .select('id')
+    .eq('league_id',leagueId)
+    .eq('session_id',sessionId)
+    .limit(1);
+
+  if(checkError){
+    alert('Unable to check existing games: '+checkError.message);
+    return false;
+  }
+
+  if(existingGames && existingGames.length){
+    alert('This league week already has scheduled games. No new games were created.');
+    return false;
+  }
+
+  const preparedRows=rows.map(row=>({
+    ...row,
+    league_id:leagueId,
+    session_id:sessionId
+  }));
+
+  const {error:saveError}=await client
+    .from('games')
+    .insert(preparedRows);
+
+  if(saveError){
+    alert('Unable to save schedule: '+saveError.message);
+    return false;
+  }
+
+  alert('Success! '+preparedRows.length+' games were saved to the league schedule.');
+  return true;
+}
+  
   
 async function generateRound(){
   const count=Number($('roundPlayerCount').value);
