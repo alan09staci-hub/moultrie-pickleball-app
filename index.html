@@ -2858,18 +2858,28 @@ async function saveAutomaticCourtGames(rows,leagueId,sessionId){
   alert('Success! '+preparedRows.length+' games were saved to the league schedule.');
   return true;
 }
-  
+
 async function confirmAutomaticGameSave(){
   if(!profile || profile.role!=='admin'){
     alert('Administrator access required.');
     return;
   }
 
+  const approved=confirm(
+    'Save the automatic court schedule?\n\n'+
+    'This will eventually create games in the league schedule.\n\n'+
+    'Press OK to confirm or Cancel to go back.'
+  );
+
+  if(!approved)return;
+
   alert(
+    'Confirmation successful. '+
     'Automatic game saving is still in safety mode. '+
     'No games were saved.'
   );
 }
+
 
   
   
