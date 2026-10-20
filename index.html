@@ -2724,8 +2724,11 @@ findName(game.player_d)+'</p>'+
             :'')+
           '</div>';
 
+    
       }).join('')+
-      '<p><strong>Schedule validated: 60 possible points per player.</strong></p>';
+      '<p><strong>Schedule validated: 60 possible points per player.</strong></p>'+
+      '<button type="button" onclick="alert(\'Automatic game saving is not enabled yet. No games were saved.\')">'+
+      'Save Automatic Games</button>';
   }catch(error){
     area.innerHTML+='<div class="notice error">'+
       escapeHtml(error.message)+'</div>';
