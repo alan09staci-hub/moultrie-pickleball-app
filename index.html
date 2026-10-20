@@ -2709,9 +2709,21 @@ if(scoringStarted){
           '<p>'+findName(game.player_a)+' &amp; '+
           findName(game.player_b)+' vs '+
           findName(game.player_c)+' &amp; '+
-          findName(game.player_d)+'</p>'+
+         
+findName(game.player_d)+'</p>'+
           '<p>First to '+game.target_score+'</p>'+
+          (courtAssignments.find(c=>c.courtNumber===game.court_number)?.players.length===5
+            ?'<p><strong>BYE: '+
+              findName(
+                courtAssignments
+                  .find(c=>c.courtNumber===game.court_number)
+                  .players
+                  .find(p=>![game.player_a,game.player_b,game.player_c,game.player_d]
+                    .some(id=>String(id)===String(p.id)))?.id
+              )+'</strong></p>'
+            :'')+
           '</div>';
+
       }).join('')+
       '<p><strong>Schedule validated: 60 possible points per player.</strong></p>';
   }catch(error){
