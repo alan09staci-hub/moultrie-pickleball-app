@@ -2553,8 +2553,9 @@ if(n===6){
 }
   
 let pendingAutomaticSchedule=null;
-  
-function generateAutomaticCourts(){
+let automaticSaveInProgress=false;
+
+  function generateAutomaticCourts(){
     pendingAutomaticSchedule=null;
     const area=$('automaticCourtResults');
     const leagueId=$('rsvpLeague').value;
@@ -2870,6 +2871,11 @@ async function saveAutomaticCourtGames(rows,leagueId,sessionId){
 }
 
 async function confirmAutomaticGameSave(){
+  if(automaticSaveInProgress){
+    alert('Automatic games are already being saved. Please wait.');
+    return;
+  }
+
   if(!profile || profile.role!=='admin'){
     alert('Administrator access required.');
     return;
@@ -2950,11 +2956,27 @@ async function confirmAutomaticGameSave(){
 
   if(!approved)return;
 
-  alert(
-    'Confirmation successful. '+
-    'Automatic game saving is still in safety mode. '+
-    'No games were saved.'
-  );
+  
+  automaticSaveInProgress=true;
+
+  try{
+    const schedule=pendingAutomaticSchedule;
+
+    const saved=await saveAutomaticCourtGames(
+      schedule.rows,
+      schedule.leagueId,
+      schedule.sessionId
+    );
+
+    if(saved){
+      pendingAutomaticSchedule=null;
+    }
+  }catch(error){
+    alert('Automatic game saving failed: '+error.message);
+  }finally{
+    automaticSaveInProgress=false;
+  }
+
 }
 
 
