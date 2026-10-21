@@ -2551,10 +2551,14 @@ if(n===6){
 
   return [];
 }
-  function generateAutomaticCourts(){
-  const area=$('automaticCourtResults');
-  const leagueId=$('rsvpLeague').value;
-  const sessionId=$('rsvpWeek').value;
+  
+let pendingAutomaticSchedule=null;
+  
+function generateAutomaticCourts(){
+    pendingAutomaticSchedule=null;
+    const area=$('automaticCourtResults');
+    const leagueId=$('rsvpLeague').value;
+    const sessionId=$('rsvpWeek').value;
     const selectedSession=leagueSessions.find(s=>
   String(s.id)===String(sessionId) &&
   String(s.league_id)===String(leagueId)
@@ -2694,8 +2698,14 @@ if(scoringStarted){
     const previewRows=prepareAutomaticCourtGames(
       courtAssignments,leagueId,sessionId
     );
+    
+    pendingAutomaticSchedule={
+      rows:previewRows,
+      leagueId:leagueId,
+      sessionId:sessionId
+    };
 
-    area.innerHTML+='<h3>Automatic Game Preview</h3>'+
+     area.innerHTML+='<h3>Automatic Game Preview</h3>'+
       '<p class="muted">Preview only — no games saved.</p>'+
       previewRows.map(game=>{
         const findName=id=>{
@@ -2864,12 +2874,79 @@ async function confirmAutomaticGameSave(){
     alert('Administrator access required.');
     return;
   }
+  
+  if(
+    !pendingAutomaticSchedule ||
+    !Array.isArray(pendingAutomaticSchedule.rows) ||
+    !pendingAutomaticSchedule.rows.length
+  ){
+    alert('Please generate court assignments before saving.');
+    return;
+  }
+
+  if(
+    String(pendingAutomaticSchedule.leagueId)!==
+      String($('rsvpLeague').value) ||
+    String(pendingAutomaticSchedule.sessionId)!==
+      String($('rsvpWeek').value)
+  ){
+    alert(
+      'The selected league or week has changed. '+
+      'Please generate court assignments again.'
+    );
+    pendingAutomaticSchedule=null;
+    return;
+  }
+
+  const selectedWeek=leagueSessions.find(s=>
+    String(s.id)===String(pendingAutomaticSchedule.sessionId) &&
+    String(s.league_id)===String(pendingAutomaticSchedule.leagueId)
+  );
+
+  if(!selectedWeek || selectedWeek.status==='completed'){
+    alert('This league week is no longer available for scheduling.');
+    pendingAutomaticSchedule=null;
+    return;
+  }
+
+  const scoresAlreadyEntered=games.some(g=>
+    String(g.league_id)===String(pendingAutomaticSchedule.leagueId) &&
+    String(g.session_id)===String(pendingAutomaticSchedule.sessionId) &&
+    g.score_a!==null &&
+    g.score_b!==null
+  );
+
+  if(scoresAlreadyEntered){
+    alert(
+      'Scoring has already started for this week. '+
+      'Automatic scheduling is locked.'
+    );
+    pendingAutomaticSchedule=null;
+    return;
+  }
+
+  const gamesAlreadyScheduled=games.some(g=>
+    String(g.league_id)===String(pendingAutomaticSchedule.leagueId) &&
+    String(g.session_id)===String(pendingAutomaticSchedule.sessionId)
+  );
+
+  if(gamesAlreadyScheduled){
+    alert(
+      'This league week already has scheduled games. '+
+      'No additional games can be created.'
+    );
+    pendingAutomaticSchedule=null;
+    return;
+  }
 
   const approved=confirm(
-    'Save the automatic court schedule?\n\n'+
-    'This will eventually create games in the league schedule.\n\n'+
+    'Moultrie Pickleball Association\n\n'+
+    'You are approving '+
+    pendingAutomaticSchedule.rows.length+
+    ' automatic games for this league week.\n\n'+
     'Press OK to confirm or Cancel to go back.'
   );
+
 
   if(!approved)return;
 
