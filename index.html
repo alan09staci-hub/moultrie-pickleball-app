@@ -1997,12 +1997,16 @@ const seasonDates=date=>{
                })+
             ' — '+(s.start_time ? new Date('2000-01-01T'+s.start_time).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) : 'Time not set')+
       ' — OPT IN: '+escapeHtml(leagueOptInStatuses[s.id]||'Unavailable')+
+     
       ' — GAME NIGHT: '+escapeHtml(s.status||'scheduled')+
+      ' <button class="secondary small" onclick="openLeagueOptIn('+s.id+')">Open Opt-In</button>'+
+      ' <button class="secondary small" onclick="closeLeagueOptIn('+s.id+')">Close Opt-In</button>'+
       ' <button class="secondary small" onclick="completeGameNight('+s.id+')">Complete Game Night</button>'+
       ' <button class="secondary small" onclick="editSessionDate('+s.id+')">Edit Date</button>'+
       ' <button class="secondary small" onclick="editSessionTime('+s.id+')">Edit Time</button>'+
       '</div>'
     ).join('');
+
 };
   area.innerHTML=leagues.length
     ? leagues.map(league=>
