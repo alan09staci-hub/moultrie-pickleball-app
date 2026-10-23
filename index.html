@@ -708,9 +708,24 @@ function renderAll(){
     ).join('')
     :'<p class="muted">No players yet.</p>';
 
+ 
   const gameHtml=games.length
-    ?games.map(gameCard).join('')
+    ?games.slice().sort((a,b)=>{
+      const weekA=leagueSessions.find(s=>
+        String(s.id)===String(a.session_id)
+      )?.week_number ?? 9999;
+
+      const weekB=leagueSessions.find(s=>
+        String(s.id)===String(b.session_id)
+      )?.week_number ?? 9999;
+
+      return Number(weekA)-Number(weekB) ||
+        Number(a.round_number||0)-Number(b.round_number||0) ||
+        Number(a.court_number||0)-Number(b.court_number||0) ||
+        Number(a.id)-Number(b.id);
+    }).map(gameCard).join('')
     :'<p class="muted">No games scheduled yet.</p>';
+
 
   $('schedule').innerHTML=gameHtml;
   $('dashGames').innerHTML=gameHtml;
