@@ -2018,6 +2018,62 @@ const seasonDates=date=>{
       ).join('')
     : '<p class="muted">No leagues created yet.</p>';
 }
+  
+async function openLeagueOptIn(sessionId){
+  if(!profile || profile.role!=='admin'){
+    alert('Administrator access required.');
+    return;
+  }
+
+  const session=leagueSessions.find(s=>
+    String(s.id)===String(sessionId)
+  );
+
+  if(!session){
+    alert('League week not found.');
+    return;
+  }
+
+  if(session.status==='completed'){
+    alert('A completed league week cannot reopen opt-in.');
+    return;
+  }
+
+  alert(
+    'Open Opt-In safety checks passed for Week '+
+    session.week_number+
+    '. Database changes are not enabled yet.'
+  );
+}
+  
+
+async function closeLeagueOptIn(sessionId){
+  if(!profile || profile.role!=='admin'){
+    alert('Administrator access required.');
+    return;
+  }
+
+  const session=leagueSessions.find(s=>
+    String(s.id)===String(sessionId)
+  );
+
+  if(!session){
+    alert('League week not found.');
+    return;
+  }
+
+  if(session.status==='completed'){
+    alert('A completed league week cannot change opt-in.');
+    return;
+  }
+
+  alert(
+    'Close Opt-In safety checks passed for Week '+
+    session.week_number+
+    '. Database changes are not enabled yet.'
+  );
+}
+
   async function completeGameNight(sessionId){
   const session=leagueSessions.find(
     s=>String(s.id)===String(sessionId)
