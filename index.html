@@ -2039,11 +2039,35 @@ async function openLeagueOptIn(sessionId){
     return;
   }
 
+ 
+  if(!confirm(
+    'Open player opt-in for Week '+
+    session.week_number+'?'
+  )){
+    return;
+  }
+
+  
+  const {data,error}=await client
+    .from('league_sessions')
+    .update({opt_in_enabled:true})
+    .eq('id',sessionId)
+    .eq('status','scheduled')
+    .select('id,week_number,opt_in_enabled')
+    .single();
+
+
+  if(error){
+    alert('Could not open opt-in: '+error.message);
+    return;
+  }
+
   alert(
-    'Open Opt-In safety checks passed for Week '+
+    'Open Opt-In request sent for Week '+
     session.week_number+
-    '. Database changes are not enabled yet.'
+    '. Refresh to verify the status.'
   );
+
 }
   
 
@@ -2067,11 +2091,33 @@ async function closeLeagueOptIn(sessionId){
     return;
   }
 
+ 
+  if(!confirm(
+    'Close player opt-in for Week '+
+    session.week_number+'?'
+  )){
+    return;
+  }
+
+  const {data,error}=await client
+    .from('league_sessions')
+    .update({opt_in_enabled:false})
+    .eq('id',sessionId)
+    .eq('status','scheduled')
+    .select('id,week_number,opt_in_enabled')
+    .single();
+
+  if(error){
+    alert('Could not close opt-in: '+error.message);
+    return;
+  }
+
   alert(
-    'Close Opt-In safety checks passed for Week '+
-    session.week_number+
-    '. Database changes are not enabled yet.'
+    'Opt-In closed for Week '+
+    data.week_number+
+    '. Refresh to verify the status.'
   );
+
 }
 
   async function completeGameNight(sessionId){
