@@ -642,8 +642,8 @@ async function refreshAll(){
 
 client
   .from('league_sessions')
-  .select('id,league_id,week_number,play_date,start_time,status')
- .order('week_number'),
+  .select('id,league_id,week_number,play_date,start_time,status,opt_in_enabled')
+  .order('week_number'),
 
 client
   .from('league_registrations')
