@@ -2348,29 +2348,155 @@ return '<div class="item">'+
       '</div>';
   }).join('');
 }
-  async function saveGameNightAttendance(sessionId,playerId,status){
-      if(!profile || profile.role!=='admin'){
+  
+async function saveGameNightAttendance(sessionId,playerId,status){
+  if(!profile || profile.role!=='admin'){
     alert('Administrator access required.');
     return;
   }
-    
-  const session=leagueSessions.find(
-    s=>String(s.id)===String(sessionId)
+
+  if(!['present','absent'].includes(status)){
+    alert('Invalid attendance status.');
+    return;
+  }
+
+  const session=leagueSessions.find(s=>
+    String(s.id)===String(sessionId)
   );
 
   if(!session){
-    alert('Game night not found.');
+    alert('League week not found.');
     return;
   }
-      const registered=leagueRegistrations.some(r=>
+
+  const registered=leagueRegistrations.some(r=>
     String(r.league_id)===String(session.league_id) &&
     String(r.player_id)===String(playerId)
   );
 
   if(!registered){
-    alert('This player is not registered for this league.');
+    alert('Player is not registered for this league.');
     return;
   }
+
+  const {error}=await client
+    .from('league_attendance')
+    .upsert({
+      session_id:sessionId,
+      player_id:playerId,
+      status:status,
+      verified_at:new Date().toISOString()
+    },{onConflict:'session_id,player_id'});
+
+  if(error){
+    alert('Attendance could not be saved: '+error.message);
+    return;
+  }
+
+  await refreshAll();
+  alert('Attendance saved: '+status);
+}
+
+    function generateAutomaticCourts(){
+    pendingAutomaticSchedule=null;
+    const area=$('automaticCourtResults');
+    const leagueId=$('rsvpLeague').value;
+    const sessionId=$('rsvpWeek').value;
+    const selectedSession=leagueSessions.find(s=>
+  String(s.id)===String(sessionId) &&
+  String(s.league_id)===String(leagueId)
+);
+
+  if(!area)return;
+
+ if(!leagueId||!sessionId||!selectedSession){
+    area.innerHTML='<p class="muted">Please select a league and week first.</p>';
+    return;
+  }
+    const scoringStarted=games.some(g=>
+  String(g.session_id)===String(sessionId) &&
+  String(g.league_id)===String(leagueId) &&
+  g.score_a!==null &&
+  g.score_b!==null
+);
+
+if(scoringStarted){
+  area.innerHTML='<p class="muted">Scoring has started for this week. Court assignments are locked.</p>';
+  return;
+}
+
+  const optedIn=leagueRsvps.filter(r=>
+    String(r.session_id)===String(sessionId) &&
+    r.status==='playing'
+  );
+    
+  const registeredIds=new Set(
+    leagueRegistrations
+      .filter(r=>String(r.league_id)===String(leagueId))
+      .map(r=>String(r.player_id))
+  );
+
+   const seenPlayers=new Set();
+
+  const eligiblePlayers=optedIn
+    .filter(r=>registeredIds.has(String(r.player_id)))
+    .filter(r=>{
+      const id=String(r.player_id);
+      if(seenPlayers.has(id))return false;
+      seenPlayers.add(id);
+      return true;
+    })
+    .map(r=>players.find(p=>String(p.id)===String(r.player_id)))
+    .filter(Boolean);
+      eligiblePlayers.sort((a,b)=>{
+    const rankA=Number(a.current_mpa_rank);
+    const rankB=Number(b.current_mpa_rank);
+
+    const validA=rankA>0;
+    const validB=rankB>0;
+
+    if(validA&&!validB)return -1;
+    if(!validA&&validB)return 1;
+    if(validA&&validB&&rankA!==rankB)return rankA-rankB;
+
+    return a.name.localeCompare(b.name);
+  });
+      const courtChart={
+    4:[4],
+    5:[5],
+    6:[6],
+    8:[4,4],
+    9:[5,4],
+    10:[5,5],
+    11:[6,5],
+    12:[4,4,4],
+    13:[5,4,4],
+    14:[5,5,4],
+    15:[5,5,5],
+    16:[6,5,5],
+    17:[5,4,4,4],
+    18:[5,5,4,4],
+    19:[5,5,5,4],
+    20:[5,5,5,5],
+    21:[6,5,5,5],
+    22:[5,5,4,4,4],
+    23:[5,5,5,4,4],
+    24:[5,5,5,5,4],
+    25:[5,5,5,5,5],
+    26:[6,5,5,5,5],
+    27:[5,5,5,4,4,4],
+    28:[5,5,5,5,4,4],
+    29:[5,5,5,5,5,4],
+    30:[5,5,5,5,5,5],
+    31:[6,5,5,5,5,5],
+    32:[6,6,5,5,5,5],
+    33:[6,6,6,5,5,5],
+    34:[6,6,6,6,5,5],
+    35:[6,6,6,6,6,5],
+    36:[6,6,6,6,6,6]
+  };
+      const courtSizes=courtChart[eligiblePlayers.length];
+
 
   if(session.status==='completed'){
     alert('Attendance is locked for completed game nights.');
