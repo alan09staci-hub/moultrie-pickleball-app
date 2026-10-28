@@ -2792,10 +2792,12 @@ const optedIn=leagueRsvps.filter(r=>
   };
       const courtSizes=courtChart[eligiblePlayers.length];
 
-  if(!courtSizes){
-   area.innerHTML='<p class="muted">Automatic court assignments require 4 to 36 opted-in players, except 7 players. Seven players cannot be divided into courts of 4, 5, or 6.</p>';
-    return;
-  }
+  
+if(!courtSizes){
+  area.innerHTML=
+    '<p class="muted">Automatic court assignments require 4 to 36 players who RSVP Playing AND are marked Present for game night, except 7 players. Seven players cannot be divided into courts of 4, 5, or 6.</p>';
+  return;
+}
 
   let position=0;
 
