@@ -3030,6 +3030,38 @@ if(missingPlayers.length){
   pendingAutomaticSchedule=null;
   return false;
 }
+  
+
+const {data:latestRsvps,error:rsvpError}=await client
+  .from('league_rsvps')
+  .select('player_id,status')
+  .eq('session_id',sessionId);
+
+if(rsvpError){
+  alert('Unable to verify RSVPs: '+rsvpError.message);
+  return false;
+}
+
+const playingPlayerIds=new Set(
+  (latestRsvps||[])
+    .filter(r=>r.status==='playing')
+    .map(r=>String(r.player_id))
+);
+
+const noLongerPlaying=[...scheduledPlayerIds].filter(
+  id=>!playingPlayerIds.has(id)
+);
+
+if(noLongerPlaying.length){
+  alert(
+    'RSVP status has changed for '+
+    noLongerPlaying.length+
+    ' scheduled player(s).\n\n'+
+    'Please generate court assignments again.'
+  );
+  pendingAutomaticSchedule=null;
+  return false;
+}
 
   const preparedRows=rows.map(row=>({
     ...row,
