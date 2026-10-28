@@ -2989,6 +2989,47 @@ async function saveAutomaticCourtGames(rows,leagueId,sessionId){
     alert('This league week already has scheduled games. No new games were created.');
     return false;
   }
+  
+const scheduledPlayerIds=new Set(
+  rows.flatMap(row=>[
+    row.player_a,
+    row.player_b,
+    row.player_c,
+    row.player_d
+  ]).filter(id=>id!==null && id!==undefined)
+    .map(id=>String(id))
+);
+
+const {data:latestAttendance,error:attendanceError}=await client
+  .from('league_attendance')
+  .select('player_id,status')
+  .eq('session_id',sessionId);
+
+if(attendanceError){
+  alert('Unable to verify attendance: '+attendanceError.message);
+  return false;
+}
+
+const presentPlayerIds=new Set(
+  (latestAttendance||[])
+    .filter(a=>a.status==='present')
+    .map(a=>String(a.player_id))
+);
+
+const missingPlayers=[...scheduledPlayerIds].filter(
+  id=>!presentPlayerIds.has(id)
+);
+
+if(missingPlayers.length){
+  alert(
+    'Attendance has changed or is unverified for '+
+    missingPlayers.length+
+    ' scheduled player(s).\n\n'+
+    'Please generate court assignments again.'
+  );
+  pendingAutomaticSchedule=null;
+  return false;
+}
 
   const preparedRows=rows.map(row=>({
     ...row,
