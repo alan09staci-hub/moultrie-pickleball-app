@@ -2713,10 +2713,17 @@ if(scoringStarted){
   return;
 }
 
-  const optedIn=leagueRsvps.filter(r=>
-    String(r.session_id)===String(sessionId) &&
-    r.status==='playing'
-  );
+ 
+const optedIn=leagueRsvps.filter(r=>
+  String(r.session_id)===String(sessionId) &&
+  r.status==='playing' &&
+  leagueAttendance.some(a=>
+    String(a.session_id)===String(sessionId) &&
+    String(a.player_id)===String(r.player_id) &&
+    a.status==='present'
+  )
+);
+
     
   const registeredIds=new Set(
     leagueRegistrations
