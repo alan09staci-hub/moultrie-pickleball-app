@@ -3107,9 +3107,12 @@ async function confirmAutomaticGameSave(){
       schedule.sessionId
     );
 
-    if(saved){
-      pendingAutomaticSchedule=null;
-    }
+   
+if(saved){
+  pendingAutomaticSchedule=null;
+  await refreshAll();
+}
+
   }catch(error){
     alert('Automatic game saving failed: '+error.message);
   }finally{
@@ -3118,9 +3121,6 @@ async function confirmAutomaticGameSave(){
 
 }
 
-
-  
-  
 async function generateRound(){
   const count=Number($('roundPlayerCount').value);
   const round=Number($('roundNumber').value);
