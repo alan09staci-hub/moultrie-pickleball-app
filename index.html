@@ -2234,7 +2234,8 @@ async function closeLeagueOptIn(sessionId){
       '</div>';
   }).join('');
 }
-  function renderWeeklyRsvp(){
+  
+function renderWeeklyRsvp(){
   const leagueSelect=$('rsvpLeague');
   const weekSelect=$('rsvpWeek');
 
@@ -2247,12 +2248,14 @@ async function closeLeagueOptIn(sessionId){
     '<option value="'+l.id+'">'+escapeHtml(l.name)+'</option>'
   ).join('');
 
-  if(selectedLeague && leagues.some(l=>String(l.id)===selectedLeague)){
+  if(selectedLeague && leagues.some(l=>
+    String(l.id)===String(selectedLeague)
+  )){
     leagueSelect.value=selectedLeague;
   }
 
   const sessions=leagueSessions.filter(
-    s=>String(s.league_id)===leagueSelect.value
+    s=>String(s.league_id)===String(leagueSelect.value)
   ).sort((a,b)=>a.week_number-b.week_number);
 
   weekSelect.innerHTML=sessions.map(s=>
@@ -2260,11 +2263,34 @@ async function closeLeagueOptIn(sessionId){
     ' — '+escapeHtml(s.play_date)+'</option>'
   ).join('');
 
-  if(selectedWeek && sessions.some(s=>String(s.id)===selectedWeek)){
+  if(selectedWeek && sessions.some(s=>
+    String(s.id)===String(selectedWeek)
+  )){
     weekSelect.value=selectedWeek;
+  }else if(sessions.length){
+    const now=new Date();
+    const today=[
+      now.getFullYear(),
+      String(now.getMonth()+1).padStart(2,'0'),
+      String(now.getDate()).padStart(2,'0')
+    ].join('-');
+
+    const byDate=sessions.slice().sort((a,b)=>
+      String(a.play_date).localeCompare(String(b.play_date))
+    );
+
+    const currentOrNext=byDate.find(s=>
+      String(s.play_date)>=today
+    );
+
+    const defaultWeek=currentOrNext||byDate[byDate.length-1];
+
+    weekSelect.value=String(defaultWeek.id);
   }
-    renderWeeklyRsvpPlayers();
+
+  renderWeeklyRsvpPlayers();
 }
+
   function renderWeeklyRsvpPlayers(){
   const area=$('weeklyRsvpPlayers');
   if(!area)return;
