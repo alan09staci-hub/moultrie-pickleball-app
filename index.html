@@ -2313,8 +2313,33 @@ function renderWeeklyRsvp(){
     area.innerHTML='<p class="muted">No players registered for this league.</p>';
     return;
   }
+    
+const rsvpCounts={playing:0,notPlaying:0,noResponse:0};
 
-  area.innerHTML=registered.map(r=>{
+registered.forEach(r=>{
+  const rsvp=leagueRsvps.find(v=>
+    String(v.session_id)===String(sessionId) &&
+    String(v.player_id)===String(r.player_id)
+  );
+
+  if(rsvp?.status==='playing'){
+    rsvpCounts.playing++;
+  }else if(rsvp?.status==='not_playing'){
+    rsvpCounts.notPlaying++;
+  }else{
+    rsvpCounts.noResponse++;
+  }
+});
+
+const rsvpSummary=
+  '<div class="item">'+
+  '<strong>Weekly RSVP Summary</strong>'+
+  '<div>Playing: '+rsvpCounts.playing+'</div>'+
+  '<div>Not Playing: '+rsvpCounts.notPlaying+'</div>'+
+  '<div>No Response: '+rsvpCounts.noResponse+'</div>'+
+  '<div><strong>Total Registered: '+registered.length+'</strong></div>'+
+  '</div>';
+ area.innerHTML=rsvpSummary+registered.map(r=>{
     const player=players.find(
       p=>String(p.id)===String(r.player_id)
     );
