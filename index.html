@@ -2379,8 +2379,33 @@ return '<div class="item">'+
     area.innerHTML='<p class="muted">No players registered for this league.</p>';
     return;
   }
+    
+const attendanceCounts={present:0,absent:0,unverified:0};
 
-  area.innerHTML=registered.map(r=>{
+registered.forEach(r=>{
+  const attendance=leagueAttendance.find(a=>
+    String(a.session_id)===String(sessionId) &&
+    String(a.player_id)===String(r.player_id)
+  );
+
+  if(attendance?.status==='present'){
+    attendanceCounts.present++;
+  }else if(attendance?.status==='absent'){
+    attendanceCounts.absent++;
+  }else{
+    attendanceCounts.unverified++;
+  }
+});
+
+const attendanceSummary=
+  '<div class="item">'+
+  '<strong>Game Night Attendance Summary</strong>'+
+  '<div>Present: '+attendanceCounts.present+'</div>'+
+  '<div>Absent: '+attendanceCounts.absent+'</div>'+
+  '<div>Unverified: '+attendanceCounts.unverified+'</div>'+
+  '<div><strong>Total Registered: '+registered.length+'</strong></div>'+
+  '</div>';
+ area.innerHTML=attendanceSummary+registered.map(r=>{
     const player=players.find(
       p=>String(p.id)===String(r.player_id)
     );
