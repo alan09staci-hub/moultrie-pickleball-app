@@ -103,6 +103,12 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
     <div class="card">
    <h2 id="dashboardTitle">Moultrie Pickleball Association</h2>
    <p id="dashboardSubtitle">Moultrie Fall 2026</p>
+      <div class="row">
+  <button onclick="showPlayerMatches()">CURRENT GAME DAY</button>
+  <button onclick="showTab('standings',document.querySelector('#nav button:nth-child(5)'))">STANDINGS</button>
+  <button onclick="showTab('league',document.querySelector('#nav button:nth-child(4)'))">SCHEDULE</button>
+  <button onclick="showTab('league',document.querySelector('#nav button:nth-child(4)'))">INFO</button>
+</div>
       <div id="playerHomeActions" class="hidden">
         
   <button onclick="showPlayerMatches()">
