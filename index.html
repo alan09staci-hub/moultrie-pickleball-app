@@ -793,11 +793,11 @@ function renderAll(){
         )
         :'Not scheduled';
 
-      dashboardLeagueInfo.innerHTML=
-        '<strong>'+escapeHtml(dashboardLeague.name)+'</strong>'+
-        '<p>League Dates: '+formatDate(firstDate)+
-        ' – '+formatDate(lastDate)+'</p>'+
-        '<p>Starting Time: '+formatTime(startTime)+'</p>';
+   dashboardLeagueInfo.innerHTML=
+  '<strong>'+escapeHtml(dashboardLeague.name)+'</strong>'+
+  '<p>📅 League Dates: '+formatDate(firstDate)+
+  ' – '+formatDate(lastDate)+'</p>'+
+  '<p>🕒 Starting Time: '+formatTime(startTime)+'</p>';
     }
   }
   $('dashStats').innerHTML=
