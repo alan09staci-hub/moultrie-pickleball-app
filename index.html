@@ -666,6 +666,15 @@ function showPlayerMatches(){
       );
     }
   }
+      document.querySelectorAll('#gameDayNav button')
+    .forEach(button=>{
+      const isActive=button.getAttribute('onclick')
+        ?.includes("'"+section+"'");
+
+      button.style.backgroundColor=isActive?'#187A42':'';
+      button.style.color=isActive?'#FFFFFF':'';
+      button.style.fontWeight=isActive?'bold':'';
+    });
 }
 async function refreshAll(){
  const [pr,gr,lr,sr,rr,rv,ar]=await Promise.all([
