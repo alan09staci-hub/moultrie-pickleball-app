@@ -587,8 +587,16 @@ async function startApp(user){
     (profile.role==='admin'?'Administrator':'Player')+
     ' • shared club data';
 
-  buildNav();
+   buildNav();
   await refreshAll();
+
+  const dashboardButton=document.querySelector(
+    '#nav button'
+  );
+
+  if(dashboardButton){
+    showTab('dashboard',dashboardButton);
+  }
 }
 
 function buildNav(){
