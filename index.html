@@ -707,10 +707,20 @@ function renderAll(){
       '<div class="item">'+escapeHtml(p.name)+'</div>'
     ).join('')
     :'<p class="muted">No players yet.</p>';
+  
+   const myPlayer=players.find(p=>
+    String(p.user_id)===String(currentUser?.id)
+  );
 
- 
-  const gameHtml=games.length
-    ?games.slice().sort((a,b)=>{
+  const visibleGames=profile?.role==='admin'
+    ? games
+    : games.filter(g=>
+        myPlayer &&
+        [g.player_a,g.player_b,g.player_c,g.player_d]
+          .some(id=>String(id)===String(myPlayer.id))
+      );
+const gameHtml=visibleGames.length
+   ?visibleGames.slice().sort((a,b)=>{
       const weekA=leagueSessions.find(s=>
         String(s.id)===String(a.session_id)
       )?.week_number ?? 9999;
@@ -2359,10 +2369,7 @@ return '<div class="item">'+
   '</div>';
   }).join('');
 }
-  function renderGameNightAttendance(){
-  const area=$('gameNightAttendance');
-  if(!area)return;
-
+ 
   const leagueId=$('rsvpLeague')?.value;
   const sessionId=$('rsvpWeek')?.value;
 
