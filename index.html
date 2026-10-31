@@ -795,7 +795,7 @@ function showPlayerMatches(){
     });
 }
 async function refreshAll(){
- const [pr,gr,lr,sr,rr,rv,ar]=await Promise.all([
+ const [pr,gr,lr,sr,rr,rv,ar,settingsResult]=await Promise.all([
   client.from('club_players').select('id,name,user_id,created_at,dupr_id,dupr_doubles_rating,mpa_provisional_rating,rating_verification_status,current_mpa_rank,previous_mpa_rank,mpa_rank_change').order('name'),
 
     client
@@ -823,7 +823,13 @@ client
   .select('id,session_id,player_id,status,updated_at'),
 client
   .from('league_attendance')
-  .select('id,session_id,player_id,status,verified_at')
+  .select('id,session_id,player_id,status,verified_at'),
+
+client
+  .from('mpa_league_settings')
+  .select('id,min_dupr,max_dupr,registration_fee,payment_instructions,max_players,number_of_courts')
+  .eq('id',1)
+  .maybeSingle()
 ]);
 
   if(pr.error)throw pr.error;
@@ -833,6 +839,7 @@ client
   if(rr.error)throw rr.error;
   if(rv.error)throw rv.error;
   if(ar.error)throw ar.error;
+  if(settingsResult.error)throw settingsResult.error;
 
   players=pr.data||[];
   games=gr.data||[];
@@ -841,6 +848,7 @@ client
   leagueRegistrations=rr.data||[];
   leagueRsvps=rv.data||[];
   leagueAttendance=ar.data||[];
+  window.mpaLeagueSettings=settingsResult.data||null;
   leagueOptInStatuses={};
 
 const optInResults=await Promise.all(
@@ -864,6 +872,16 @@ leagueSessions.forEach((s,i)=>{
 }
 
 function renderAll(){
+    const savedSettings=window.mpaLeagueSettings;
+
+  if(savedSettings && profile?.role==='admin'){
+    $('settingMinDupr').value=savedSettings.min_dupr;
+    $('settingMaxDupr').value=savedSettings.max_dupr;
+    $('settingFee').value=savedSettings.registration_fee;
+    $('settingPayment').value=savedSettings.payment_instructions;
+    $('settingMaxPlayers').value=savedSettings.max_players;
+    $('settingCourts').value=savedSettings.number_of_courts;
+  }
     const dashboardLeague=leagues.find(l=>
     l.name==='Moultrie Fall 2026'
   ) || leagues[0];
