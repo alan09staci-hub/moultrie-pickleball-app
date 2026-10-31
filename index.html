@@ -118,15 +118,15 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 
 <p><strong>MPA Doubles Ladder League</strong></p>
 
-<p>Skill Rating: 3.5–4.49 DUPR</p>
+<p>Skill Rating: <span id="infoDescriptionDupr">3.5–4.49</span> DUPR</p>
 
 <p>League Duration: 8 playing weeks</p>
 
-<p>League Limit: 36 Players</p>
+<p>League Limit: <span id="infoDescriptionMaxPlayers">36</span> Players</p>
 
-<p>Registration Fee: $50 Per Player</p>
+<p>Registration Fee: $<span id="infoDescriptionFee">50</span> Per Player</p>
 
-<p>Payment Methods: To Be Announced</p>
+<p>Payment Methods: <span id="infoDescriptionPayment">To Be Announced</span></p>
 
 <p>Players are assigned to court groups based on their ladder rankings. Rankings are determined by Percentage of Points (POP), followed by match wins and previous week's ranking.</p>
 </div>
@@ -136,11 +136,11 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 
   <p><strong>Session:</strong> MPA Doubles Ladder League</p>
 
-  <p><strong>Skill Rating:</strong> 3.5–4.49 DUPR</p>
+ <p><strong>Skill Rating:</strong> <span id="infoSessionDupr">3.5–4.49</span> DUPR</p>
 
-  <p><strong>Maximum Players:</strong> 36</p>
+ <p><strong>Maximum Players:</strong> <span id="infoSessionMaxPlayers">36</span></p>
 
-  <p><strong>Number of Courts:</strong> 6</p>
+ <p><strong>Number of Courts:</strong> <span id="infoSessionCourts">6</span></p>
 
   <p><strong>Court Group Size:</strong> 4, 5, or 6 players</p>
 
@@ -148,9 +148,9 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 
   <p><strong>Ranking Method:</strong> Percentage of Points (POP)</p>
 
-  <p><strong>Registration Fee:</strong> $50 per player</p>
+ <p><strong>Registration Fee:</strong> $<span id="infoSessionFee">50</span> per player</p>
 
-  <p><strong>Payment Instructions:</strong> To be announced</p>
+ <p><strong>Payment Instructions:</strong> <span id="infoSessionPayment">To be announced</span></p>
 </div>
     <div class="item">
      <h3>📅 League Schedule</h3>
@@ -929,6 +929,26 @@ async function saveMPALeagueSettings(){
 
 function renderAll(){
     const savedSettings=window.mpaLeagueSettings;
+    if(savedSettings){
+    const duprRange=
+      Number(savedSettings.min_dupr).toFixed(2)+
+      '–'+
+      Number(savedSettings.max_dupr).toFixed(2);
+
+    const fee=Number(savedSettings.registration_fee).toFixed(2);
+    const payment=savedSettings.payment_instructions||'To be announced';
+
+    $('infoDescriptionDupr').textContent=duprRange;
+    $('infoDescriptionMaxPlayers').textContent=savedSettings.max_players;
+    $('infoDescriptionFee').textContent=fee;
+    $('infoDescriptionPayment').textContent=payment;
+
+    $('infoSessionDupr').textContent=duprRange;
+    $('infoSessionMaxPlayers').textContent=savedSettings.max_players;
+    $('infoSessionCourts').textContent=savedSettings.number_of_courts;
+    $('infoSessionFee').textContent=fee;
+    $('infoSessionPayment').textContent=payment;
+  }
 
   if(savedSettings && profile?.role==='admin'){
     $('settingMinDupr').value=savedSettings.min_dupr;
