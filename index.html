@@ -760,6 +760,46 @@ leagueSessions.forEach((s,i)=>{
 }
 
 function renderAll(){
+    const dashboardLeague=leagues.find(l=>
+    l.name==='Moultrie Fall 2026'
+  ) || leagues[0];
+
+  const dashboardLeagueInfo=$('dashboardLeagueInfo');
+
+  if(dashboardLeagueInfo){
+    if(!dashboardLeague){
+      dashboardLeagueInfo.innerHTML=
+        '<p class="muted">No league available yet.</p>';
+    }else{
+      const sessions=leagueSessions
+        .filter(s=>
+          String(s.league_id)===String(dashboardLeague.id)
+        )
+        .sort((a,b)=>Number(a.week_number)-Number(b.week_number));
+
+      const firstDate=sessions[0]?.play_date;
+      const lastDate=sessions[sessions.length-1]?.play_date;
+      const startTime=sessions.find(s=>s.start_time)?.start_time;
+
+      const formatDate=date=>date
+        ?new Date(date+'T12:00:00').toLocaleDateString('en-US',{
+          month:'long',day:'numeric',year:'numeric'
+        })
+        :'Not scheduled';
+
+      const formatTime=time=>time
+        ?new Date('2000-01-01T'+time).toLocaleTimeString(
+          'en-US',{hour:'numeric',minute:'2-digit'}
+        )
+        :'Not scheduled';
+
+      dashboardLeagueInfo.innerHTML=
+        '<strong>'+escapeHtml(dashboardLeague.name)+'</strong>'+
+        '<p>League Dates: '+formatDate(firstDate)+
+        ' – '+formatDate(lastDate)+'</p>'+
+        '<p>Starting Time: '+formatTime(startTime)+'</p>';
+    }
+  }
   $('dashStats').innerHTML=
     '<div class="item"><strong>'+players.length+
     '</strong><div class="muted">Players</div></div>'+
