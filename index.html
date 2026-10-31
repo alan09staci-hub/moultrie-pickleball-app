@@ -106,7 +106,9 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 
     <div class="item">
      <h3>📅 League Schedule</h3>
-      <p>League dates and playing times will be displayed here.</p>
+     <div id="infoLeagueSchedule">
+  <p>Loading league schedule...</p>
+</div>
     </div>
 
     <div class="item">
@@ -820,6 +822,12 @@ function renderAll(){
   ' – '+formatDate(lastDate)+'</p>'+
   '<p>🕒 Starting Time: '+formatTime(startTime)+'</p>';
     }
+  }
+    const infoLeagueSchedule=$('infoLeagueSchedule');
+
+  if(infoLeagueSchedule && dashboardLeagueInfo){
+    infoLeagueSchedule.innerHTML=
+      dashboardLeagueInfo.innerHTML;
   }
   $('dashStats').innerHTML=
     '<div class="item"><strong>'+players.length+
