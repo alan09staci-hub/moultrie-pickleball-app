@@ -791,6 +791,7 @@ const gameHtml=visibleGames.length
   $('dashGames').innerHTML=gameHtml;
   renderPlayerLeagues();
   renderGameDayRsvps();
+  renderGameDayGroups();
   renderPlayerMatchScores();
   renderStandings();
   renderAnalytics();
@@ -1451,6 +1452,61 @@ msg.innerHTML=
   }catch(err){
     msg.innerHTML='Error: '+err.message;
   }
+}
+function renderGameDayGroups(){
+  const container=$('gameDayGroups');
+
+  if(!container)return;
+    const currentSession=leagueSessions.find(s=>
+    s.status!=='completed' &&
+    games.some(g=>
+      String(g.session_id)===String(s.id)
+    )
+  );
+    const currentGames=currentSession
+    ?games.filter(g=>
+      String(g.session_id)===String(currentSession.id)
+    )
+    :[];
+    const courtNumbers=[...new Set(
+    currentGames
+      .map(g=>Number(g.court_number))
+      .filter(n=>Number.isInteger(n) && n>0)
+  )].sort((a,b)=>a-b);
+  
+  const courtPlayers={};
+
+  courtNumbers.forEach(number=>{
+    const playerIds=new Set();
+
+    currentGames
+      .filter(g=>Number(g.court_number)===number)
+      .forEach(g=>{
+        [g.player_a,g.player_b,g.player_c,g.player_d]
+          .forEach(id=>{
+            if(id!==null && id!==undefined){
+              playerIds.add(String(id));
+            }
+          });
+      });
+
+    courtPlayers[number]=players
+      .filter(p=>playerIds.has(String(p.id)))
+      .map(p=>p.name)
+      .sort((a,b)=>a.localeCompare(b));
+  });
+   container.innerHTML=courtNumbers.length
+  ?courtNumbers.map(number=>
+    '<div class="item">'+
+      '<strong>Court '+number+'</strong>'+
+      '<div style="margin-top:8px">'+
+        courtPlayers[number].map(name=>
+          '<div>'+escapeHtml(name)+'</div>'
+        ).join('')+
+      '</div>'+
+    '</div>'
+  ).join('')
+  :'<p class="muted">No court assignments available yet.</p>';
 }
   function renderGameDayRsvps(){
   const container=$('gameDayRsvps');
