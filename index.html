@@ -2369,7 +2369,11 @@ return '<div class="item">'+
   '</div>';
   }).join('');
 }
- 
+
+function renderGameNightAttendance(){
+  const area=$('gameNightAttendance');
+  if(!area)return;
+
   const leagueId=$('rsvpLeague')?.value;
   const sessionId=$('rsvpWeek')?.value;
 
