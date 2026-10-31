@@ -790,6 +790,7 @@ const gameHtml=visibleGames.length
   $('schedule').innerHTML=gameHtml;
   $('dashGames').innerHTML=gameHtml;
   renderPlayerLeagues();
+  renderGameDayRsvps();
   renderPlayerMatchScores();
   renderStandings();
   renderAnalytics();
@@ -1451,6 +1452,47 @@ msg.innerHTML=
     msg.innerHTML='Error: '+err.message;
   }
 }
+  function renderGameDayRsvps(){
+  const container=$('gameDayRsvps');
+
+  if(!container)return;
+
+      const currentSession=leagueSessions.find(s=>
+    s.status!=='completed' &&
+    games.some(g=>
+      String(g.session_id)===String(s.id)
+    )
+  );
+    
+  if(!currentSession){
+    container.innerHTML=
+      '<p class="muted">No current game day has been scheduled.</p>';
+    return;
+   }
+
+  const playingRsvps=leagueRsvps.filter(r=>
+  currentSession &&
+  String(r.session_id)===String(currentSession.id) &&
+  r.status==='playing'
+);
+    
+  const playingNames=playingRsvps.map(r=>{
+    const player=players.find(p=>
+      String(p.id)===String(r.player_id)
+    );
+
+    return player?escapeHtml(player.name):'Unknown player';
+    }).sort((a,b)=>a.localeCompare(b));
+  container.innerHTML=
+  '<h3>Players RSVP’d Playing</h3>'+
+  '<p class="muted">'+playingRsvps.length+
+  ' players RSVP’d Playing for this game day.</p>'+
+  (playingNames.length
+    ?playingNames.map(name=>
+      '<div class="item">'+name+'</div>'
+    ).join('')
+    :'<p class="muted">No players have RSVP’d Playing yet.</p>');
+}
 function renderPlayerLeagues(){
   const container=$('playerLeagues');
   if(!container)return;
@@ -1464,7 +1506,13 @@ function renderPlayerLeagues(){
       '<p class="muted">Your account is not linked to a player yet.</p>';
     return;
   }
+  
+  const gameDayRsvps=$('gameDayRsvps');
 
+  if(gameDayRsvps){
+    gameDayRsvps.innerHTML=
+      '<p class="muted">Loading weekly RSVP information...</p>';
+  }
   const myLeagueIds=new Set(
     leagueRegistrations
       .filter(r=>String(r.player_id)===String(myPlayer.id))
