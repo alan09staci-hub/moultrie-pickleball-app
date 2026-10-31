@@ -841,7 +841,7 @@ if(profile.role==='admin'){
       const alreadyScored=
         g.score_a!==null || g.score_b!==null;
 
-      return gameCard(g)+(
+     return playerMatchCard(g)+(
         alreadyScored
           ?'<p class="muted">Score recorded. Contact an administrator for corrections.</p>'
           :'<div class="triple">'+
@@ -1758,6 +1758,47 @@ byeHtml+
 '<br>'+
 score+
 '</div>';
+}
+  function playerMatchCard(g){
+  const team1=[
+    g.player_a_info?.name||'Player A',
+    g.player_b_info?.name||'Player B'
+  ];
+
+  const team2=[
+    g.player_c_info?.name||'Player C',
+    g.player_d_info?.name||'Player D'
+  ];
+
+  const playingIds=[
+    g.player_a,g.player_b,g.player_c,g.player_d
+  ].map(String);
+
+  const byePlayers=(g.court_players||[])
+    .filter(id=>!playingIds.includes(String(id)))
+    .map(id=>players.find(p=>String(p.id)===String(id)))
+    .filter(Boolean);
+
+  return '<div class="item">'+
+    '<h3>Match '+escapeHtml(g.round_number||1)+'</h3>'+
+    '<p class="muted">First to '+escapeHtml(g.target_score||11)+'</p>'+
+    '<strong>Team 1</strong>'+
+    team1.map(name=>
+      '<div style="font-size:20px;font-weight:bold;margin:8px 0">'+
+      escapeHtml(name)+'</div>'
+    ).join('')+
+    '<div style="text-align:center;font-weight:bold;margin:20px 0">VS</div>'+
+    '<strong>Team 2</strong>'+
+    team2.map(name=>
+      '<div style="font-size:20px;font-weight:bold;margin:8px 0">'+
+      escapeHtml(name)+'</div>'
+    ).join('')+
+    (byePlayers.length
+      ?'<div style="background:#f1f4f3;padding:12px;margin-top:20px;border-radius:8px">'+
+        byePlayers.map(p=>escapeHtml(p.name)).join(', ')+
+        ' <strong style="float:right">BYE</strong></div>'
+      :'')+
+    '</div>';
 }
 
 function renderStandings(){
