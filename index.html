@@ -305,10 +305,17 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
   <input id="settingCourts" type="number"
          value="6">
 
-  <p class="muted">
-    Settings are not connected to the database yet.
-    Saving will be added after testing.
-  </p>
+ <button type="button" id="saveMPASettingsBtn" onclick="saveMPALeagueSettings()">
+  💾 Save League Settings
+</button>
+
+<p class="muted" id="mpaSettingsMsg">
+  Save button is disabled until database saving is connected and tested.
+</p>
+
+<p class="muted" id="mpaSettingsMsg">
+  Administrator: Review your league settings before saving.
+</p>
 </div>
       
 <p class="muted">Only users with the admin role can use these controls. The database also blocks non-admin writes.</p>
@@ -868,7 +875,56 @@ leagueSessions.forEach((s,i)=>{
   renderLeagues();
   renderLeagueRegistrations();
   renderWeeklyRsvp();
-  renderAll();
+   renderAll();
+}
+
+async function saveMPALeagueSettings(){
+  if(profile?.role!=='admin'){
+    alert('Administrator access required.');
+    return;
+  }
+
+  const settings={
+    min_dupr:Number($('settingMinDupr').value),
+    max_dupr:Number($('settingMaxDupr').value),
+    registration_fee:Number($('settingFee').value),
+    payment_instructions:$('settingPayment').value.trim(),
+    max_players:Number($('settingMaxPlayers').value),
+    number_of_courts:Number($('settingCourts').value)
+  };
+
+  if(
+    !$('settingMinDupr').value ||
+    !$('settingMaxDupr').value ||
+    !$('settingFee').value ||
+    !$('settingMaxPlayers').value ||
+    !$('settingCourts').value ||
+    settings.min_dupr<0 ||
+    settings.max_dupr<settings.min_dupr ||
+    settings.registration_fee<0 ||
+    !Number.isInteger(settings.max_players) ||
+    settings.max_players<1 ||
+    !Number.isInteger(settings.number_of_courts) ||
+    settings.number_of_courts<1
+  ){
+    alert('Please enter valid league settings.');
+    return;
+  }
+
+  const {data,error}=await client
+    .from('mpa_league_settings')
+    .update(settings)
+    .eq('id',1)
+    .select()
+    .single();
+
+  if(error){
+    $('mpaSettingsMsg').textContent='Save failed: '+error.message;
+    return;
+  }
+
+  window.mpaLeagueSettings=data;
+  $('mpaSettingsMsg').textContent='League settings saved successfully.';
 }
 
 function renderAll(){
