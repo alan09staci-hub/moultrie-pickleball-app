@@ -127,7 +127,18 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 
   <section id="scheduleTab" class="tab hidden">
     <div class="card">
-      <h2>Round-Robin Schedule</h2>
+    <h2>Current Game Day</h2>
+      <div id="gameDayNav" class="row">
+  <button type="button" onclick="showGameDaySection('rsvps')">RSVPs</button>
+  <button type="button" onclick="showGameDaySection('groups')">Groups</button>
+  <button type="button" onclick="showGameDaySection('matches')">Matches</button>
+</div>
+     <div id="gameDayRsvps" class="list hidden">
+  <p class="muted">Weekly RSVP information will appear here.</p>
+</div>
+     <div id="gameDayGroups" class="list hidden">
+  <p class="muted">Court assignments and player groups will appear here.</p>
+</div>
       <div id="schedule" class="list"></div>
     </div>
   </section>
@@ -629,8 +640,31 @@ function showPlayerMatches(){
 
   if(scheduleButton){
     showTab('schedule',scheduleButton);
+    showGameDaySection('matches');
   }else{
     alert('Schedule tab not found.');
+  }
+}
+  function showGameDaySection(section){
+  const validSections=['rsvps','groups','matches'];
+
+  if(!validSections.includes(section)){
+    return;
+  }
+
+  const sections={
+    rsvps:$('gameDayRsvps'),
+    groups:$('gameDayGroups'),
+    matches:$('schedule')
+  };
+
+  for(const [name,element] of Object.entries(sections)){
+    if(element){
+      element.classList.toggle(
+        'hidden',
+        name!==section
+      );
+    }
   }
 }
 async function refreshAll(){
