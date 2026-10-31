@@ -101,8 +101,15 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 
   <section id="dashboardTab" class="tab">
     <div class="card">
-      <h2>Club Dashboard</h2>
-      <p>Welcome to the Moultrie Pickleball Association player app.</p>
+   <h2 id="dashboardTitle">Moultrie Pickleball Association</h2>
+   <p id="dashboardSubtitle">Moultrie Fall 2026</p>
+      <div id="playerHomeActions" class="hidden">
+        
+  <button onclick="showPlayerMatches()">
+    CURRENT GAME DAY
+  </button>
+</div>
+      
       <div id="dashStats" class="row"></div>
     </div>
     <div class="card">
@@ -743,6 +750,15 @@ const gameHtml=visibleGames.length
   renderPlayerMatchScores();
   renderStandings();
   renderAnalytics();
+
+    const playerHomeActions=$('playerHomeActions');
+
+  if(playerHomeActions){
+    playerHomeActions.classList.toggle(
+      'hidden',
+      profile?.role==='admin'
+    );
+  }
 
 if(profile.role==='admin'){
   renderAdmin();
