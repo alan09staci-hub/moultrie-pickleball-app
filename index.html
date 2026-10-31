@@ -99,6 +99,27 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 
   <div class="nav" id="nav"></div>
 
+  <section id="infoTab" class="tab hidden">
+  <div class="card">
+    <h2>Moultrie Pickleball Association</h2>
+    <h3>League Information</h3>
+
+    <div class="item">
+      <h3>League Schedule</h3>
+      <p>League dates and playing times will be displayed here.</p>
+    </div>
+
+    <div class="item">
+      <h3>Playing Location</h3>
+      <p>Location information coming soon.</p>
+    </div>
+
+    <div class="item">
+      <h3>League Rules</h3>
+      <p>League rules and playing guidelines coming soon.</p>
+    </div>
+  </div>
+</section>
   <section id="dashboardTab" class="tab">
     <div class="card">
    <h2 id="dashboardTitle">Moultrie Pickleball Association</h2>
@@ -110,7 +131,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
   <button onclick="showPlayerMatches()">CURRENT GAME DAY</button>
   <button onclick="showTab('standings',document.querySelector('#nav button:nth-child(5)'))">STANDINGS</button>
 <button onclick="showTab('schedule',document.querySelector('#nav button:nth-child(3)'))">SCHEDULE</button>
-  <button onclick="showTab('league',document.querySelector('#nav button:nth-child(4)'))">INFO</button>
+<button onclick="showTab('info',this)">INFO</button>
 </div>
       <div id="playerHomeActions" class="hidden">
         
