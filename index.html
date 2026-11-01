@@ -706,6 +706,32 @@ async function startApp(user){
 
    buildNav();
   await refreshAll();
+      const existingSettingsChannel=client
+    .getChannels()
+    .find(channel=>channel.topic==='realtime:mpa-live-settings');
+
+  if(existingSettingsChannel){
+    await client.removeChannel(existingSettingsChannel);
+  }
+
+  client
+    .channel('mpa-live-settings')
+    .on(
+      'postgres_changes',
+      {
+        event:'UPDATE',
+        schema:'public',
+        table:'mpa_league_settings'
+      },
+      async ()=>{
+        try{
+          await refreshAll();
+        }catch(error){
+          console.error('Live settings refresh failed:',error);
+        }
+      }
+    )
+    .subscribe();
 
   const dashboardButton=document.querySelector(
     '#nav button'
