@@ -1835,8 +1835,10 @@ function renderGameDayGroups(){
 
     return player?escapeHtml(player.name):'Unknown player';
     }).sort((a,b)=>a.localeCompare(b));
-  container.innerHTML=
+   container.innerHTML=
   '<h3>Players RSVP’d Playing</h3>'+
+  '<p><strong>Week '+escapeHtml(currentSession.week_number)+
+  ' — '+escapeHtml(currentSession.play_date)+'</strong></p>'+
   '<p class="muted">'+playingRsvps.length+
   ' players RSVP’d Playing for this game day.</p>'+
   (playingNames.length
