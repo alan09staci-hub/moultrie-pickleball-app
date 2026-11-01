@@ -714,24 +714,38 @@ async function startApp(user){
     await client.removeChannel(existingSettingsChannel);
   }
 
-  client
-    .channel('mpa-live-settings')
-    .on(
+    const liveTables=[
+    'club_players',
+    'games',
+    'league_attendance',
+    'league_registrations',
+    'league_rsvps',
+    'league_sessions',
+    'leagues',
+    'mpa_league_settings'
+  ];
+
+  let liveChannel=client.channel('mpa-live-settings');
+
+  for(const table of liveTables){
+    liveChannel=liveChannel.on(
       'postgres_changes',
       {
-        event:'UPDATE',
+        event:'*',
         schema:'public',
-        table:'mpa_league_settings'
+        table:table
       },
       async ()=>{
         try{
           await refreshAll();
         }catch(error){
-          console.error('Live settings refresh failed:',error);
+          console.error('Live refresh failed:',error);
         }
       }
-    )
-    .subscribe();
+    );
+  }
+
+  liveChannel.subscribe();
 
   const dashboardButton=document.querySelector(
     '#nav button'
