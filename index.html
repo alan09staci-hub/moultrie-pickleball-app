@@ -871,10 +871,9 @@ client
 client
   .from('league_attendance')
   .select('id,session_id,player_id,status,verified_at'),
-
 client
   .from('mpa_league_settings')
-  .select('id,min_dupr,max_dupr,registration_fee,payment_instructions,max_players,number_of_courts')
+  .select('id,min_dupr,max_dupr,registration_fee,payment_instructions,max_players,number_of_courts,current_session_id')
   .eq('id',1)
   .maybeSingle()
 ]);
@@ -1753,12 +1752,10 @@ function renderGameDayGroups(){
   const container=$('gameDayGroups');
 
   if(!container)return;
-    const currentSession=leagueSessions.find(s=>
-    s.status!=='completed' &&
-    games.some(g=>
-      String(g.session_id)===String(s.id)
-    )
-  );
+   const currentSession=leagueSessions.find(s=>
+  String(s.id)===String(window.mpaLeagueSettings?.current_session_id) &&
+  s.status!=='completed'
+);
     const currentGames=currentSession
     ?games.filter(g=>
       String(g.session_id)===String(currentSession.id)
@@ -1809,12 +1806,10 @@ function renderGameDayGroups(){
 
   if(!container)return;
 
-      const currentSession=leagueSessions.find(s=>
-    s.status!=='completed' &&
-    games.some(g=>
-      String(g.session_id)===String(s.id)
-    )
-  );
+     const currentSession=leagueSessions.find(s=>
+  String(s.id)===String(window.mpaLeagueSettings?.current_session_id) &&
+  s.status!=='completed'
+);
     
   if(!currentSession){
     container.innerHTML=
@@ -2530,6 +2525,7 @@ const seasonDates=date=>{
       ' <button class="secondary small" onclick="openLeagueOptIn('+s.id+')">Open Opt-In</button>'+
       ' <button class="secondary small" onclick="closeLeagueOptIn('+s.id+')">Close Opt-In</button>'+
       ' <button class="secondary small" onclick="completeGameNight('+s.id+')">Complete Game Night</button>'+
+     ' <button class="secondary small" onclick="setCurrentGameWeek('+s.id+')">Set Current Game Week</button>'+
       ' <button class="secondary small" onclick="editSessionDate('+s.id+')">Edit Date</button>'+
       ' <button class="secondary small" onclick="editSessionTime('+s.id+')">Edit Time</button>'+
       '</div>'
@@ -2545,6 +2541,51 @@ const seasonDates=date=>{
 '<div class="list">'+leagueWeekDates(league)+'</div></div>'
       ).join('')
     : '<p class="muted">No leagues created yet.</p>';
+}
+
+  async function setCurrentGameWeek(sessionId){
+  if(!profile || profile.role!=='admin'){
+    alert('Administrator access required.');
+    return;
+  }
+
+  const session=leagueSessions.find(s=>
+    String(s.id)===String(sessionId)
+  );
+
+  if(!session || session.status==='completed'){
+    alert('This week cannot be selected as the current game week.');
+    return;
+  }
+
+  const confirmed=confirm(
+    'Set Week '+session.week_number+
+    ' ('+session.play_date+') as the Current Game Week?\n\n'+
+    'Players will see this week as the current game day.'
+  );
+
+  if(!confirmed)return;
+
+  const {data,error}=await client
+    .from('mpa_league_settings')
+    .update({current_session_id:session.id})
+    .eq('id',1)
+    .select()
+    .single();
+
+  if(error){
+    alert('Unable to set current game week: '+error.message);
+    return;
+  }
+
+  window.mpaLeagueSettings=data;
+
+  renderAll();
+
+  alert(
+    'Week '+session.week_number+
+    ' is now the Current Game Week.'
+  );
 }
   
 async function openLeagueOptIn(sessionId){
