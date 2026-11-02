@@ -201,8 +201,11 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 
   <section id="scheduleTab" class="tab hidden">
     <div class="card">
-    <h2>Current Game Day</h2>
-      <div id="gameDayNav" class="row">
+   <h2>Current Game Day</h2>
+
+<div id="gameDayScheduleWarning" class="notice error hidden"></div>
+
+<div id="gameDayNav" class="row">
   <button type="button" onclick="showGameDaySection('rsvps')">RSVPs</button>
   <button type="button" onclick="showGameDaySection('groups')">Groups</button>
   <button type="button" onclick="showGameDaySection('matches')">Matches</button>
@@ -1092,6 +1095,7 @@ const gameHtml=visibleGames.length
   renderPlayerLeagues();
   renderGameDayRsvps();
   renderGameDayGroups();
+  renderGameDayScheduleWarning();
   renderPlayerMatchScores();
   renderStandings();
   renderAnalytics();
@@ -1750,6 +1754,84 @@ msg.innerHTML=
   }catch(err){
     msg.innerHTML='Error: '+err.message;
   }
+}
+
+  function renderGameDayScheduleWarning(){
+  const container=$('gameDayScheduleWarning');
+  if(!container)return;
+
+  if(profile?.role!=='admin'){
+    container.innerHTML='';
+    container.classList.add('hidden');
+    return;
+  }
+                         
+  const session=leagueSessions.find(s=>
+    String(s.id)===String(window.mpaLeagueSettings?.current_session_id) &&
+    s.status!=='completed'
+  );
+
+  if(!session){
+    container.innerHTML='';
+    container.classList.add('hidden');
+    return;
+  }
+
+  const currentGames=games.filter(g=>
+    String(g.session_id)===String(session.id)
+  );
+
+  const playingIds=new Set(
+    leagueRsvps
+      .filter(r=>
+        String(r.session_id)===String(session.id) &&
+        r.status==='playing'
+      )
+      .map(r=>String(r.player_id))
+  );
+
+  const mismatches=new Map();
+
+  currentGames.forEach(game=>{
+    [game.player_a,game.player_b,game.player_c,game.player_d]
+      .forEach(id=>{
+        if(id==null || playingIds.has(String(id)))return;
+
+        const player=players.find(p=>String(p.id)===String(id));
+        const name=player?.name||'Unknown player';
+        const key=String(id);
+
+        if(!mismatches.has(key)){
+          mismatches.set(key,{
+            name,
+            courts:new Set()
+          });
+        }
+
+        mismatches.get(key).courts.add(game.court_number);
+      });
+  });
+
+  if(!mismatches.size){
+    container.innerHTML='';
+    container.classList.add('hidden');
+    return;
+  }
+
+  container.innerHTML=
+    '<strong>Schedule Warning — Week '+
+    escapeHtml(session.week_number)+'</strong>'+
+    '<p>Saved matches include players who are not currently RSVP’d Playing:</p>'+
+    '<ul>'+
+    [...mismatches.values()].map(item=>
+      '<li>'+escapeHtml(item.name)+
+      ' — Court '+escapeHtml([...item.courts].join(', '))+
+      '</li>'
+    ).join('')+
+    '</ul>'+
+    '<p>Administrator review required. No games or scores have been changed.</p>';
+
+  container.classList.remove('hidden');
 }
 function renderGameDayGroups(){
   const container=$('gameDayGroups');
