@@ -2435,8 +2435,21 @@ function renderAdmin(){
   $('gameB').innerHTML=opts;
   $('gameC').innerHTML=opts;
   $('gameD').innerHTML=opts;
-  $('adminGames').innerHTML=games.length
-  ?games.slice().sort((a,b)=>(a.round_number||0)-(b.round_number||0)).map(g=>{
+   $('adminGames').innerHTML=games.length
+  ?games.slice().sort((a,b)=>{
+    const weekA=leagueSessions.find(s=>
+      String(s.id)===String(a.session_id)
+    )?.week_number ?? 9999;
+
+    const weekB=leagueSessions.find(s=>
+      String(s.id)===String(b.session_id)
+    )?.week_number ?? 9999;
+
+    return Number(weekA)-Number(weekB) ||
+      Number(a.court_number||0)-Number(b.court_number||0) ||
+      Number(a.round_number||0)-Number(b.round_number||0) ||
+      Number(a.id)-Number(b.id);
+  }).map(g=>{
       const a=g.player_a_info?.name||'Player A';
       const b=g.player_b_info?.name||'Player B';
       const c=g.player_c_info?.name||'Player C';
