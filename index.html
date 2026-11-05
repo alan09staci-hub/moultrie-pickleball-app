@@ -3794,6 +3794,42 @@ if(noLongerPlaying.length){
   return false;
 }
 
+    // Database safety check before saving games.
+  const {data:safetyRows,error:safetyError}=await client
+    .rpc('check_schedule_rebuild',{
+      p_league_id:leagueId,
+      p_session_id:sessionId
+    });
+
+  if(safetyError){
+    alert(
+      'Unable to verify schedule safety: '+
+      safetyError.message
+    );
+    return false;
+  }
+
+  const safety=Array.isArray(safetyRows)
+    ?safetyRows[0]
+    :safetyRows;
+
+  if(!safety || safety.can_rebuild!==true){
+    alert(
+      'Automatic schedule saving is blocked.\n\n'+
+      (safety?.reason || 'Database safety checks did not pass.')
+    );
+    return false;
+  }
+
+  // Never replace existing saved games automatically.
+  if(Number(safety.existing_games)>0){
+    alert(
+      'This week already has saved games.\n\n'+
+      'No games were changed or deleted.'
+    );
+    return false;
+  }
+
   const preparedRows=rows.map(row=>({
     ...row,
     league_id:leagueId,
