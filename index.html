@@ -440,7 +440,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 <h2>60-Point Round</h2>
       <p class="muted">Doubles only: the 60-point guarantee does not apply to the existing Singles pairings. Use Create Individual Game for singles.</p>
       <label for="roundLeague">League</label>
-      <select id="roundLeague" onchange="renderRoundWeekSelector()"></select>
+      <select id="roundLeague" onchange="renderRoundWeekSelector();renderRoundPlayerSelectors()"></select>
       <label for="roundWeek">Week</label>
       <select id="roundWeek"></select>
 <p class="muted">Choose 4, 5, or 6 players. Each player will have the opportunity to earn 60 points.</p>
@@ -3468,12 +3468,21 @@ function renderRoundLeagueSelectors(){
   ).join('');
   if(leagues.some(l=>String(l.id)===String(selectedLeague)))leagueSelect.value=selectedLeague;
   renderRoundWeekSelector();
+  renderRoundPlayerSelectors();
 }
 function renderRoundPlayerSelectors(){
   const box=$('roundPlayerSelectors');
   if(!box)return;
 
   const count=Number($('roundPlayerCount').value);
+  const leagueId=$('roundLeague')?.value;
+  const previous=[...box.querySelectorAll('.roundPlayerSelect')].map(s=>s.value);
+  const registered=new Set(leagueRegistrations.filter(r=>
+    String(r.league_id)===String(leagueId)
+  ).map(r=>String(r.player_id)));
+  const eligible=leagueId
+    ?players.filter(p=>registered.has(String(p.id)))
+    :[];
 
   box.innerHTML='';
 
@@ -3483,10 +3492,12 @@ function renderRoundPlayerSelectors(){
 
     select.innerHTML=
       '<option value="">Select player '+(i+1)+'</option>'+
-      players.map(p=>
+      eligible.map(p=>
         '<option value="'+p.id+'">'+escapeHtml(p.name)+'</option>'
       ).join('');
-
+    if(eligible.some(p=>String(p.id)===String(previous[i]))){
+      select.value=previous[i];
+    }
     box.appendChild(select);
   }
 }
@@ -4181,16 +4192,16 @@ if(![4,5,6].includes(count)){
   msg('roundMsg','A court must have exactly 4, 5, or 6 players.');
   return;
 }
-  if(!round||round<1){
-    msg('roundMsg','Enter a round number.');
+  if(!Number.isSafeInteger(round)||round<1){
+    msg('roundMsg','Enter a positive whole-number round number.');
     return;
   }
 
-  if(players.length<count){
-    msg(
-      'roundMsg',
-      'You need at least '+count+' players before creating this round.'
-    );
+  const registeredCount=new Set(leagueRegistrations.filter(r=>
+    String(r.league_id)===String(leagueId)
+  ).map(r=>String(r.player_id))).size;
+  if(registeredCount<count){
+    msg('roundMsg','You need at least '+count+' registered players in this league.');
     return;
   }
 
@@ -4283,20 +4294,51 @@ const rows=pairs.map((p,i)=>({
 }
 }
   function printCourtRollCall(){
-  const selectedIds=[
-    ...document.querySelectorAll('.roundPlayerSelect')
-  ]
-    .map(s=>s.value)
-    .filter(Boolean);
-
-  if(!selectedIds.length){
-    alert('Select the court players before printing.');
+  const leagueId=$('roundLeague')?.value;
+  const sessionId=$('roundWeek')?.value;
+  const league=leagues.find(l=>String(l.id)===String(leagueId));
+  const session=leagueSessions.find(s=>
+    String(s.id)===String(sessionId)&&String(s.league_id)===String(leagueId)
+  );
+  const count=Number($('roundPlayerCount')?.value);
+  const round=Number($('roundNumber')?.value);
+  const selectedIds=[...document.querySelectorAll('.roundPlayerSelect')].map(s=>s.value);
+  if(!league||!session||!Number.isSafeInteger(round)||round<1||
+     selectedIds.length!==count||selectedIds.some(id=>!id)||
+     new Set(selectedIds).size!==count){
+    alert('Choose a league, week, positive whole-number round and all distinct court players before printing.');
     return;
   }
-
-  const selectedPlayers=selectedIds
-    .map(id=>players.find(p=>String(p.id)===String(id)))
-    .filter(Boolean);
+  const selectedPlayers=selectedIds.map(id=>
+    players.find(p=>String(p.id)===String(id))
+  );
+  if(selectedPlayers.some(p=>!p)){
+    alert('One or more selected players are unavailable. Refresh and try again.');
+    return;
+  }
+  const printWindow=window.open('','_blank');
+  if(!printWindow){
+    alert('Allow pop-ups for this site to print the court roll call.');
+    return;
+  }
+  const title='MPA Court Roll Call';
+  const names=selectedPlayers.map((p,i)=>
+    '<tr><td>'+(i+1)+'</td><td>'+escapeHtml(p.name)+'</td><td>__________</td></tr>'
+  ).join('');
+  printWindow.document.write('<!doctype html><html><head><meta charset="utf-8">'+
+    '<title>'+title+'</title><style>body{font:16px Arial,sans-serif;margin:32px;color:#163330}'+
+    'h1{margin-bottom:8px}p{margin:6px 0}table{border-collapse:collapse;width:100%;margin-top:24px}'+
+    'th,td{border:1px solid #999;padding:14px;text-align:left}'+
+    '@media print{body{margin:20mm}}</style></head><body>'+
+    '<h1>'+title+'</h1><p><strong>League:</strong> '+escapeHtml(league.name)+'</p>'+
+    '<p><strong>Week:</strong> '+escapeHtml(String(session.week_number))+
+    ' — '+escapeHtml(String(session.play_date))+'</p>'+
+    '<p><strong>Court:</strong> 1 &nbsp; <strong>Round:</strong> '+round+'</p>'+
+    '<table><thead><tr><th>#</th><th>Player</th><th>Check-in</th></tr></thead>'+
+    '<tbody>'+names+'</tbody></table></body></html>');
+  printWindow.document.close();
+  printWindow.focus();
+  printWindow.print();
 }
 
 async function saveScore(id){
