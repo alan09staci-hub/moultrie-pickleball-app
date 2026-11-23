@@ -487,6 +487,10 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 
     <div class="card admin-section hidden" id="adminScores">
 <h2>Enter / Correct Scores</h2>
+      <label for="scoreLeague">League</label>
+      <select id="scoreLeague" onchange="renderScoreWeekSelector()"></select>
+      <label for="scoreWeek">Game date</label>
+      <select id="scoreWeek" onchange="renderScoreGames()"></select>
       <div id="adminGames" class="list"></div>
     </div>
   </section>
@@ -2501,32 +2505,60 @@ function renderAnalytics(){
   $('gameC').style.display=isDoubles?'':'none';
   $('gameD').style.display=isDoubles?'':'none';
   }
-function renderAdmin(){
-  $('adminRoster').innerHTML=players.map(p=>
-    '<div class="item">'+
-      '<div class="row">'+
-        '<div>'+escapeHtml(p.name)+'</div>'+
-        '<button class="danger small" onclick="removePlayer('+p.id+')">'+
-          'Remove'+
-        '</button>'+
-      '</div>'+
-    '</div>'
-   ).join('');
+function renderScoreLeagueSelector(){
+  const select=$('scoreLeague');
+  if(!select)return;
+  const previous=select.value;
+  const leaguesWithGames=leagues.filter(l=>games.some(g=>String(g.league_id)===String(l.id)));
+  const hasUnassigned=games.some(g=>!g.league_id||!g.session_id);
+  select.innerHTML='<option value="">Choose league</option>'+
+    leaguesWithGames.map(l=>'<option value="'+l.id+'">'+escapeHtml(l.name)+'</option>').join('')+
+    (hasUnassigned?'<option value="unassigned">Other / unassigned games</option>':'');
+  if([...select.options].some(o=>o.value===previous&&previous)){
+    select.value=previous;
+  }else if(leaguesWithGames.length){
+    select.value=String(leaguesWithGames[0].id);
+  }else if(hasUnassigned){
+    select.value='unassigned';
+  }
+  renderScoreWeekSelector();
+}
 
-  renderDuprPlayers();
+function renderScoreWeekSelector(){
+  const leagueId=$('scoreLeague')?.value;
+  const select=$('scoreWeek');
+  if(!select)return;
+  const previous=select.value;
+  if(leagueId==='unassigned'){
+    select.innerHTML='<option value="unassigned">Unassigned games</option>';
+    renderScoreGames();
+    return;
+  }
+  const sessions=leagueSessions.filter(s=>
+    String(s.league_id)===String(leagueId)&&
+    games.some(g=>String(g.session_id)===String(s.id))
+  ).sort((a,b)=>String(b.play_date).localeCompare(String(a.play_date)));
+  select.innerHTML='<option value="">Choose game date</option>'+
+    sessions.map(s=>'<option value="'+s.id+'">Week '+s.week_number+
+      ' — '+escapeHtml(String(s.play_date))+'</option>').join('');
+  if(sessions.some(s=>String(s.id)===String(previous))){
+    select.value=previous;
+  }else if(sessions.length){
+    select.value=String(sessions[0].id);
+  }
+  renderScoreGames();
+}
 
-  const opts=
-    '<option value="">Choose player</option>'+
-    players.map(p=>
-      '<option value="'+p.id+'">'+escapeHtml(p.name)+'</option>'
-    ).join('');
-
-  $('gameA').innerHTML=opts;
-  $('gameB').innerHTML=opts;
-  $('gameC').innerHTML=opts;
-  $('gameD').innerHTML=opts;
-   $('adminGames').innerHTML=games.length
-  ?games.slice().sort((a,b)=>{
+function renderScoreGames(){
+  const leagueId=$('scoreLeague')?.value;
+  const sessionId=$('scoreWeek')?.value;
+  const filteredGames=leagueId==='unassigned'
+    ?games.filter(g=>!g.league_id||!g.session_id)
+    :games.filter(g=>leagueId&&sessionId&&
+      String(g.league_id)===String(leagueId)&&
+      String(g.session_id)===String(sessionId));
+  $('adminGames').innerHTML=filteredGames.length
+  ?filteredGames.slice().sort((a,b)=>{
     const weekA=leagueSessions.find(s=>
       String(s.id)===String(a.session_id)
     )?.week_number ?? 9999;
@@ -2584,7 +2616,35 @@ function renderAdmin(){
         '</button>'+
       '</div>';
     }).join('')
-    :'<p class="muted">No games yet.</p>';
+    :'<p class="muted">No games for this league and date.</p>';
+
+}
+
+function renderAdmin(){
+  $('adminRoster').innerHTML=players.map(p=>
+    '<div class="item">'+
+      '<div class="row">'+
+        '<div>'+escapeHtml(p.name)+'</div>'+
+        '<button class="danger small" onclick="removePlayer('+p.id+')">'+
+          'Remove'+
+        '</button>'+
+      '</div>'+
+    '</div>'
+   ).join('');
+
+  renderDuprPlayers();
+
+  const opts=
+    '<option value="">Choose player</option>'+
+    players.map(p=>
+      '<option value="'+p.id+'">'+escapeHtml(p.name)+'</option>'
+    ).join('');
+
+  $('gameA').innerHTML=opts;
+  $('gameB').innerHTML=opts;
+  $('gameC').innerHTML=opts;
+  $('gameD').innerHTML=opts;
+  renderScoreLeagueSelector();
   renderIndividualGameSelectors();
   renderRoundPlayerSelectors();
   renderRoundLeagueSelectors();
