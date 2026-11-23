@@ -49,6 +49,17 @@ th{font-size:12px;color:var(--muted)}
 .brandmark{text-align:center;font-size:42px;margin-bottom:5px}
 footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 @media(max-width:600px){.row,.triple{grid-template-columns:1fr}main{padding:12px}}
+
+/* Print the court roll call directly from this page; no popup is needed. */
+#mpaCourtRollCallPrint{display:none}
+@media print{
+  body:has(#mpaCourtRollCallPrint) > *:not(#mpaCourtRollCallPrint){display:none!important}
+  #mpaCourtRollCallPrint{display:block!important;position:static!important;background:white;color:#163330;font:16px Arial,sans-serif;padding:20mm}
+  #mpaCourtRollCallPrint h1{margin:0 0 16px}
+  #mpaCourtRollCallPrint p{margin:8px 0}
+  #mpaCourtRollCallPrint table{border-collapse:collapse;width:100%;margin-top:24px}
+  #mpaCourtRollCallPrint th,#mpaCourtRollCallPrint td{border:1px solid #999;padding:14px;text-align:left}
+}
 </style>
 </head>
 <body>
@@ -4293,54 +4304,61 @@ const rows=pairs.map((p,i)=>({
   manualRoundSaveInProgress=false;
 }
 }
-  function printCourtRollCall(){
-  const leagueId=$('roundLeague')?.value;
-  const sessionId=$('roundWeek')?.value;
-  const league=leagues.find(l=>String(l.id)===String(leagueId));
-  const session=leagueSessions.find(s=>
-    String(s.id)===String(sessionId)&&String(s.league_id)===String(leagueId)
-  );
-  const count=Number($('roundPlayerCount')?.value);
-  const round=Number($('roundNumber')?.value);
-  const selectedIds=[...document.querySelectorAll('.roundPlayerSelect')].map(s=>s.value);
-  if(!league||!session||!Number.isSafeInteger(round)||round<1||
-     selectedIds.length!==count||selectedIds.some(id=>!id)||
-     new Set(selectedIds).size!==count){
-    alert('Choose a league, week, positive whole-number round and all distinct court players before printing.');
-    return;
-  }
-  const selectedPlayers=selectedIds.map(id=>
-    players.find(p=>String(p.id)===String(id))
-  );
-  if(selectedPlayers.some(p=>!p)){
-    alert('One or more selected players are unavailable. Refresh and try again.');
-    return;
-  }
-  const printWindow=window.open('','_blank');
-  if(!printWindow){
-    alert('Allow pop-ups for this site to print the court roll call.');
-    return;
-  }
-  const title='MPA Court Roll Call';
-  const names=selectedPlayers.map((p,i)=>
-    '<tr><td>'+(i+1)+'</td><td>'+escapeHtml(p.name)+'</td><td>__________</td></tr>'
-  ).join('');
-  printWindow.document.write('<!doctype html><html><head><meta charset="utf-8">'+
-    '<title>'+title+'</title><style>body{font:16px Arial,sans-serif;margin:32px;color:#163330}'+
-    'h1{margin-bottom:8px}p{margin:6px 0}table{border-collapse:collapse;width:100%;margin-top:24px}'+
-    'th,td{border:1px solid #999;padding:14px;text-align:left}'+
-    '@media print{body{margin:20mm}}</style></head><body>'+
-    '<h1>'+title+'</h1><p><strong>League:</strong> '+escapeHtml(league.name)+'</p>'+
-    '<p><strong>Week:</strong> '+escapeHtml(String(session.week_number))+
-    ' — '+escapeHtml(String(session.play_date))+'</p>'+
-    '<p><strong>Court:</strong> 1 &nbsp; <strong>Round:</strong> '+round+'</p>'+
-    '<table><thead><tr><th>#</th><th>Player</th><th>Check-in</th></tr></thead>'+
-    '<tbody>'+names+'</tbody></table></body></html>');
-  printWindow.document.close();
-  printWindow.focus();
-  printWindow.print();
-}
+function printCourtRollCall(){
+  try{
+    const leagueId=$('roundLeague')?.value;
+    const sessionId=$('roundWeek')?.value;
+    const league=leagues.find(l=>String(l.id)===String(leagueId));
+    const session=leagueSessions.find(s=>
+      String(s.id)===String(sessionId)&&String(s.league_id)===String(leagueId)
+    );
+    const count=Number($('roundPlayerCount')?.value);
+    const roundInput=$('roundNumber')?.value;
+    const round=Number(roundInput);
+    const selectedIds=[...document.querySelectorAll('.roundPlayerSelect')].map(s=>s.value);
+    if(!league||!session||!roundInput||!Number.isSafeInteger(round)||round<1||
+       selectedIds.length!==count||selectedIds.some(id=>!id)||
+       new Set(selectedIds).size!==count){
+      alert('Choose a league, week, positive whole-number round and all distinct court players before printing.');
+      return;
+    }
+    const selectedPlayers=selectedIds.map(id=>
+      players.find(p=>String(p.id)===String(id))
+    );
+    if(selectedPlayers.some(p=>!p)){
+      alert('One or more selected players are unavailable. Refresh and try again.');
+      return;
+    }
+    const registered=new Set(leagueRegistrations.filter(r=>
+      String(r.league_id)===String(leagueId)
+    ).map(r=>String(r.player_id)));
+    if(selectedIds.some(id=>!registered.has(String(id)))){
+      alert('All selected players must be registered for this league.');
+      return;
+    }
 
+    const names=selectedPlayers.map((p,i)=>
+      '<tr><td>'+(i+1)+'</td><td>'+escapeHtml(p.name)+'</td><td>__________</td></tr>'
+    ).join('');
+    let sheet=document.getElementById('mpaCourtRollCallPrint');
+    if(!sheet){
+      sheet=document.createElement('section');
+      sheet.id='mpaCourtRollCallPrint';
+      document.body.appendChild(sheet);
+    }
+    sheet.innerHTML='<h1>MPA Court Roll Call</h1>'+
+      '<p><strong>League:</strong> '+escapeHtml(league.name)+'</p>'+
+      '<p><strong>Week:</strong> '+escapeHtml(String(session.week_number))+
+      ' — '+escapeHtml(String(session.play_date))+'</p>'+
+      '<p><strong>Round:</strong> '+round+'</p>'+
+      '<table><thead><tr><th>#</th><th>Player</th><th>Check-in</th></tr></thead>'+
+      '<tbody>'+names+'</tbody></table>';
+    window.print();
+  }catch(error){
+    console.error('Court roll call printing failed:',error);
+    alert('Could not start printing. Please try again or check Safari print settings.');
+  }
+}
 async function saveScore(id){
   const a=$('sa_'+id).value;
   const b=$('sb_'+id).value;
