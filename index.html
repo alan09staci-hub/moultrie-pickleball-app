@@ -4206,6 +4206,13 @@ async function saveScore(id){
     alert('One team must reach '+target+' points to win.');
     return;
   }
+  if(game && game.score_a != null && game.score_b != null &&
+     (Number(game.score_a)!==scoreA || Number(game.score_b)!==scoreB)){
+    if(!confirm('Correct the saved score for this game from '+
+      game.score_a+'–'+game.score_b+' to '+scoreA+'–'+scoreB+
+      '? This will change standings and rankings.'))return;
+  }
+
   const {error}=await client
     .from('games')
     .update({
@@ -4223,7 +4230,17 @@ async function saveScore(id){
 }
 
 async function removeGame(id){
-  if(!confirm('Delete this game?'))return;
+  if(profile?.role!=='admin'){
+    alert('Administrator access required.');
+    return;
+  }
+  const game=games.find(g=>String(g.id)===String(id));
+  if(!game){
+    alert('Game not found. Refresh and try again.');
+    return;
+  }
+  if(!confirm('Permanently delete game #'+id+
+    '? This removes the game and its scores and may change standings and rankings. This cannot be undone.'))return;
 
   const {error}=await client
     .from('games')
