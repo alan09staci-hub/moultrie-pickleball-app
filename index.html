@@ -3186,7 +3186,8 @@ const attendanceSummary=
       '<div class="muted">Attendance: '+
       escapeHtml(attendance?.status||'unverified')+'</div>'+
       '<button class="secondary small" onclick="saveGameNightAttendance('+sessionId+','+r.player_id+',\'present\')">Present</button> '+
-'<button class="secondary small" onclick="saveGameNightAttendance('+sessionId+','+r.player_id+',\'absent\')">Absent</button>'+
+'<button class="secondary small" onclick="saveGameNightAttendance('+sessionId+','+r.player_id+',\'absent\')">Absent</button> '+
+'<button class="secondary small" onclick="saveGameNightAttendance('+sessionId+','+r.player_id+',\'unverified\')">Unverified</button>'+
       '</div>';
   }).join('');
 }
@@ -3197,7 +3198,7 @@ async function saveGameNightAttendance(sessionId,playerId,status){
     return;
   }
 
-  if(!['present','absent'].includes(status)){
+  if(!['present','absent','unverified'].includes(status)){
     alert('Invalid attendance status.');
     return;
   }
