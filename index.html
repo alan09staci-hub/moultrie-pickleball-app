@@ -319,7 +319,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
   <input id="settingCourts" type="number"
          value="6">
 
- <button type="button" id="saveMPASettingsBtn" onclick="saveMPALeagueSettings()">
+ <button type="button" id="saveMPASettingsBtn" onclick="saveMPALeagueSettings()" disabled aria-disabled="true" title="Saving is unavailable until database saving has been tested.">
   💾 Save League Settings
 </button>
 
@@ -983,6 +983,11 @@ leagueSessions.forEach((s,i)=>{
 }
 
 async function saveMPALeagueSettings(){
+  // Safety lock: do not write league settings until saving is tested and explicitly enabled.
+  if($('saveMPASettingsBtn')?.disabled){
+    msg('mpaSettingsMsg','Saving is disabled until database saving has been tested.');
+    return;
+  }
   if(profile?.role!=='admin'){
     alert('Administrator access required.');
     return;
