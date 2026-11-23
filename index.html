@@ -426,6 +426,10 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
     Assign opted-in players to Courts 1–6 based on their MPA rankings.
     Five-player courts are preferred.
   </p>
+  <label for="automaticLeague">Select League</label>
+  <select id="automaticLeague" onchange="renderAutomaticCourtWeekSelector()"></select>
+  <label for="automaticWeek">Select Week</label>
+  <select id="automaticWeek" onchange="clearAutomaticCourtPreview()"></select>
     <button onclick="generateAutomaticCourts()">
     Generate Court Assignments
   </button>
@@ -980,6 +984,7 @@ leagueSessions.forEach((s,i)=>{
   renderLeagueRegistrations();
   renderWeeklyRsvp();
   renderAttendanceSelectors();
+  renderAutomaticCourtSelectors();
    renderAll();
 }
 
@@ -3554,11 +3559,57 @@ if(n===6){
 let pendingAutomaticSchedule=null;
 let automaticSaveInProgress=false;
 
+function clearAutomaticCourtPreview(){
+  pendingAutomaticSchedule=null;
+  const area=$('automaticCourtResults');
+  if(area)area.innerHTML='';
+}
+
+function renderAutomaticCourtSelectors(){
+  const leagueSelect=$('automaticLeague');
+  if(!leagueSelect)return;
+  const selectedLeague=leagueSelect.value;
+  leagueSelect.innerHTML=leagues.map(l=>
+    '<option value="'+l.id+'">'+escapeHtml(l.name)+'</option>'
+  ).join('');
+  if(leagues.some(l=>String(l.id)===String(selectedLeague))){
+    leagueSelect.value=selectedLeague;
+  }
+  renderAutomaticCourtWeekSelector(false);
+}
+
+function renderAutomaticCourtWeekSelector(clearPreview=true){
+  const leagueSelect=$('automaticLeague');
+  const weekSelect=$('automaticWeek');
+  if(!leagueSelect||!weekSelect)return;
+  const selectedWeek=weekSelect.value;
+  const sessions=leagueSessions.filter(s=>
+    String(s.league_id)===String(leagueSelect.value)
+  ).sort((a,b)=>a.week_number-b.week_number);
+  weekSelect.innerHTML=sessions.map(s=>
+    '<option value="'+s.id+'">Week '+s.week_number+
+    ' — '+escapeHtml(s.play_date)+'</option>'
+  ).join('');
+  if(sessions.some(s=>String(s.id)===String(selectedWeek))){
+    weekSelect.value=selectedWeek;
+  }else if(sessions.length){
+    const now=new Date();
+    const today=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),
+      String(now.getDate()).padStart(2,'0')].join('-');
+    const byDate=sessions.slice().sort((a,b)=>
+      String(a.play_date).localeCompare(String(b.play_date))
+    );
+    const defaultWeek=byDate.find(s=>String(s.play_date)>=today)||byDate[byDate.length-1];
+    weekSelect.value=String(defaultWeek.id);
+  }
+  if(clearPreview)clearAutomaticCourtPreview();
+}
+
   function generateAutomaticCourts(){
     pendingAutomaticSchedule=null;
     const area=$('automaticCourtResults');
-    const leagueId=$('rsvpLeague').value;
-    const sessionId=$('rsvpWeek').value;
+    const leagueId=$('automaticLeague').value;
+    const sessionId=$('automaticWeek').value;
     const selectedSession=leagueSessions.find(s=>
   String(s.id)===String(sessionId) &&
   String(s.league_id)===String(leagueId)
@@ -4009,9 +4060,9 @@ async function confirmAutomaticGameSave(){
 
   if(
     String(pendingAutomaticSchedule.leagueId)!==
-      String($('rsvpLeague').value) ||
+      String($('automaticLeague').value) ||
     String(pendingAutomaticSchedule.sessionId)!==
-      String($('rsvpWeek').value)
+      String($('automaticWeek').value)
   ){
     alert(
       'The selected league or week has changed. '+
