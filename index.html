@@ -520,10 +520,15 @@ function escapeHtml(s){
   }[m]));
 }
 
+// Public project configuration; Supabase RLS controls data access.
+// Use the same MPA project on every Vercel preview and browser.
+const MPA_SUPABASE_URL='https://tiydvkmbdzlgndaqykxj.supabase.co';
+const MPA_SUPABASE_PUBLISHABLE_KEY="sb_publishable_qeHbYb8HM2WPPmOcOm5RJQ_gCJ0OwaW";
+
 function saved(){
   return {
-    url:localStorage.getItem('mpa_supabase_url'),
-    key:localStorage.getItem('mpa_supabase_key')
+    url:MPA_SUPABASE_URL,
+    key:MPA_SUPABASE_PUBLISHABLE_KEY
   };
 }
 
