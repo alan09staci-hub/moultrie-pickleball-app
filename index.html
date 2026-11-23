@@ -434,10 +434,11 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 
     <div class="card admin-section hidden" id="adminSixtyPointRound">
 <h2>60-Point Round</h2>
-      <select id="roundMatchType">
-  <option value="doubles" selected>Doubles</option>
-  <option value="singles">Singles</option>
-      </select>
+      <p class="muted">Doubles only: the 60-point guarantee does not apply to the existing Singles pairings. Use Create Individual Game for singles.</p>
+      <label for="roundLeague">League</label>
+      <select id="roundLeague" onchange="renderRoundWeekSelector()"></select>
+      <label for="roundWeek">Week</label>
+      <select id="roundWeek"></select>
 <p class="muted">Choose 4, 5, or 6 players. Each player will have the opportunity to earn 60 points.</p>
       <div class="row">
         <select id="roundPlayerCount" onchange="renderRoundPlayerSelectors()">
@@ -2564,6 +2565,7 @@ function renderAdmin(){
     :'<p class="muted">No games yet.</p>';
   renderIndividualGameSelectors();
   renderRoundPlayerSelectors();
+  renderRoundLeagueSelectors();
 }
 
 async function addPlayer(){
@@ -3433,6 +3435,29 @@ async function createGame(){
 
   await refreshAll();
 }
+function renderRoundWeekSelector(){
+  const leagueSelect=$('roundLeague');
+  const weekSelect=$('roundWeek');
+  if(!leagueSelect||!weekSelect)return;
+  const selectedWeek=weekSelect.value;
+  const sessions=leagueSessions.filter(s=>
+    String(s.league_id)===String(leagueSelect.value)
+  ).sort((a,b)=>Number(a.week_number)-Number(b.week_number));
+  weekSelect.innerHTML='<option value="">Choose week</option>'+sessions.map(s=>
+    '<option value="'+s.id+'">Week '+s.week_number+' — '+escapeHtml(s.play_date)+'</option>'
+  ).join('');
+  if(sessions.some(s=>String(s.id)===String(selectedWeek)))weekSelect.value=selectedWeek;
+}
+function renderRoundLeagueSelectors(){
+  const leagueSelect=$('roundLeague');
+  if(!leagueSelect)return;
+  const selectedLeague=leagueSelect.value;
+  leagueSelect.innerHTML='<option value="">Choose league</option>'+leagues.map(l=>
+    '<option value="'+l.id+'">'+escapeHtml(l.name)+'</option>'
+  ).join('');
+  if(leagues.some(l=>String(l.id)===String(selectedLeague)))leagueSelect.value=selectedLeague;
+  renderRoundWeekSelector();
+}
 function renderRoundPlayerSelectors(){
   const box=$('roundPlayerSelectors');
   if(!box)return;
@@ -4074,6 +4099,20 @@ if(saved){
 }
 
 async function generateRound(){
+  if(profile?.role!=='admin'){
+    msg('roundMsg','Administrator access required.');
+    return;
+  }
+  const leagueId=$('roundLeague')?.value;
+  const sessionId=$('roundWeek')?.value;
+  const session=leagueSessions.find(s=>
+    String(s.id)===String(sessionId) &&
+    String(s.league_id)===String(leagueId)
+  );
+  if(!session || session.status==='completed'){
+    msg('roundMsg','Choose an active league and week before creating a round.');
+    return;
+  }
   const count=Number($('roundPlayerCount').value);
   const round=Number($('roundNumber').value);
 if(![4,5,6].includes(count)){
@@ -4109,18 +4148,50 @@ if(new Set(selectedIds).size!==count){
 }
 
 const chosen=selectedIds.map(id=>players.find(p=>String(p.id)===String(id)));
-const matchType=$('roundMatchType').value;
-const pairs=matchType==='doubles'
-  ? buildDoublesRoundPairings(chosen)
-  : buildRoundPairings(chosen);
-
+if(chosen.some(p=>!p)){
+  msg('roundMsg','A selected player no longer exists. Refresh and try again.');
+  return;
+}
+const registered=new Set(leagueRegistrations.filter(r=>
+  String(r.league_id)===String(leagueId)
+).map(r=>String(r.player_id)));
+if(selectedIds.some(id=>!registered.has(String(id)))){
+  msg('roundMsg','All selected players must be registered for the chosen league.');
+  return;
+}
+const pairs=buildDoublesRoundPairings(chosen);
+const expectedGames=count===4?3:count===5?5:9;
+const expectedPerPlayer=count===4?3:count===5?4:6;
+if(pairs.length!==expectedGames || chosen.some((player,i)=>
+  pairs.filter(pair=>pair.includes(i)).length!==expectedPerPlayer
+)){
+  msg('roundMsg','The pairings do not provide 60 possible points per player. Nothing was saved.');
+  return;
+}
+const {data:existing,error:checkError}=await client.from('games')
+  .select('id')
+  .eq('league_id',leagueId)
+  .eq('session_id',sessionId)
+  .eq('court_number',1)
+  .eq('round_number',round)
+  .limit(1);
+if(checkError){
+  msg('roundMsg','Unable to check existing rounds: '+checkError.message);
+  return;
+}
+if(existing?.length){
+  msg('roundMsg','This round already has games for Court 1 in the selected week. Nothing was saved.');
+  return;
+}
 const rows=pairs.map((p,i)=>({
+  league_id:leagueId,
+  session_id:sessionId,
   court_players:selectedIds,
   player_a:chosen[p[0]].id,
   player_b:chosen[p[1]].id,
-  player_c:matchType==='doubles' ? chosen[p[2]].id : null,
-  player_d:matchType==='doubles' ? chosen[p[3]].id : null,
-  match_type:matchType,
+  player_c:chosen[p[2]].id,
+  player_d:chosen[p[3]].id,
+  match_type:'doubles',
   round_number:round,
   court_number:1,
   target_score:target
