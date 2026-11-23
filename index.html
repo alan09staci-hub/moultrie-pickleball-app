@@ -983,9 +983,10 @@ leagueSessions.forEach((s,i)=>{
    renderAll();
 }
 
+const LEAGUE_SETTINGS_SAVE_ENABLED=false; // Explicit release gate; enable only after tested approval.
 async function saveMPALeagueSettings(){
-  // Safety lock: do not write league settings until saving is tested and explicitly enabled.
-  if($('saveMPASettingsBtn')?.disabled){
+  // Independent safety gate; changing the HTML button alone cannot enable writes.
+  if(!LEAGUE_SETTINGS_SAVE_ENABLED){
     msg('mpaSettingsMsg','Saving is disabled until database saving has been tested.');
     return;
   }
@@ -4098,7 +4099,12 @@ if(saved){
 
 }
 
+let manualRoundSaveInProgress=false;
 async function generateRound(){
+  if(manualRoundSaveInProgress){
+    msg('roundMsg','A round is already being saved. Please wait.');
+    return;
+  }
   if(profile?.role!=='admin'){
     msg('roundMsg','Administrator access required.');
     return;
@@ -4168,6 +4174,8 @@ if(pairs.length!==expectedGames || chosen.some((player,i)=>
   msg('roundMsg','The pairings do not provide 60 possible points per player. Nothing was saved.');
   return;
 }
+manualRoundSaveInProgress=true;
+try{
 const {data:existing,error:checkError}=await client.from('games')
   .select('id')
   .eq('league_id',leagueId)
@@ -4214,6 +4222,9 @@ const rows=pairs.map((p,i)=>({
   );
 
   await refreshAll();
+}finally{
+  manualRoundSaveInProgress=false;
+}
 }
   function printCourtRollCall(){
   const selectedIds=[
