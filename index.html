@@ -27,6 +27,9 @@ button.small{width:auto;padding:8px 11px;font-size:13px}
 .nav{display:flex;gap:6px;overflow:auto;padding:8px 0}
 .nav button{white-space:nowrap;width:auto;padding:9px 13px;margin:0;background:#e5ecea;color:var(--dark)}
 .nav button.active{background:var(--brand);color:#fff}
+.admin-nav{display:flex;gap:6px;overflow:auto;padding:8px 0;flex-wrap:wrap}
+.admin-nav button{white-space:nowrap;width:auto;padding:9px 13px;margin:0;background:#e5ecea;color:var(--dark)}
+.admin-nav button.active{background:var(--brand);color:#fff}
 .hidden{display:none!important}
 .muted{color:var(--muted);font-size:13px}
 .pill{display:inline-block;background:#e7efed;border-radius:999px;padding:4px 9px;font-size:12px}
@@ -276,8 +279,11 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
   
   <section id="adminTab" class="tab hidden">
     <div class="card">
-     <h2>Admin Center</h2>
-      <div class="item">
+      <h2>Admin Center</h2>
+      <div class="admin-nav" id="adminNav" aria-label="Admin sections"></div>
+    </div>
+    <div class="card admin-section" id="adminLeagueSettings">
+<div class="item">
   <h3>⚙️ Admin League Settings</h3>
 
   <p class="muted">
@@ -312,7 +318,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
   💾 Save League Settings
 </button>
 
-<p class="muted" id="mpaSettingsMsg">
+<p class="muted" id="mpaSettingsSafetyMsg">
   Save button is disabled until database saving is connected and tested.
 </p>
 
@@ -345,17 +351,19 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
   Test Week 1 Player Check
 </button>
 <div id="week1MatchTestResult"></div>
-      
-     </div>
+    </div>
 
-    <div class="card">
-      <h2>League Management</h2>
+    <div class="card admin-section hidden" id="adminLeagueManagement">
+<h2>League Management</h2>
       <p>Create and manage association leagues.</p>
       <input id="newLeagueName" placeholder="League name">
       <input id="newLeagueStartDate" type="date" aria-label="League start date">
       <button onclick="createLeague()">Create League</button>
       <div id="adminLeagues" class="list"></div>
-      <h3>League Player Registration</h3>
+    </div>
+
+    <div class="card admin-section hidden" id="adminLeagueRegistration">
+<h3>League Player Registration</h3>
 <p>Assign existing club players to a league.</p>
 
 <select id="registrationLeague"></select>
@@ -364,33 +372,42 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 <button onclick="registerLeaguePlayer()">Register Player</button>
 
 <div id="leagueRegistrations" class="list"></div>
-    
-    
-    <hr>
+    </div>
+
+    <div class="card admin-section hidden" id="adminWeeklyRsvp">
 <h3>Weekly Player RSVP</h3>
 <p>Manage who is Playing or Not Playing each week.</p>
 <select id="rsvpLeague" onchange="renderWeeklyRsvp()"></select>
 <select id="rsvpWeek" onchange="renderWeeklyRsvpPlayers()"></select>
 <div id="weeklyRsvpPlayers" class="list"></div>
-      <hr>
+    </div>
+
+    <div class="card admin-section hidden" id="adminAttendance">
 <h3>Game Night Attendance</h3>
 <p class="muted">
   Record which players actually attended each league week.
   Attendance is separate from weekly RSVP.
 </p>
+<label for="attendanceLeague">Select League</label>
+<select id="attendanceLeague" onchange="renderAttendanceSelectors()"></select>
+<label for="attendanceWeek">Select Week</label>
+<select id="attendanceWeek" onchange="renderGameNightAttendance()"></select>
 <div id="gameNightAttendance" class="list">
   <p class="muted">Select a league and week above to manage attendance.</p>
 </div>
-</div>
-    
-   <div class="card">
-      <h2>Manage Players</h2>
+    </div>
+
+    <div class="card admin-section hidden" id="adminManagePlayers">
+<h2>Manage Players</h2>
       <div class="row">
         <input id="newPlayer" placeholder="Player name">
         <button onclick="addPlayer()">Add player</button>
       </div>
       <div id="adminRoster" class="list"></div>
-     <h3>DUPR Rating Management</h3>
+    </div>
+
+    <div class="card admin-section hidden" id="adminDuprRatings">
+<h3>DUPR Rating Management</h3>
 <p class="muted">
   Verify official DUPR doubles ratings or approve
   provisional MPA ratings for unrated players.
@@ -398,10 +415,9 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 </p>
 <div id="duprPlayerList" class="list"></div>
     </div>
-    
-<div class="card">
-  <h2>Automatic Court Assignments</h2>
-  <p class="muted">
+
+    <div class="card admin-section hidden" id="adminAutomaticCourts">
+<p class="muted">
     Assign opted-in players to Courts 1–6 based on their MPA rankings.
     Five-player courts are preferred.
   </p>
@@ -409,9 +425,10 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
     Generate Court Assignments
   </button>
   <div id="automaticCourtResults"></div>
-</div>
-    <div class="card">
-      <h2>60-Point Round</h2>
+    </div>
+
+    <div class="card admin-section hidden" id="adminSixtyPointRound">
+<h2>60-Point Round</h2>
       <select id="roundMatchType">
   <option value="doubles" selected>Doubles</option>
   <option value="singles">Singles</option>
@@ -431,8 +448,8 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 <div id="roundMsg"></div>
     </div>
 
-    <div class="card">
-      <h2>Create Individual Game</h2>
+    <div class="card admin-section hidden" id="adminIndividualGame">
+<h2>Create Individual Game</h2>
       <select id="gameMatchType" onchange="renderIndividualGameSelectors()">
   <option value="doubles" selected>Doubles</option>
   <option value="singles">Singles</option>
@@ -447,8 +464,8 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
       <div id="gameCreateMsg"></div>
     </div>
 
-    <div class="card">
-      <h2>Enter / Correct Scores</h2>
+    <div class="card admin-section hidden" id="adminScores">
+<h2>Enter / Correct Scores</h2>
       <div id="adminGames" class="list"></div>
     </div>
   </section>
@@ -708,6 +725,7 @@ async function startApp(user){
     ' • shared club data';
 
    buildNav();
+   buildAdminNav();
   await refreshAll();
       const existingSettingsChannel=client
     .getChannels()
@@ -789,6 +807,44 @@ function showTab(name,btn){
 
   btn.classList.add('active');
 }
+
+function showAdminSection(sectionId,btn){
+  document.querySelectorAll('#adminTab .admin-section').forEach(section=>{
+    section.classList.add('hidden');
+  });
+  const selected=document.getElementById(sectionId);
+  if(!selected)return;
+  selected.classList.remove('hidden');
+  document.querySelectorAll('#adminNav button').forEach(button=>{
+    button.classList.remove('active');
+  });
+  if(btn)btn.classList.add('active');
+  if(sectionId==='adminAttendance')renderAttendanceSelectors();
+}
+
+function buildAdminNav(){
+  const sections=[
+    ['adminLeagueSettings','League Settings'],
+    ['adminLeagueManagement','League Management'],
+    ['adminLeagueRegistration','League Player Registration'],
+    ['adminWeeklyRsvp','Weekly Player RSVP'],
+    ['adminAttendance','Game Night Attendance'],
+    ['adminManagePlayers','Manage Players'],
+    ['adminDuprRatings','DUPR Ratings'],
+    ['adminAutomaticCourts','Automatic Court Assignments'],
+    ['adminSixtyPointRound','60-Point Round'],
+    ['adminIndividualGame','Create Individual Game'],
+    ['adminScores','Enter / Correct Scores']
+  ];
+  const nav=$('adminNav');
+  if(!nav||profile?.role!=='admin')return;
+  nav.innerHTML=sections.map(([id,label],index)=>
+    '<button type="button" class="'+(index===0?'active':'')+
+    '" onclick="showAdminSection(\''+id+'\',this)">'+label+'</button>'
+  ).join('');
+  showAdminSection('adminLeagueSettings',nav.querySelector('button'));
+}
+
   function showPlayerLeagueOptIn(){
   const leagueButton=Array.from(
     document.querySelectorAll('#nav button')
@@ -917,6 +973,7 @@ leagueSessions.forEach((s,i)=>{
   renderLeagues();
   renderLeagueRegistrations();
   renderWeeklyRsvp();
+  renderAttendanceSelectors();
    renderAll();
 }
 
@@ -3027,12 +3084,43 @@ return '<div class="item">'+
   }).join('');
 }
 
+
+function renderAttendanceSelectors(){
+  const leagueSelect=$('attendanceLeague');
+  const weekSelect=$('attendanceWeek');
+  if(!leagueSelect||!weekSelect)return;
+
+  const selectedLeague=leagueSelect.value;
+  const selectedWeek=weekSelect.value;
+  leagueSelect.innerHTML=leagues.map(l=>
+    '<option value="'+l.id+'">'+escapeHtml(l.name)+'</option>'
+  ).join('');
+  if(selectedLeague&&leagues.some(l=>String(l.id)===String(selectedLeague))){
+    leagueSelect.value=selectedLeague;
+  }
+  const sessions=leagueSessions.filter(s=>
+    String(s.league_id)===String(leagueSelect.value)
+  ).sort((a,b)=>a.week_number-b.week_number);
+  weekSelect.innerHTML=sessions.map(s=>
+    '<option value="'+s.id+'">Week '+s.week_number+
+    ' — '+escapeHtml(s.play_date)+'</option>'
+  ).join('');
+  if(selectedWeek&&sessions.some(s=>String(s.id)===String(selectedWeek))){
+    weekSelect.value=selectedWeek;
+  }else if(sessions.length){
+    const today=new Date().toLocaleDateString('en-CA');
+    const currentOrNext=sessions.find(s=>String(s.play_date)>=today);
+    weekSelect.value=String((currentOrNext||sessions[sessions.length-1]).id);
+  }
+  renderGameNightAttendance();
+}
+
 function renderGameNightAttendance(){
   const area=$('gameNightAttendance');
   if(!area)return;
 
-  const leagueId=$('rsvpLeague')?.value;
-  const sessionId=$('rsvpWeek')?.value;
+  const leagueId=$('attendanceLeague')?.value;
+  const sessionId=$('attendanceWeek')?.value;
 
   if(!leagueId||!sessionId){
     area.innerHTML='<p class="muted">Select a league and week above.</p>';
