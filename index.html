@@ -50,6 +50,17 @@ th{font-size:12px;color:var(--muted)}
 footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 @media(max-width:600px){.row,.triple{grid-template-columns:1fr}main{padding:12px}}
 
+/* Score cards: black background, white text, saved winner/loser colors. */
+#adminScores #adminGames .score-game-card{background:#101010;color:#fff;border-color:#333}
+#adminScores #adminGames .score-game-card strong{color:#fff;font-weight:800}
+#adminScores #adminGames .score-game-card .muted{color:#e4e4e4}
+#adminScores #adminGames .score-game-card .score-bye{background:#101010;color:#fff;border-color:#555;font-weight:700}
+#adminScores #adminGames .score-game-card input{background:#fff;color:#101010;font-weight:700}
+#adminScores #adminGames .score-game-card input.score-winner{background:#e5f7e9;color:#145c2a;border:3px solid #22a447}
+#adminScores #adminGames .score-game-card input.score-loser{background:#ffebeb;color:#8d1f17;border:3px solid #dc3737}
+#adminScores #adminGames .score-game-card .score-save-feedback{color:#9ef1b1;font-weight:800;margin-top:8px}
+#adminScores #adminGames .score-game-card button{color:#fff}
+
 /* Print the court roll call directly from this page; no popup is needed. */
 #mpaCourtRollCallPrint{display:none}
 @media print{
@@ -2549,6 +2560,8 @@ function renderScoreWeekSelector(){
   renderScoreGames();
 }
 
+let lastSavedScoreGameId=null;
+
 function renderScoreGames(){
   const leagueId=$('scoreLeague')?.value;
   const sessionId=$('scoreWeek')?.value;
@@ -2593,7 +2606,10 @@ function renderScoreGames(){
           '</div>'
         :'';
 
-      return '<div class="item">'+
+      const scored=g.score_a!=null&&g.score_b!=null;
+      const scoreAClass=scored?(Number(g.score_a)>Number(g.score_b)?' score-winner':' score-loser'):'';
+      const scoreBClass=scored?(Number(g.score_b)>Number(g.score_a)?' score-winner':' score-loser'):'';
+      return '<div class="item score-game-card">'+
        '<strong>'+
   (g.match_type==='doubles'
     ? escapeHtml(a)+' + '+escapeHtml(b)+' vs '+escapeHtml(c)+' + '+escapeHtml(d)
@@ -2602,15 +2618,16 @@ function renderScoreGames(){
 '</strong>'+
         roundInfo+
         (byePlayers.length
-  ?'<div class="item"><strong>BYE: '+byePlayers.map(escapeHtml).join(' + ')+'</strong></div>'
+  ?'<div class="item score-bye"><strong>BYE: '+byePlayers.map(escapeHtml).join(' + ')+'</strong></div>'
   :'')+
         '<div class="triple">'+
-         '<input id="sa_'+g.id+'" type="text" inputmode="numeric" '+
+         '<input id="sa_'+g.id+'" class="'+scoreAClass.trim()+'" type="text" inputmode="numeric" '+
           'placeholder="Score A" value="'+(g.score_a??'')+'">'+
-        '<input id="sb_'+g.id+'" type="text" inputmode="numeric" '+
+        '<input id="sb_'+g.id+'" class="'+scoreBClass.trim()+'" type="text" inputmode="numeric" '+
           'placeholder="Score B" value="'+(g.score_b??'')+'">'+
           '<button onclick="saveScore('+g.id+')">Save score</button>'+
         '</div>'+
+        (lastSavedScoreGameId===g.id?'<div class="score-save-feedback" role="status">Score saved successfully.</div>':'')+
         '<button class="danger small" onclick="removeGame('+g.id+')">'+
           'Delete game'+
         '</button>'+
@@ -4441,6 +4458,7 @@ async function saveScore(id){
     return;
   }
 
+  lastSavedScoreGameId=id;
   await refreshAll();
 }
 
