@@ -372,28 +372,6 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
       
 <p class="muted">Only users with the admin role can use these controls. The database also blocks non-admin writes.</p>
 
-<button onclick="calculateMPARankings()">
-  Recalculate MPA Rankings
-</button>
-
-   <div id="rankingMsg"></div>
-
-  <button onclick="previewWeek1Seeds()">
-    Preview Week 1 Seeds
-  </button>
-
-  <div id="week1SeedPreview"></div>
-
-      <button onclick="previewWeek1Courts()">Preview Week 1 Courts</button>
-<div id="week1CourtPreview"></div>
-      <button onclick="openWeek1MatchScoring()">
-  SCORE — Week 1 Matches
-</button>
-<div id="week1MatchScoring"></div>
-      <button onclick="createWeek1LeagueMatches()">
-  Test Week 1 Player Check
-</button>
-<div id="week1MatchTestResult"></div>
     </div>
 
     <div class="card admin-section hidden" id="adminLeagueManagement">
@@ -510,6 +488,34 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
   </div>
       <button onclick="createGame()">Create game</button>
       <div id="gameCreateMsg"></div>
+    </div>
+
+    <div class="card admin-section hidden" id="adminLegacyWeekOne">
+<h2>Legacy Week 1 Tools</h2>
+<p class="notice">These older tools are specific to Week 1 and include test-only or disabled actions. For regular game nights use Automatic Court Assignments, 60-Point Round, and Enter / Correct Scores above.</p>
+<button onclick="calculateMPARankings()">
+  Update League Rankings (currently disabled)
+</button>
+
+   <div id="rankingMsg"></div>
+
+  <button onclick="previewWeek1Seeds()">
+    Preview Week 1 Player Seeds
+  </button>
+
+  <div id="week1SeedPreview"></div>
+
+      <button onclick="previewWeek1Courts()">Preview Week 1 Court Assignments</button>
+<div id="week1CourtPreview"></div>
+      <button onclick="openWeek1MatchScoring()">
+  View Legacy Week 1 Score Example
+</button>
+<div id="week1MatchScoring"></div>
+      <button onclick="createWeek1LeagueMatches()">
+  Legacy Week 1 Player Check (test only)
+</button>
+<div id="week1MatchTestResult"></div>
+
     </div>
 
     <div class="card admin-section hidden" id="adminScores">
@@ -873,7 +879,7 @@ const mpaAdminGroups=[
   {title:'Registrations',desc:'Register players; confirmation and fee waivers are planned.',color:'#f3c5dc',ids:['adminLeagueRegistration']},
   {title:'Players',desc:'Manage the league roster and DUPR ratings.',color:'#151515',ids:['adminManagePlayers','adminDuprRatings']},
   {title:'Members',desc:'Free member directory and private editable profiles (planned).',color:'#595959',pending:true},
-  {title:'Game day tools',desc:'RSVP, attendance, courts, rounds, games, scores, and completion.',color:'#2f80df',ids:['adminWeeklyRsvp','adminAttendance','adminAutomaticCourts','adminSixtyPointRound','adminIndividualGame','adminScores']},
+  {title:'Game day tools',desc:'RSVP, attendance, courts, rounds, games, scores, and completion.',color:'#2f80df',ids:['adminWeeklyRsvp','adminAttendance','adminAutomaticCourts','adminSixtyPointRound','adminIndividualGame','adminScores','adminLegacyWeekOne']},
   {title:'Standings penalties',desc:'Missed-night penalties and admin adjustments (planned).',color:'#df2c2c',pending:true},
   {title:'Round Robin',desc:'One-off member sign-up round robin (planned).',color:'#1c9d4a',pending:true},
   {title:'Bracket',desc:'One-off double-elimination event (planned).',color:'#e78000',pending:true},
