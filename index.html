@@ -60,6 +60,8 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 #adminScores #adminGames .score-game-card input.score-loser{background:#ffebeb;color:#8d1f17;border:3px solid #dc3737}
 #adminScores #adminGames .score-game-card .score-save-feedback{color:#9ef1b1;font-weight:800;margin-top:8px}
 #adminScores #adminGames .score-game-card button{color:#fff}
+#adminScores #adminGames .score-game-card .score-locked-label{color:#fff;font-weight:800;margin:8px 0}
+#adminScores #adminGames .score-game-card input:disabled{opacity:1;-webkit-text-fill-color:currentColor;cursor:default}
 
 /* Print the court roll call directly from this page; no popup is needed. */
 #mpaCourtRollCallPrint{display:none}
@@ -2606,6 +2608,7 @@ function renderScoreGames(){
           '</div>'
         :'';
 
+      const locked=leagueSessions.some(s=>String(s.id)===String(g.session_id)&&s.status==='completed');
       const scored=g.score_a!=null&&g.score_b!=null;
       const scoreAClass=scored?(Number(g.score_a)>Number(g.score_b)?' score-winner':' score-loser'):'';
       const scoreBClass=scored?(Number(g.score_b)>Number(g.score_a)?' score-winner':' score-loser'):'';
@@ -2622,15 +2625,13 @@ function renderScoreGames(){
   :'')+
         '<div class="triple">'+
          '<input id="sa_'+g.id+'" class="'+scoreAClass.trim()+'" type="text" inputmode="numeric" '+
-          'placeholder="Score A" value="'+(g.score_a??'')+'">'+
+          'placeholder="Score A" value="'+(g.score_a??'')+'" '+(locked?'disabled':'')+'>'+
         '<input id="sb_'+g.id+'" class="'+scoreBClass.trim()+'" type="text" inputmode="numeric" '+
-          'placeholder="Score B" value="'+(g.score_b??'')+'">'+
-          '<button onclick="saveScore('+g.id+')">Save score</button>'+
+          'placeholder="Score B" value="'+(g.score_b??'')+'" '+(locked?'disabled':'')+'>'+
+          (locked?'<span class="score-locked-label">LOCKED — Game Night Completed</span>':'<button onclick="saveScore('+g.id+')">Save score</button>')+
         '</div>'+
         (lastSavedScoreGameId===g.id?'<div class="score-save-feedback" role="status">Score saved successfully.</div>':'')+
-        '<button class="danger small" onclick="removeGame('+g.id+')">'+
-          'Delete game'+
-        '</button>'+
+        (locked?'':'<button class="danger small" onclick="removeGame('+g.id+')">Delete game</button>')+
       '</div>';
     }).join('')
     :'<p class="muted">No games for this league and date.</p>';
