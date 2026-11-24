@@ -112,6 +112,24 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 #adminTab .mpa-game-tool>summary span{display:block;font-size:14px;font-weight:700;margin-top:5px;color:#fff}
 #adminTab .mpa-game-tool>.admin-section{margin:0;box-shadow:none;border:0;border-radius:0}
 #adminTab .mpa-game-tool>summary:focus-visible{outline:3px solid #fff;outline-offset:-5px}
+
+/* Screenshot-inspired league setup; scoped to the Admin Create a League card. */
+.mpa-league-creator{background:#141414;color:#fff;border-color:#141414;padding:22px;border-radius:18px}
+.mpa-league-creator h2{font-size:22px;font-weight:850;margin:0 0 18px}
+.mpa-league-admin-tag{display:inline-block;vertical-align:middle;background:#f8cb48;color:#111;font-size:13px;letter-spacing:1px;border-radius:20px;padding:4px 12px}
+.mpa-league-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 16px}
+.mpa-league-form-grid>div{min-width:0}
+.mpa-league-form-grid .mpa-league-full{grid-column:1/-1}
+.mpa-league-creator label{display:block;font-weight:800;margin-bottom:5px}
+.mpa-league-creator input,.mpa-league-creator select{background:#292929;color:#fff;border:1px solid #606060;border-radius:10px;width:100%;margin:0}
+.mpa-league-creator input::placeholder{color:#aaa}
+.mpa-league-hint{color:#bbb;font-size:13px;line-height:1.5;margin:8px 0 12px}
+.mpa-league-dates-button{width:auto;background:#333;color:#fff;border:1px solid #777;margin-top:18px}
+.mpa-league-create-button{width:auto;background:#f8cb48;color:#111;font-size:17px;font-weight:850;padding:13px 20px}
+.mpa-league-date-preview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.mpa-league-date-preview label{font-size:13px}
+.mpa-league-creator #adminLeagues{margin-top:16px}
+@media(max-width:560px){.mpa-league-form-grid,.mpa-league-date-preview{grid-template-columns:1fr}.mpa-league-creator{padding:16px}}
 </style>
 </head>
 <body>
@@ -399,12 +417,26 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 
     </div>
 
-    <div class="card admin-section hidden" id="adminLeagueManagement">
-<h2>League Management</h2>
-      <p>Create and manage association leagues.</p>
-      <input id="newLeagueName" placeholder="League name">
-      <input id="newLeagueStartDate" type="date" aria-label="League start date">
-      <button onclick="createLeague()">Create League</button>
+    <div class="card admin-section hidden mpa-league-creator" id="adminLeagueManagement">
+      <h2>CREATE A LEAGUE <span class="mpa-league-admin-tag">ADMIN</span></h2>
+      <div class="mpa-league-form-grid">
+        <div class="mpa-league-full"><label for="newLeagueName">League Name</label><input id="newLeagueName" placeholder="e.g. Advanced 2026"></div>
+        <div><label for="newLeagueType">Type</label><select id="newLeagueType"><option>Advanced</option><option>Intermediate/Advanced</option><option>Intermediate</option><option>Women's</option><option>Elite</option><option>50+</option><option>Open</option></select></div>
+        <div><label for="newLeagueSkill">Skill</label><select id="newLeagueSkill"><option>3.5–4.49</option><option>2.5–3.49</option><option>4.5+</option><option>Open / All levels</option></select></div>
+        <div><label for="newLeagueFormat">Format</label><select id="newLeagueFormat"><option>Coed Doubles</option><option>Women's Doubles</option><option>Men's Doubles</option><option>Mixed Doubles</option><option>Singles</option></select></div>
+        <div><label>Logo color</label><p class="mpa-league-hint">Set by the league — Advanced blue, Intermediate/Advanced green, Women's pink, Elite dark gray, 50+ red, anything else black and yellow.</p></div>
+        <div><label for="newLeagueDay">Day</label><select id="newLeagueDay"><option>Saturday</option><option>Sunday</option><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option></select></div>
+        <div><label for="newLeagueTime">Time</label><input id="newLeagueTime" type="time" value="18:30"><p class="mpa-league-hint">YMCA, 601 26th Ave SE, Moultrie, GA 31768</p></div>
+        <div><label for="newLeagueStartDate">Season start</label><input id="newLeagueStartDate" type="date"></div>
+        <div><label for="newLeagueStopDate">Season stop</label><input id="newLeagueStopDate" type="date"></div>
+        <div><label for="newLeagueSeason">Season</label><select id="newLeagueSeason"><option value="">Not set</option><option>Spring</option><option>Summer</option><option>Fall</option><option>Winter</option></select></div>
+        <div><label for="newLeagueMaxPlayers">Max players</label><input id="newLeagueMaxPlayers" type="number" min="1" max="36" value="36"><p class="mpa-league-hint">Max 36 players, max 6 courts.</p></div>
+      </div>
+      <button type="button" class="mpa-league-dates-button" onclick="previewNewLeagueDates()">Generate the 8 weekly dates</button>
+      <p class="mpa-league-hint">Pick the start date and day above, then generate the 8 weekly game days. Each date can be adjusted in this preview.</p>
+      <div id="newLeagueDatePreview" class="mpa-league-date-preview"></div>
+      <p class="mpa-league-hint">Setup preview: only league name and start date are currently saved. Other fields and adjusted weekly dates will be connected in the next database step.</p>
+      <button type="button" class="mpa-league-create-button" onclick="createLeague()">Create league</button>
       <div id="adminLeagues" class="list"></div>
     </div>
 
@@ -2774,7 +2806,28 @@ async function addPlayer(){
   await refreshAll();
 }
 
-  async function createLeague(){
+  async function previewNewLeagueDates(){
+  const start=$('newLeagueStartDate').value;
+  const container=$('newLeagueDatePreview');
+  if(!start){alert('Choose a season start date first.');return;}
+  const startDate=new Date(start+'T12:00:00');
+  const weekday=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].indexOf($('newLeagueDay').value);
+  const offset=(weekday-startDate.getDay()+7)%7;
+  container.replaceChildren();
+  for(let week=1;week<=8;week++){
+    const date=new Date(startDate);
+    date.setDate(date.getDate()+offset+(week-1)*7);
+    const year=date.getFullYear(),month=String(date.getMonth()+1).padStart(2,'0'),day=String(date.getDate()).padStart(2,'0');
+    const wrap=document.createElement('div');
+    const label=document.createElement('label');
+    label.textContent='Week '+week;
+    const input=document.createElement('input');
+    input.type='date';input.value=year+'-'+month+'-'+day;
+    wrap.append(label,input);container.appendChild(wrap);
+  }
+}
+
+function createLeague(){
   const name=$('newLeagueName').value.trim();
   const startDate=$('newLeagueStartDate').value;
   if(!name){
