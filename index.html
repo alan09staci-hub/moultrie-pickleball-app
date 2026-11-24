@@ -87,6 +87,18 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 #adminTab .mpa-admin-panel-body{padding:12px}
 #adminTab .mpa-admin-panel-body>.admin-section{margin:10px 0;box-shadow:none}
 #adminTab .mpa-admin-panel>summary:focus-visible{outline:3px solid #111;outline-offset:-4px}
+
+/* Nested Game Day legacy tool tabs: alternating black and dark yellow, white text. */
+#adminLegacyWeekOne .mpa-legacy-tool{border-radius:12px;overflow:hidden;margin:10px 0;border:1px solid #d5d5d5;background:#fff}
+#adminLegacyWeekOne .mpa-legacy-tool>summary{position:relative;list-style:none;cursor:pointer;padding:16px 44px 16px 16px;background:#101010;color:#fff}
+#adminLegacyWeekOne .mpa-legacy-tool:nth-of-type(even)>summary{background:#9b7000;color:#fff}
+#adminLegacyWeekOne .mpa-legacy-tool>summary::-webkit-details-marker{display:none}
+#adminLegacyWeekOne .mpa-legacy-tool>summary:after{content:'▸';position:absolute;right:18px;top:22px;color:#fff}
+#adminLegacyWeekOne .mpa-legacy-tool[open]>summary:after{content:'▾'}
+#adminLegacyWeekOne .mpa-legacy-tool>summary strong{display:block;font-size:17px;font-weight:800;color:#fff}
+#adminLegacyWeekOne .mpa-legacy-tool>summary span{display:block;font-size:14px;font-weight:700;margin-top:5px;color:#fff}
+#adminLegacyWeekOne .mpa-legacy-content{padding:14px}
+#adminLegacyWeekOne .mpa-legacy-tool>summary:focus-visible{outline:3px solid #fff;outline-offset:-5px}
 </style>
 </head>
 <body>
@@ -492,30 +504,12 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 
     <div class="card admin-section hidden" id="adminLegacyWeekOne">
 <h2>Legacy Week 1 Tools</h2>
-<p class="notice">These older tools are specific to Week 1 and include test-only or disabled actions. For regular game nights use Automatic Court Assignments, 60-Point Round, and Enter / Correct Scores above.</p>
-<button onclick="calculateMPARankings()">
-  Update League Rankings (currently disabled)
-</button>
-
-   <div id="rankingMsg"></div>
-
-  <button onclick="previewWeek1Seeds()">
-    Preview Week 1 Player Seeds
-  </button>
-
-  <div id="week1SeedPreview"></div>
-
-      <button onclick="previewWeek1Courts()">Preview Week 1 Court Assignments</button>
-<div id="week1CourtPreview"></div>
-      <button onclick="openWeek1MatchScoring()">
-  View Legacy Week 1 Score Example
-</button>
-<div id="week1MatchScoring"></div>
-      <button onclick="createWeek1LeagueMatches()">
-  Legacy Week 1 Player Check (test only)
-</button>
-<div id="week1MatchTestResult"></div>
-
+<p class="notice">These older controls are Week 1-specific. Use the main Game Day Tools above for regular league nights.</p>
+<details class="mpa-legacy-tool"><summary><strong>Update League Rankings</strong><span>Ranking recalculation — currently disabled</span></summary><div class="mpa-legacy-content"><button onclick="calculateMPARankings()">Update League Rankings (currently disabled)</button><div id="rankingMsg"></div></div></details>
+<details class="mpa-legacy-tool"><summary><strong>Preview Week 1 Player Seeds</strong><span>See the original Week 1 player seeding preview</span></summary><div class="mpa-legacy-content"><button onclick="previewWeek1Seeds()">Preview Week 1 Player Seeds</button><div id="week1SeedPreview"></div></div></details>
+<details class="mpa-legacy-tool"><summary><strong>Preview Week 1 Court Assignments</strong><span>Preview how Week 1 players would be grouped into courts</span></summary><div class="mpa-legacy-content"><button onclick="previewWeek1Courts()">Preview Week 1 Court Assignments</button><div id="week1CourtPreview"></div></div></details>
+<details class="mpa-legacy-tool"><summary><strong>View Legacy Week 1 Score Example</strong><span>Show the older sample match scoring screen — not live scoring</span></summary><div class="mpa-legacy-content"><button onclick="openWeek1MatchScoring()">View Legacy Week 1 Score Example</button><div id="week1MatchScoring"></div></div></details>
+<details class="mpa-legacy-tool"><summary><strong>Legacy Week 1 Player Check</strong><span>Week 1-only test action — may create matches; use with caution</span></summary><div class="mpa-legacy-content"><p class="notice">This older test may write Week 1 matches. Do not run it on an active or completed week without reviewing the consequences.</p><button onclick="createWeek1LeagueMatches()">Run Legacy Week 1 Player Check (test only)</button><div id="week1MatchTestResult"></div></div></details>
     </div>
 
     <div class="card admin-section hidden" id="adminScores">
