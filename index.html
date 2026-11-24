@@ -73,6 +73,20 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
   #mpaCourtRollCallPrint table{border-collapse:collapse;width:100%;margin-top:24px}
   #mpaCourtRollCallPrint th,#mpaCourtRollCallPrint td{border:1px solid #999;padding:14px;text-align:left}
 }
+
+/* MPA Admin Center: color-coded expandable sections, preserving existing tools. */
+#adminTab .mpa-admin-panels{display:grid;gap:12px}
+#adminTab .mpa-admin-panel{border:1px solid #d4d7d9;border-radius:14px;overflow:hidden;background:#fff}
+#adminTab .mpa-admin-panel>summary{list-style:none;cursor:pointer;background:var(--panel-color);color:#fff;padding:18px 20px;position:relative;padding-right:42px}
+#adminTab .mpa-admin-panel:nth-child(2)>summary,#adminTab .mpa-admin-panel:nth-child(4)>summary{color:#151515}
+#adminTab .mpa-admin-panel>summary::-webkit-details-marker{display:none}
+#adminTab .mpa-admin-panel>summary:after{content:'▸';position:absolute;right:20px;top:24px}
+#adminTab .mpa-admin-panel[open]>summary:after{content:'▾'}
+#adminTab .mpa-admin-panel>summary strong{display:block;font-size:20px}
+#adminTab .mpa-admin-panel>summary span{display:block;font-size:14px;margin-top:5px;font-weight:400}
+#adminTab .mpa-admin-panel-body{padding:12px}
+#adminTab .mpa-admin-panel-body>.admin-section{margin:10px 0;box-shadow:none}
+#adminTab .mpa-admin-panel>summary:focus-visible{outline:3px solid #111;outline-offset:-4px}
 </style>
 </head>
 <body>
@@ -851,43 +865,69 @@ function showTab(name,btn){
   btn.classList.add('active');
 }
 
-function showAdminSection(sectionId,btn){
-  document.querySelectorAll('#adminTab .admin-section').forEach(section=>{
-    section.classList.add('hidden');
-  });
-  const selected=document.getElementById(sectionId);
-  if(!selected)return;
-  selected.classList.remove('hidden');
-  document.querySelectorAll('#adminNav button').forEach(button=>{
-    button.classList.remove('active');
-  });
-  if(btn)btn.classList.add('active');
+// Step 240X-M-156: reorganize existing controls without replacing their IDs or data.
+const mpaAdminGroups=[
+  {title:'Create a league',desc:'Create or edit leagues, dates, settings, and schedules.',color:'#2f80df',ids:['adminLeagueManagement','adminLeagueSettings']},
+  {title:'Announce this league',desc:'Email, SMS, Facebook, Instagram, and public announcements.',color:'#f8cb48',pending:true},
+  {title:'Registration',desc:'Open or close league sign-ups (planned).',color:'#1c9d4a',pending:true},
+  {title:'Registrations',desc:'Register players; confirmation and fee waivers are planned.',color:'#f3c5dc',ids:['adminLeagueRegistration']},
+  {title:'Players',desc:'Manage the league roster and DUPR ratings.',color:'#151515',ids:['adminManagePlayers','adminDuprRatings']},
+  {title:'Members',desc:'Free member directory and private editable profiles (planned).',color:'#595959',pending:true},
+  {title:'Game day tools',desc:'RSVP, attendance, courts, rounds, games, scores, and completion.',color:'#2f80df',ids:['adminWeeklyRsvp','adminAttendance','adminAutomaticCourts','adminSixtyPointRound','adminIndividualGame','adminScores']},
+  {title:'Standings penalties',desc:'Missed-night penalties and admin adjustments (planned).',color:'#df2c2c',pending:true},
+  {title:'Round Robin',desc:'One-off member sign-up round robin (planned).',color:'#1c9d4a',pending:true},
+  {title:'Bracket',desc:'One-off double-elimination event (planned).',color:'#e78000',pending:true},
+  {title:'Admin passcodes',desc:'Individual administrator entry passcodes (planned).',color:'#6b55e6',pending:true},
+  {title:'Admin activity',desc:'Administrator sign-in and activity history (planned).',color:'#108080',pending:true},
+  {title:'Delete a league',desc:'Safe deletion or archiving with confirmations (planned).',color:'#df2c2c',pending:true}
+];
+function showAdminSection(sectionId){
+  const section=$(sectionId);
+  if(!section)return;
+  const panel=section.closest('.mpa-admin-panel');
+  if(panel)panel.open=true;
+  section.scrollIntoView({behavior:'smooth',block:'nearest'});
   if(sectionId==='adminAttendance')renderAttendanceSelectors();
 }
-
 function buildAdminNav(){
-  const sections=[
-    ['adminLeagueSettings','League Settings'],
-    ['adminLeagueManagement','League Management'],
-    ['adminLeagueRegistration','League Player Registration'],
-    ['adminWeeklyRsvp','Weekly Player RSVP'],
-    ['adminAttendance','Game Night Attendance'],
-    ['adminManagePlayers','Manage Players'],
-    ['adminDuprRatings','DUPR Ratings'],
-    ['adminAutomaticCourts','Automatic Court Assignments'],
-    ['adminSixtyPointRound','60-Point Round'],
-    ['adminIndividualGame','Create Individual Game'],
-    ['adminScores','Enter / Correct Scores']
-  ];
   const nav=$('adminNav');
   if(!nav||profile?.role!=='admin')return;
-  nav.innerHTML=sections.map(([id,label],index)=>
-    '<button type="button" class="'+(index===0?'active':'')+
-    '" onclick="showAdminSection(\''+id+'\',this)">'+label+'</button>'
-  ).join('');
-  showAdminSection('adminLeagueSettings',nav.querySelector('button'));
+  if(nav.dataset.reorganized==='yes')return;
+  nav.dataset.reorganized='yes';
+  nav.className='mpa-admin-panels';
+  const allSections=Array.from(document.querySelectorAll('#adminTab .admin-section'));
+  const sectionsById=new Map(allSections.map(el=>[el.id,el]));
+  mpaAdminGroups.forEach((group,index)=>{
+    const panel=document.createElement('details');
+    panel.className='mpa-admin-panel';
+    panel.style.setProperty('--panel-color',group.color);
+    if(index===0)panel.open=true;
+    const heading=document.createElement('summary');
+    const title=document.createElement('strong');
+    title.textContent=group.title;
+    const desc=document.createElement('span');
+    desc.textContent=group.desc;
+    heading.append(title,desc);
+    panel.appendChild(heading);
+    const body=document.createElement('div');
+    body.className='mpa-admin-panel-body';
+    for(const id of group.ids||[]){
+      const existing=sectionsById.get(id);
+      if(existing){
+        existing.classList.remove('hidden');
+        body.appendChild(existing);
+      }
+    }
+    if(group.pending){
+      const note=document.createElement('p');
+      note.className='notice';
+      note.textContent='Planned feature — not available yet. Existing league data has not been changed.';
+      body.appendChild(note);
+    }
+    panel.appendChild(body);
+    nav.appendChild(panel);
+  });
 }
-
   function showPlayerLeagueOptIn(){
   const leagueButton=Array.from(
     document.querySelectorAll('#nav button')
