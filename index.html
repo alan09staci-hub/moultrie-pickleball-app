@@ -99,6 +99,18 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 #adminLegacyWeekOne .mpa-legacy-tool>summary span{display:block;font-size:14px;font-weight:700;margin-top:5px;color:#fff}
 #adminLegacyWeekOne .mpa-legacy-content{padding:14px}
 #adminLegacyWeekOne .mpa-legacy-tool>summary:focus-visible{outline:3px solid #fff;outline-offset:-5px}
+
+/* Individual Game Day sections alternate black and yellow, with white labels. */
+#adminTab .mpa-game-tool{margin:10px 0;border:1px solid #d5d5d5;border-radius:12px;overflow:hidden;background:#fff}
+#adminTab .mpa-game-tool>summary{list-style:none;position:relative;cursor:pointer;background:#101010;color:#fff;padding:17px 45px 17px 17px}
+#adminTab .mpa-game-tool:nth-child(even)>summary{background:#9b7000;color:#fff}
+#adminTab .mpa-game-tool>summary::-webkit-details-marker{display:none}
+#adminTab .mpa-game-tool>summary:after{content:'▸';position:absolute;right:19px;top:23px;color:#fff}
+#adminTab .mpa-game-tool[open]>summary:after{content:'▾'}
+#adminTab .mpa-game-tool>summary strong{display:block;font-size:19px;font-weight:800;color:#fff}
+#adminTab .mpa-game-tool>summary span{display:block;font-size:14px;font-weight:700;margin-top:5px;color:#fff}
+#adminTab .mpa-game-tool>.admin-section{margin:0;box-shadow:none;border:0;border-radius:0}
+#adminTab .mpa-game-tool>summary:focus-visible{outline:3px solid #fff;outline-offset:-5px}
 </style>
 </head>
 <body>
@@ -923,6 +935,33 @@ function buildAdminNav(){
       note.className='notice';
       note.textContent='Planned feature — not available yet. Existing league data has not been changed.';
       body.appendChild(note);
+    }
+    if(group.title==='Game day tools'){
+      const labels={
+        adminWeeklyRsvp:['Weekly Player RSVP','Manage weekly opt-in and opt-out'],
+        adminAttendance:['Game Night Attendance','Verify who attended league night'],
+        adminAutomaticCourts:['Automatic Court Assignments','Generate and review player court groups'],
+        adminSixtyPointRound:['60-Point Round','Create doubles rotations and print court roll call'],
+        adminIndividualGame:['Create Individual Game','Create singles or doubles matches'],
+        adminScores:['Enter / Correct Scores','Record and correct league game scores'],
+        adminLegacyWeekOne:['Legacy Week 1 Tools','Older previews and test controls']
+      };
+      Array.from(body.children).forEach(section=>{
+        if(!section.classList.contains('admin-section'))return;
+        const info=labels[section.id];
+        if(!info)return;
+        const subpanel=document.createElement('details');
+        subpanel.className='mpa-game-tool';
+        const summary=document.createElement('summary');
+        const title=document.createElement('strong');
+        title.textContent=info[0];
+        const description=document.createElement('span');
+        description.textContent=info[1];
+        summary.append(title,description);
+        subpanel.appendChild(summary);
+        body.insertBefore(subpanel,section);
+        subpanel.appendChild(section);
+      });
     }
     panel.appendChild(body);
     nav.appendChild(panel);
