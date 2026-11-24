@@ -913,7 +913,7 @@ function buildAdminNav(){
     const panel=document.createElement('details');
     panel.className='mpa-admin-panel';
     panel.style.setProperty('--panel-color',group.color);
-    if(index===0)panel.open=true;
+    // Start every Admin Center section collapsed; open only on user selection.
     const heading=document.createElement('summary');
     const title=document.createElement('strong');
     title.textContent=group.title;
