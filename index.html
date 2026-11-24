@@ -619,6 +619,14 @@ function watchAuthEvents(){
   }
 }
 
+// Keep a valid login across reloads on the same preview address.
+// Browser storage cannot share authentication between different Vercel hostnames.
+function createMPASupabaseClient(url,key){
+  return window.supabase.createClient(url,key,{
+    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+  });
+}
+
 async function connectSupabase(){
   const url=$('supabaseUrl').value.trim();
   const key=$('supabaseKey').value.trim();
@@ -629,7 +637,7 @@ async function connectSupabase(){
   }
 
   try{
-    client=window.supabase.createClient(url,key);
+    client=createMPASupabaseClient(url,key);
     watchAuthEvents();
 
     const {error}=await client.auth.getSession();
@@ -652,7 +660,7 @@ function loadConnection(){
     $('supabaseUrl').value=s.url;
     $('supabaseKey').value=s.key;
 
-    client=window.supabase.createClient(s.url,s.key);
+    client=createMPASupabaseClient(s.url,s.key);
     watchAuthEvents();
 
     $('setupScreen').classList.add('hidden');
