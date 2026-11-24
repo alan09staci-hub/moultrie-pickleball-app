@@ -130,6 +130,27 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 .mpa-league-date-preview label{font-size:13px}
 .mpa-league-creator #adminLeagues{margin-top:16px}
 @media(max-width:560px){.mpa-league-form-grid,.mpa-league-date-preview{grid-template-columns:1fr}.mpa-league-creator{padding:16px}}
+
+/* Four-step Admin Create a League wizard */
+.mpa-league-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.mpa-league-title h2{margin:0}
+.mpa-league-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-bottom:22px}
+.mpa-league-steps .mpa-league-step{padding:11px 3px;font-size:12px;background:#343434;color:#fff;border-radius:8px;margin:0}
+.mpa-league-steps .mpa-league-step.active{background:#f8cb48;color:#111}
+.mpa-league-pane h3{font-size:20px;margin:0 0 4px}
+.mpa-league-pane>label{margin-top:14px}
+.mpa-league-creator select{margin:5px 0 10px}
+.mpa-league-color-preview{display:flex;align-items:center;gap:12px;margin-top:14px;font-size:13px;color:#ddd}
+#newLeagueColorSwatch{display:inline-block;width:44px;height:44px;border-radius:10px;background:#2f80df}
+.mpa-league-location{background:#292929;padding:12px;border-radius:10px;margin:12px 0;color:#eee;line-height:1.6}
+.mpa-league-actions{display:flex;justify-content:space-between;gap:12px;margin-top:20px;border-top:1px solid #444;padding-top:16px}
+.mpa-league-actions button{width:auto;background:#f8cb48;color:#111;padding:10px 18px}
+.mpa-league-actions button:disabled{opacity:.4;cursor:not-allowed}
+.mpa-league-review{background:#292929;padding:14px;border-radius:12px}
+.mpa-league-review>div{display:grid;grid-template-columns:110px minmax(0,1fr);gap:12px;padding:9px 0;border-bottom:1px solid #444;overflow-wrap:anywhere;font-size:14px}
+.mpa-league-review>div:last-child{border-bottom:0}
+.mpa-league-review span{color:#ddd}
+@media(max-width:560px){.mpa-league-steps .mpa-league-step{font-size:10px;padding:9px 2px}.mpa-league-review>div{grid-template-columns:90px minmax(0,1fr)}}
 </style>
 </head>
 <body>
@@ -418,25 +439,55 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
     </div>
 
     <div class="card admin-section hidden mpa-league-creator" id="adminLeagueManagement">
-      <h2>CREATE A LEAGUE <span class="mpa-league-admin-tag">ADMIN</span></h2>
-      <div class="mpa-league-form-grid">
-        <div class="mpa-league-full"><label for="newLeagueName">League Name</label><input id="newLeagueName" placeholder="e.g. Advanced 2026"></div>
-        <div><label for="newLeagueType">Type</label><select id="newLeagueType"><option>Advanced</option><option>Intermediate/Advanced</option><option>Intermediate</option><option>Women's</option><option>Elite</option><option>50+</option><option>Open</option></select></div>
-        <div><label for="newLeagueSkill">Skill</label><select id="newLeagueSkill"><option>3.5–4.49</option><option>2.5–3.49</option><option>4.5+</option><option>Open / All levels</option></select></div>
-        <div><label for="newLeagueFormat">Format</label><select id="newLeagueFormat"><option>Coed Doubles</option><option>Women's Doubles</option><option>Men's Doubles</option><option>Mixed Doubles</option><option>Singles</option></select></div>
-        <div><label>Logo color</label><p class="mpa-league-hint">Set by the league — Advanced blue, Intermediate/Advanced green, Women's pink, Elite dark gray, 50+ red, anything else black and yellow.</p></div>
-        <div><label for="newLeagueDay">Day</label><select id="newLeagueDay"><option>Saturday</option><option>Sunday</option><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option></select></div>
-        <div><label for="newLeagueTime">Time</label><input id="newLeagueTime" type="time" value="18:30"><p class="mpa-league-hint">YMCA, 601 26th Ave SE, Moultrie, GA 31768</p></div>
-        <div><label for="newLeagueStartDate">Season start</label><input id="newLeagueStartDate" type="date"></div>
-        <div><label for="newLeagueStopDate">Season stop</label><input id="newLeagueStopDate" type="date"></div>
-        <div><label for="newLeagueSeason">Season</label><select id="newLeagueSeason"><option value="">Not set</option><option>Spring</option><option>Summer</option><option>Fall</option><option>Winter</option></select></div>
-        <div><label for="newLeagueMaxPlayers">Max players</label><input id="newLeagueMaxPlayers" type="number" min="1" max="36" value="36"><p class="mpa-league-hint">Max 36 players, max 6 courts.</p></div>
+      <div class="mpa-league-title"><h2>CREATE A LEAGUE</h2><span class="mpa-league-admin-tag">ADMIN</span></div>
+      <div class="mpa-league-steps" aria-label="League setup steps">
+        <button type="button" class="mpa-league-step active" data-league-step="0" onclick="showLeagueSetupStep(0)">1 · Identity</button>
+        <button type="button" class="mpa-league-step" data-league-step="1" onclick="showLeagueSetupStep(1)">2 · Schedule</button>
+        <button type="button" class="mpa-league-step" data-league-step="2" onclick="showLeagueSetupStep(2)">3 · Registration</button>
+        <button type="button" class="mpa-league-step" data-league-step="3" onclick="showLeagueSetupStep(3)">4 · Review</button>
       </div>
-      <button type="button" class="mpa-league-dates-button" onclick="previewNewLeagueDates()">Generate the 8 weekly dates</button>
-      <p class="mpa-league-hint">Pick the start date and day above, then generate the 8 weekly game days. Each date can be adjusted in this preview.</p>
-      <div id="newLeagueDatePreview" class="mpa-league-date-preview"></div>
-      <p class="mpa-league-hint">Setup preview: only league name and start date are currently saved. Other fields and adjusted weekly dates will be connected in the next database step.</p>
-      <button type="button" class="mpa-league-create-button" onclick="createLeague()">Create league</button>
+      <section class="mpa-league-pane" data-league-pane="0">
+        <h3>1. League Identity</h3><p class="mpa-league-hint">Give your league a name and playing format.</p>
+        <label for="newLeagueName">League name</label><input id="newLeagueName" placeholder="e.g. Advanced 2027">
+        <div class="mpa-league-form-grid">
+          <div><label for="newLeagueType">League type</label><select id="newLeagueType" onchange="updateLeagueSetupReview()"><option>Advanced</option><option>Intermediate/Advanced</option><option>Intermediate</option><option>Women's</option><option>Elite</option><option>50+</option><option>Open</option></select></div>
+          <div><label for="newLeagueSkill">Skill level</label><select id="newLeagueSkill"><option>3.5–4.49</option><option>2.5–3.49</option><option>4.5+</option><option>Open / All levels</option></select></div>
+        </div>
+        <label for="newLeagueFormat">Playing format</label><select id="newLeagueFormat"><option>Coed Doubles</option><option>Women's Doubles</option><option>Men's Doubles</option><option>Mixed Doubles</option><option>Singles</option></select>
+        <div class="mpa-league-color-preview"><span id="newLeagueColorSwatch" aria-hidden="true"></span><span>League color assigned automatically by type</span></div>
+      </section>
+      <section class="mpa-league-pane hidden" data-league-pane="1">
+        <h3>2. Schedule</h3><p class="mpa-league-hint">Choose the season schedule and adjust individual game nights.</p>
+        <div class="mpa-league-location"><strong>📍 YMCA</strong><br>601 26th Ave SE, Moultrie, GA 31768</div>
+        <div class="mpa-league-form-grid">
+          <div><label for="newLeagueDay">Playing day</label><select id="newLeagueDay"><option>Saturday</option><option>Sunday</option><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option></select></div>
+          <div><label for="newLeagueTime">Start time</label><input id="newLeagueTime" type="time" value="18:30"></div>
+          <div><label for="newLeagueStartDate">Season start</label><input id="newLeagueStartDate" type="date"></div>
+          <div><label for="newLeagueStopDate">Season stop</label><input id="newLeagueStopDate" type="date"></div>
+        </div>
+        <label for="newLeagueSeason">Season</label><select id="newLeagueSeason"><option value="">Not set</option><option>Spring</option><option>Summer</option><option>Fall</option><option>Winter</option></select>
+        <button type="button" class="mpa-league-dates-button" onclick="previewNewLeagueDates()">📅 Generate 8 game nights</button>
+        <p class="mpa-league-hint">Adjust any date for holidays or schedule changes.</p>
+        <div id="newLeagueDatePreview" class="mpa-league-date-preview"></div>
+      </section>
+      <section class="mpa-league-pane hidden" data-league-pane="2">
+        <h3>3. Registration</h3><p class="mpa-league-hint">Set capacity, eligibility, and the league registration fee. Payment arrangements are handled separately.</p>
+        <div class="mpa-league-form-grid">
+          <div><label for="newLeagueMaxPlayers">Maximum players</label><input id="newLeagueMaxPlayers" type="number" min="1" max="36" value="36"></div>
+          <div><label for="newLeagueCourts">Number of courts</label><input id="newLeagueCourts" type="number" min="1" max="6" value="6"></div>
+          <div><label for="newLeagueMinDupr">Minimum DUPR</label><input id="newLeagueMinDupr" type="number" step="0.01" min="0" value="3.50"></div>
+          <div><label for="newLeagueMaxDupr">Maximum DUPR</label><input id="newLeagueMaxDupr" type="number" step="0.01" min="0" value="4.49"></div>
+        </div>
+        <label for="newLeagueFee">League registration fee ($)</label><input id="newLeagueFee" type="number" min="0" step="0.01" value="50">
+        <p class="mpa-league-hint">MPA membership is free. DUPR is authoritative; provisional self-ratings are allowed only without DUPR. Playing up requires admin approval; playing down is not allowed.</p>
+      </section>
+      <section class="mpa-league-pane hidden" data-league-pane="3">
+        <h3>4. Review &amp; Create</h3><p class="mpa-league-hint">Review the details before saving.</p>
+        <div id="newLeagueReview" class="mpa-league-review" aria-live="polite"></div>
+        <p class="mpa-league-hint"><strong>Current database limitation:</strong> Creating a league saves only its name and start date. All other setup fields and edited game nights are preview-only until we approve the database connection in a later step.</p>
+        <button type="button" class="mpa-league-create-button" onclick="createLeague()">Create league (name and start date only)</button>
+      </section>
+      <div class="mpa-league-actions"><button type="button" id="newLeagueBack" onclick="showLeagueSetupStep(Math.max(0,window.mpaLeagueSetupStep-1))" disabled>← Back</button><button type="button" id="newLeagueNext" onclick="showLeagueSetupStep(Math.min(3,window.mpaLeagueSetupStep+1))">Next →</button></div>
       <div id="adminLeagues" class="list"></div>
     </div>
 
@@ -2806,6 +2857,32 @@ async function addPlayer(){
   await refreshAll();
 }
 
+window.mpaLeagueSetupStep=0;
+function updateLeagueSetupReview(){
+  const val=id=>$(id)?.value||'Not set';
+  const colors={'Advanced':'#2f80df','Intermediate/Advanced':'#198754',"Women's":'#e887b5','Elite':'#444444','50+':'#b72c2c'};
+  const swatch=$('newLeagueColorSwatch');
+  if(swatch)swatch.style.background=colors[val('newLeagueType')]||'#f8cb48';
+  const review=$('newLeagueReview');
+  if(!review)return;
+  const dates=Array.from($('newLeagueDatePreview')?.querySelectorAll('input[type="date"]')||[]).map((el,i)=>'Week '+(i+1)+': '+el.value);
+  const rows=[
+    ['League',val('newLeagueName')],['Type / Skill',val('newLeagueType')+' · '+val('newLeagueSkill')],['Format',val('newLeagueFormat')],
+    ['Location','YMCA, Moultrie, GA'],['Schedule',val('newLeagueDay')+' at '+val('newLeagueTime')],['Season',val('newLeagueSeason')+' · '+val('newLeagueStartDate')+' to '+val('newLeagueStopDate')],
+    ['Capacity',val('newLeagueMaxPlayers')+' players · '+val('newLeagueCourts')+' courts'],['DUPR',val('newLeagueMinDupr')+'–'+val('newLeagueMaxDupr')],['League fee','$'+val('newLeagueFee')],
+    ['Game nights',dates.length?dates.join(' | '):'Not generated']
+  ];
+  review.replaceChildren();
+  rows.forEach(([label,value])=>{const line=document.createElement('div');const strong=document.createElement('strong');strong.textContent=label;const span=document.createElement('span');span.textContent=value;line.append(strong,span);review.appendChild(line);});
+}
+function showLeagueSetupStep(step){
+  window.mpaLeagueSetupStep=Math.max(0,Math.min(3,Number(step)||0));
+  document.querySelectorAll('#adminLeagueManagement [data-league-pane]').forEach(el=>el.classList.toggle('hidden',Number(el.dataset.leaguePane)!==window.mpaLeagueSetupStep));
+  document.querySelectorAll('#adminLeagueManagement [data-league-step]').forEach(el=>{const active=Number(el.dataset.leagueStep)===window.mpaLeagueSetupStep;el.classList.toggle('active',active);el.setAttribute('aria-current',active?'step':'false');});
+  $('newLeagueBack').disabled=window.mpaLeagueSetupStep===0;
+  $('newLeagueNext').classList.toggle('hidden',window.mpaLeagueSetupStep===3);
+  updateLeagueSetupReview();
+}
   async function previewNewLeagueDates(){
   const start=$('newLeagueStartDate').value;
   const container=$('newLeagueDatePreview');
@@ -2825,6 +2902,7 @@ async function addPlayer(){
     input.type='date';input.value=year+'-'+month+'-'+day;
     wrap.append(label,input);container.appendChild(wrap);
   }
+  updateLeagueSetupReview();
 }
 
 function createLeague(){
