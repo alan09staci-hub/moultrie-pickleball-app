@@ -2983,11 +2983,17 @@ async function closeLeagueOptIn(sessionId){
     return;
   }
 
-   alert(
-    'Week '+session.week_number+
-    ' passed the attendance and scheduled-game score checks. '+
-    'Official completion remains disabled until final validation is implemented.'
-  );
+  if(!confirm('Complete Week '+session.week_number+'? All scores will be locked and this game night cannot be reopened.'))return;
+  const {data,error}=await client.from('league_sessions')
+    .update({status:'completed',opt_in_enabled:false})
+    .eq('id',sessionId).eq('status','scheduled')
+    .select('id,status').single();
+  if(error){
+    alert('Could not complete game night: '+error.message);
+    return;
+  }
+  await refreshAll();
+  alert('Week '+session.week_number+' is now Completed. Scores are locked.');
 }
   function renderLeagueRegistrations(){
   const leagueSelect=$('registrationLeague');
@@ -4420,6 +4426,11 @@ async function saveScore(id){
     return;
   }
   const game=games.find(x=>x.id===id);
+  if(game?.session_id && leagueSessions.some(s=>
+    String(s.id)===String(game.session_id)&&s.status==='completed')){
+    alert('This game night is completed. Scores are locked.');
+    return;
+  }
   const target=game?.target_score
     ?Number(game.target_score)
     :null;
@@ -4470,6 +4481,11 @@ async function removeGame(id){
   const game=games.find(g=>String(g.id)===String(id));
   if(!game){
     alert('Game not found. Refresh and try again.');
+    return;
+  }
+  if(game.session_id && leagueSessions.some(s=>
+    String(s.id)===String(game.session_id)&&s.status==='completed')){
+    alert('This game night is completed. Games are locked.');
     return;
   }
   if(!confirm('Permanently delete game #'+id+
